@@ -1,0 +1,14 @@
+node_modules/
+dist/
+dist-apk/
+.env
+.env.local
+.DS_Store
+*.log
+
+# Android build outputs
+android/app/build/
+android/.gradle/
+android/build/
+android/captures/
+android/local.properties
