@@ -286,6 +286,12 @@ const MainApp: React.FC = () => {
           onSuccess={(loggedUser) => {
             if (loggedUser?.role === 'DOCTOR') {
               setActiveTab('doctor_console');
+            } else if (
+              loggedUser?.role === 'CLINIC' ||
+              loggedUser?.role === 'RECEPTIONIST' ||
+              loggedUser?.role === 'ADMIN'
+            ) {
+              setActiveTab('profile');
             }
           }}
         />

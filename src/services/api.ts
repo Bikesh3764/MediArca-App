@@ -76,6 +76,9 @@ export interface User {
     gender?: string;
     dateOfBirth?: string;
     bloodGroup?: string;
+    allergies?: string;
+    existingConditions?: string;
+    currentMedications?: string;
     emergencyContact?: string;
   };
   doctorProfile?: DoctorProfile;

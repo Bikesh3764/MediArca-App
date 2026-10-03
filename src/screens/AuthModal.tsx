@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
+import { isGoogleConfigured } from '../config/auth';
 import { AppleButton } from '../components/ui/AppleButton';
 import { AppleInput } from '../components/ui/AppleInput';
 import { BrandLogo } from '../components/ui/BrandLogo';
@@ -110,8 +111,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleQuickLogin = async (demoEmail: string, demoPass: string) => {
+  const handleQuickLogin = async (demoEmail: string, demoPass: string, role?: 'PATIENT' | 'DOCTOR') => {
     setError(null);
+    if (role) setActiveRole(role);
     setQuickLoggingEmail(demoEmail);
     setEmail(demoEmail);
     setPassword(demoPass);
@@ -214,18 +216,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleGoogleError = () => {
-    const isRegisteredOrigin =
-      typeof window !== 'undefined' &&
-      (window.location.origin === 'http://localhost:5173' ||
-        window.location.origin === 'https://bikesh3764.github.io');
+  const isAuthorizedGoogleOrigin =
+    typeof window !== 'undefined' &&
+    (window.location.origin === 'http://localhost:5173' ||
+      window.location.origin === 'https://bikesh3764.github.io');
 
-    if (!isRegisteredOrigin) {
+  const showOfficialGoogleButton = Boolean(isAuthorizedGoogleOrigin && isGoogleConfigured);
+
+  const handleGoogleError = () => {
+    if (!isAuthorizedGoogleOrigin) {
       setError(
-        `Google OAuth requires origin http://localhost:5173 (current: ${window.location.origin}). Run on port 5173, or use 1-Click Demo Login below.`
+        `Google OAuth requires origin http://localhost:5173 (current: ${window.location.origin}). Run Vite on port 5173, or use 1-Click Demo Login below.`
       );
     } else {
-      setError('Google sign-in popup was cancelled or origin was not authorized.');
+      setError('Google Sign-In was cancelled or popup closed.');
     }
   };
 
@@ -339,9 +343,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Error Notification */}
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <span className="leading-snug">{error}</span>
+          <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex flex-col gap-2">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <span className="leading-snug">{error}</span>
+            </div>
+            {error.toLowerCase().includes('google') && (
+              <button
+                type="button"
+                onClick={handleSimulatedGoogleLogin}
+                className="text-xs font-semibold text-[#0066cc] hover:underline self-start flex items-center gap-1.5 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-rose-200 shadow-2xs"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#0066cc]" />
+                <span>Continue with Demo Google Account</span>
+              </button>
+            )}
           </div>
         )}
 
@@ -351,32 +367,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {/* Google Sign-In Container */}
             <div className="space-y-2">
               <div className="flex justify-center w-full min-h-[40px]">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  shape="pill"
-                  theme="outline"
-                  size="large"
-                  text="continue_with"
-                  width="100%"
-                />
+                {showOfficialGoogleButton ? (
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
+                    shape="pill"
+                    theme="outline"
+                    size="large"
+                    text="continue_with"
+                    width="100%"
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSimulatedGoogleLogin}
+                    disabled={loading || Boolean(quickLoggingEmail)}
+                    className="w-full h-11 px-4 rounded-full border border-[#e5e5ea] bg-white hover:bg-[#fbfbfd] text-[#1d1d1f] text-xs font-medium transition-all shadow-2xs active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                    </svg>
+                    <span>Continue with Google</span>
+                  </button>
+                )}
               </div>
-
-              {/* 1-Click Simulated Google Sign-In button */}
-              <button
-                type="button"
-                onClick={handleSimulatedGoogleLogin}
-                disabled={loading || Boolean(quickLoggingEmail)}
-                className="w-full h-10 px-4 rounded-full border border-[#e5e5ea] bg-white hover:bg-[#fbfbfd] text-[#1d1d1f] text-xs font-medium transition-all shadow-2xs active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-                </svg>
-                <span>Continue with Google (Simulated 1-Click)</span>
-              </button>
             </div>
 
             {/* Separator */}
@@ -449,7 +466,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => handleQuickLogin('john.doe@gmail.com', 'patient123')}
+                  onClick={() => handleQuickLogin('john.doe@gmail.com', 'patient123', 'PATIENT')}
                   disabled={Boolean(quickLoggingEmail)}
                   className={`py-2.5 px-3 rounded-xl border text-xs font-medium transition-all text-center cursor-pointer active:scale-[0.98] ${
                     activeRole === 'PATIENT'
@@ -457,7 +474,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       : 'bg-[#f5f5f7] hover:bg-[#ebebee] text-[#1d1d1f] border-[#e5e5ea]'
                   }`}
                 >
-                  <div className="font-semibold flex items-center justify-center gap-1">
+                  <div className="font-semibold flex items-center justify-center gap-1.5">
                     <UserIcon className="w-3.5 h-3.5" />
                     <span>Demo Patient</span>
                   </div>
@@ -468,7 +485,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => handleQuickLogin('dr.sarah@mediarca.com', 'doctor123')}
+                  onClick={() => handleQuickLogin('dr.sarah@mediarca.com', 'doctor123', 'DOCTOR')}
                   disabled={Boolean(quickLoggingEmail)}
                   className={`py-2.5 px-3 rounded-xl border text-xs font-medium transition-all text-center cursor-pointer active:scale-[0.98] ${
                     activeRole === 'DOCTOR'
@@ -476,7 +493,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       : 'bg-[#f5f5f7] hover:bg-[#ebebee] text-[#1d1d1f] border-[#e5e5ea]'
                   }`}
                 >
-                  <div className="font-semibold flex items-center justify-center gap-1">
+                  <div className="font-semibold flex items-center justify-center gap-1.5">
                     <Stethoscope className="w-3.5 h-3.5" />
                     <span>Demo Doctor</span>
                   </div>
@@ -486,7 +503,35 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </button>
               </div>
 
-              {/* Collapsible Staff Portals: Clinic, Receptionist, Admin */}
+              {/* Staff Portals Quick Row (Matching Web App) */}
+              <div className="mt-3 flex items-center justify-center gap-2 text-[11px] text-[#86868b]">
+                <span>Staff portals:</span>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('receptionist@mediarca.com', 'receptionist123')}
+                  className="text-[#0066cc] hover:underline font-medium cursor-pointer"
+                >
+                  Receptionist Desk
+                </button>
+                <span>•</span>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('clinic@mediarca.com', 'clinic123')}
+                  className="text-[#0066cc] hover:underline font-medium cursor-pointer"
+                >
+                  Clinic Portal
+                </button>
+                <span>•</span>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('admin@mediarca.com', 'admin123')}
+                  className="text-[#0066cc] hover:underline font-medium cursor-pointer"
+                >
+                  Admin
+                </button>
+              </div>
+
+              {/* Collapsible Staff Portals: Clinic, Receptionist, Admin Details */}
               <div className="mt-2.5">
                 <button
                   type="button"
@@ -660,15 +705,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             {/* Google Sign Up */}
             <div className="flex justify-center w-full min-h-[40px]">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                shape="pill"
-                theme="outline"
-                size="medium"
-                text="signup_with"
-                width="100%"
-              />
+              {showOfficialGoogleButton ? (
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  shape="pill"
+                  theme="outline"
+                  size="large"
+                  text="signup_with"
+                  width="100%"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSimulatedGoogleLogin}
+                  disabled={loading}
+                  className="w-full h-11 px-4 rounded-full border border-[#e5e5ea] bg-white hover:bg-[#fbfbfd] text-[#1d1d1f] text-xs font-medium transition-all shadow-2xs active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                >
+                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                  </svg>
+                  <span>Sign up with Google</span>
+                </button>
+              )}
             </div>
 
             <div className="text-center pt-1">

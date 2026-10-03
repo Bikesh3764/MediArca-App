@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Heart,
   Info,
+  Building,
 } from 'lucide-react';
 
 interface ProfileScreenProps {
@@ -101,6 +102,93 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-[#0066cc]" />
+              </AppleCard>
+            )}
+
+            {/* Clinic Admin Card */}
+            {user.role === 'CLINIC' && (
+              <AppleCard className="space-y-3 bg-gradient-to-r from-emerald-50/60 to-teal-50/60 border-emerald-200/80">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                    <Building className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#1d1d1f]">
+                      Clinic Administration Portal
+                    </h4>
+                    <p className="text-xs text-[#86868b]">
+                      Metropolis Polyclinic Operations (Verified)
+                    </p>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-emerald-200/40 text-xs text-[#555] space-y-1">
+                  <div className="flex justify-between">
+                    <span>Check-in Code:</span>
+                    <span className="font-mono font-bold text-emerald-800">METRO01</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Status:</span>
+                    <span className="text-emerald-700 font-semibold">Active Official Clinic</span>
+                  </div>
+                </div>
+              </AppleCard>
+            )}
+
+            {/* Receptionist Card */}
+            {user.role === 'RECEPTIONIST' && (
+              <AppleCard className="space-y-3 bg-gradient-to-r from-purple-50/60 to-indigo-50/60 border-purple-200/80">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#1d1d1f]">
+                      Front Desk Reception Desk
+                    </h4>
+                    <p className="text-xs text-[#86868b]">
+                      Clara Oswald (Walk-in Token Dispenser)
+                    </p>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-purple-200/40 text-xs text-[#555] space-y-1">
+                  <div className="flex justify-between">
+                    <span>Desk Location:</span>
+                    <span className="font-semibold text-purple-900">Front Desk, Metropolis</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Permission:</span>
+                    <span className="text-purple-700 font-semibold">Queue Check-in & Walk-in Pass</span>
+                  </div>
+                </div>
+              </AppleCard>
+            )}
+
+            {/* Admin Card */}
+            {user.role === 'ADMIN' && (
+              <AppleCard className="space-y-3 bg-gradient-to-r from-amber-50/60 to-yellow-50/60 border-amber-200/80">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-black flex items-center justify-center font-bold">
+                    <Shield className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#1d1d1f]">
+                      Platform Terminal Console
+                    </h4>
+                    <p className="text-xs text-[#86868b]">
+                      Root Administrator Access
+                    </p>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-amber-200/40 text-xs text-[#555] space-y-1 font-mono">
+                  <div className="flex justify-between">
+                    <span>Terminal Mode:</span>
+                    <span className="font-bold text-amber-800">UNRESTRICTED</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Doctor Verification:</span>
+                    <span className="text-amber-700 font-semibold">Enabled</span>
+                  </div>
+                </div>
               </AppleCard>
             )}
 
