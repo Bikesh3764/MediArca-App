@@ -4,10 +4,10 @@ import { api, User, getAuthToken, setAuthToken, removeAuthToken } from '../servi
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string; requiresVerification?: boolean }>;
-  loginWithGoogle: (credential: string, role?: string) => Promise<{ success: boolean; message?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message?: string; requiresVerification?: boolean; user?: User }>;
+  loginWithGoogle: (credential: string, role?: string) => Promise<{ success: boolean; message?: string; user?: User }>;
   register: (data: { email: string; password: string; fullName: string; phone?: string; role?: string }) => Promise<{ success: boolean; message?: string }>;
-  verifyOtp: (email: string, otp: string) => Promise<{ success: boolean; message?: string }>;
+  verifyOtp: (email: string, otp: string) => Promise<{ success: boolean; message?: string; user?: User }>;
   resendOtp: (email: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -50,8 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await api.login(email, password);
     if (res.success && res.data?.token) {
       await setAuthToken(res.data.token);
-      setUser(res.data.user);
-      return { success: true };
+      const loggedUser = res.data.user || res.data;
+      setUser(loggedUser);
+      return { success: true, user: loggedUser };
     }
     return {
       success: false,
@@ -65,8 +66,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await api.googleAuth(credential, role);
       if (res.success && res.data?.token) {
         await setAuthToken(res.data.token);
-        setUser(res.data.user);
-        return { success: true };
+        const loggedUser = res.data.user || res.data;
+        setUser(loggedUser);
+        return { success: true, user: loggedUser };
       }
       return {
         success: false,
@@ -92,8 +94,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await api.verifyOtp(email, otp);
     if (res.success && res.data?.token) {
       await setAuthToken(res.data.token);
-      setUser(res.data.user);
-      return { success: true };
+      const loggedUser = res.data.user || res.data;
+      setUser(loggedUser);
+      return { success: true, user: loggedUser };
     }
     return {
       success: false,

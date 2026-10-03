@@ -283,6 +283,11 @@ const MainApp: React.FC = () => {
         <AuthModal
           isOpen={authModalOpen}
           onClose={() => setAuthModalOpen(false)}
+          onSuccess={(loggedUser) => {
+            if (loggedUser?.role === 'DOCTOR') {
+              setActiveTab('doctor_console');
+            }
+          }}
         />
       </div>
     </div>
