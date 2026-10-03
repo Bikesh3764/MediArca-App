@@ -1,7 +1,9 @@
 import { Preferences } from '@capacitor/preferences';
 
-// Production Render API & Supabase backend
-export const DEFAULT_API_URL = 'https://mediarca-mdwk.onrender.com/api';
+// Production Render API & Supabase backend (or custom local override)
+export const DEFAULT_API_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
+  'https://mediarca-mdwk.onrender.com/api';
 
 let currentApiUrl = DEFAULT_API_URL;
 
