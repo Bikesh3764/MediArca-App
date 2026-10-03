@@ -97,19 +97,22 @@ export const LiveQueuePass: React.FC<LiveQueuePassProps> = ({
           </div>
 
           <div className="flex flex-col items-end text-right">
-            <div className="w-12 h-12 rounded-full border-2 border-white/30 overflow-hidden bg-white/10 mb-1.5 flex items-center justify-center">
+            <div className="w-12 h-12 min-w-[48px] min-h-[48px] max-w-[48px] max-h-[48px] rounded-full border-2 border-white/30 overflow-hidden bg-white/10 mb-1.5 flex items-center justify-center shrink-0">
               {doctorAvatar ? (
                 <img
                   src={getFileUrl(doctorAvatar)}
                   alt={doctorName}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               ) : (
                 <User className="w-6 h-6 text-white/70" />
               )}
             </div>
             <h4 className="text-sm font-semibold text-white leading-tight">
-              Dr. {doctorName}
+              {doctorName.toLowerCase().startsWith('dr.') ? doctorName : `Dr. ${doctorName}`}
             </h4>
             <p className="text-[11px] text-white/80">{specialty}</p>
           </div>

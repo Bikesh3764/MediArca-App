@@ -183,7 +183,9 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
                       #{String(appt.queueNumber).padStart(2, '0')}
                     </span>
                     <span className="text-xs font-bold text-[#1d1d1f]">
-                      Dr. {appt.doctor?.user?.fullName || 'Doctor'}
+                      {appt.doctor?.user?.fullName?.toLowerCase().startsWith('dr.')
+                        ? appt.doctor.user.fullName
+                        : `Dr. ${appt.doctor?.user?.fullName || 'Doctor'}`}
                     </span>
                   </div>
                   <p className="text-[11px] text-[#86868b] mt-0.5">

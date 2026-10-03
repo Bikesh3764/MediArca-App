@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import { getFileUrl } from '../services/api';
 import { AppleCard } from '../components/ui/AppleCard';
 import { AppleButton } from '../components/ui/AppleButton';
 import {
@@ -40,8 +41,19 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             {/* User Identity Card */}
             <AppleCard className="space-y-4">
               <div className="flex items-center gap-3.5">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#0066cc] to-[#10b981] flex items-center justify-center text-white text-xl font-bold">
-                  {user.fullName ? user.fullName[0].toUpperCase() : 'U'}
+                <div className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-full overflow-hidden bg-[#0066cc] flex items-center justify-center text-white text-xl font-bold shrink-0">
+                  {user.avatarUrl ? (
+                    <img
+                      src={getFileUrl(user.avatarUrl)}
+                      alt={user.fullName}
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <span>{user.fullName ? user.fullName[0].toUpperCase() : 'U'}</span>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-[#1d1d1f]">

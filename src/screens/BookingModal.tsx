@@ -127,7 +127,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             Confirm Booking
           </span>
           <h3 className="text-xl font-bold text-[#1d1d1f] mt-0.5">
-            Dr. {doctor.user?.fullName || 'Practitioner'}
+            {doctor.user?.fullName?.toLowerCase().startsWith('dr.')
+              ? doctor.user.fullName
+              : `Dr. ${doctor.user?.fullName || 'Practitioner'}`}
           </h3>
           <p className="text-xs text-[#86868b]">
             {doctor.specialty} • {clinicName}

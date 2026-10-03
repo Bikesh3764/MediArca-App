@@ -121,7 +121,9 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
                       Token #{String(appt.queueNumber).padStart(2, '0')}
                     </span>
                     <h4 className="text-sm font-bold text-[#1d1d1f] mt-0.5">
-                      Dr. {appt.doctor?.user?.fullName || 'Practitioner'}
+                      {appt.doctor?.user?.fullName?.toLowerCase().startsWith('dr.')
+                        ? appt.doctor.user.fullName
+                        : `Dr. ${appt.doctor?.user?.fullName || 'Practitioner'}`}
                     </h4>
                     <p className="text-xs text-[#86868b]">
                       {appt.doctor?.specialty}
