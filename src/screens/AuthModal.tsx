@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import { AppleButton } from '../components/ui/AppleButton';
 import { AppleInput } from '../components/ui/AppleInput';
+import { BrandLogo } from '../components/ui/BrandLogo';
 import { X, Mail, Lock, User, Phone, CheckCircle, ArrowLeft } from 'lucide-react';
 
 interface AuthModalProps {
@@ -15,7 +17,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { login, register, verifyOtp, resendOtp } = useAuth();
+  const { login, loginWithGoogle, register, verifyOtp, resendOtp } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup' | 'otp'>('login');
 
   const [email, setEmail] = useState('');
@@ -105,6 +107,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    if (!credentialResponse?.credential) {
+      setError('Google sign-in did not return valid credentials.');
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    const res = await loginWithGoogle(credentialResponse.credential, 'PATIENT');
+    setLoading(false);
+    if (res.success) {
+      onSuccess?.();
+      onClose();
+    } else {
+      setError(res.message || 'Google sign-in failed');
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google sign-in was cancelled or encountered an error.');
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
       <div className="relative w-full max-w-sm bg-white rounded-[24px] shadow-2xl p-6 border border-[#e5e5ea]">
@@ -116,11 +139,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </button>
 
         {/* Brand Header */}
-        <div className="text-center mb-6">
-          <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-[#0066cc] to-[#10b981] flex items-center justify-center shadow-md">
-            <span className="text-xl font-bold text-white tracking-tight">M</span>
+        <div className="text-center mb-5">
+          <div className="flex justify-center mb-2.5">
+            <BrandLogo variant="icon" size="lg" />
           </div>
-          <h2 className="text-xl font-bold text-[#1d1d1f]">
+          <h2 className="text-xl font-bold text-[#1d1d1f] tracking-tight">
             {mode === 'login'
               ? 'Welcome to MediArca'
               : mode === 'signup'
@@ -174,6 +197,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 Sign In
               </AppleButton>
             </div>
+
+            {/* Apple Separator */}
+            <div className="relative my-3">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#e5e5ea]" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-white px-2 text-[#86868b] font-medium">or</span>
+              </div>
+            </div>
+
+            {/* Google Sign In Button */}
+            <div className="flex justify-center w-full min-h-[40px]">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                shape="pill"
+                theme="outline"
+                size="medium"
+                text="signin_with"
+                width="100%"
+              />
+            </div>
+
             <div className="text-center pt-2">
               <button
                 type="button"
@@ -238,6 +285,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 Create Account
               </AppleButton>
             </div>
+
+            {/* Apple Separator */}
+            <div className="relative my-3">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#e5e5ea]" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-white px-2 text-[#86868b] font-medium">or</span>
+              </div>
+            </div>
+
+            {/* Google Sign Up Button */}
+            <div className="flex justify-center w-full min-h-[40px]">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                shape="pill"
+                theme="outline"
+                size="medium"
+                text="signup_with"
+                width="100%"
+              />
+            </div>
+
             <div className="text-center pt-2">
               <button
                 type="button"

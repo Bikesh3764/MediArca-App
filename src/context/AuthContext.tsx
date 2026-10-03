@@ -5,6 +5,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message?: string; requiresVerification?: boolean }>;
+  loginWithGoogle: (credential: string, role?: string) => Promise<{ success: boolean; message?: string }>;
   register: (data: { email: string; password: string; fullName: string; phone?: string; role?: string }) => Promise<{ success: boolean; message?: string }>;
   verifyOtp: (email: string, otp: string) => Promise<{ success: boolean; message?: string }>;
   resendOtp: (email: string) => Promise<{ success: boolean; message?: string }>;
@@ -59,6 +60,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   };
 
+  const loginWithGoogle = async (credential: string, role = 'PATIENT') => {
+    try {
+      const res = await api.googleAuth(credential, role);
+      if (res.success && res.data?.token) {
+        await setAuthToken(res.data.token);
+        setUser(res.data.user);
+        return { success: true };
+      }
+      return {
+        success: false,
+        message: res.message || 'Google sign in failed',
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        message: err.message || 'Google sign in failed',
+      };
+    }
+  };
+
   const register = async (data: { email: string; password: string; fullName: string; phone?: string; role?: string }) => {
     const res = await api.register(data);
     return {
@@ -99,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         loading,
         login,
+        loginWithGoogle,
         register,
         verifyOtp,
         resendOtp,

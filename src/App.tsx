@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { GOOGLE_CLIENT_ID } from './config/auth';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DoctorProfile, DoctorSlot } from './services/api';
+import { BrandLogo } from './components/ui/BrandLogo';
 import { ExploreScreen } from './screens/ExploreScreen';
 import { DoctorDetailScreen } from './screens/DoctorDetailScreen';
 import { BookingModal } from './screens/BookingModal';
@@ -16,7 +19,6 @@ import {
   QrCode,
   Calendar,
   User,
-  Stethoscope,
 } from 'lucide-react';
 
 type Tab = 'explore' | 'queue' | 'checkin' | 'history' | 'profile' | 'doctor_console';
@@ -98,199 +100,201 @@ const MainApp: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f5f5f7] text-[#1d1d1f]">
-      {/* Top Branding Bar */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-2.5 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0066cc] to-[#10b981] flex items-center justify-center shadow-xs">
-            <span className="text-sm font-bold text-white tracking-tight">M</span>
+    <div className="min-h-screen bg-[#ebebee] flex justify-center">
+      {/* Mobile-contained layout: sleek native frame on desktop, 100% full screen on mobile devices */}
+      <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] shadow-2xl border-x border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
+        {/* Top Official MediArca Header */}
+        <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BrandLogo variant="full" size="sm" />
           </div>
-          <div>
-            <h1 className="text-sm font-bold text-[#1d1d1f] tracking-tight leading-none">
-              MediArca
-            </h1>
-            <p className="text-[10px] text-[#86868b] leading-tight">
-              Clinical Queues
-            </p>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          {user ? (
-            <button
-              onClick={() => setActiveTab('profile')}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:bg-[#e5e5ea] text-xs font-medium text-[#1d1d1f]"
-            >
-              <div className="w-4 h-4 rounded-full bg-[#0066cc] text-white flex items-center justify-center text-[9px] font-bold">
-                {user.fullName ? user.fullName[0].toUpperCase() : 'U'}
-              </div>
-              <span className="truncate max-w-[80px]">
-                {user.fullName.split(' ')[0]}
-              </span>
-            </button>
+          <div className="flex items-center gap-2">
+            {user ? (
+              <button
+                type="button"
+                onClick={() => setActiveTab('profile')}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:bg-[#e5e5ea] text-xs font-medium text-[#1d1d1f] cursor-pointer"
+              >
+                <div className="w-4 h-4 rounded-full bg-[#0066cc] text-white flex items-center justify-center text-[9px] font-bold">
+                  {user.fullName ? user.fullName[0].toUpperCase() : 'U'}
+                </div>
+                <span className="truncate max-w-[80px]">
+                  {user.fullName.split(' ')[0]}
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setAuthModalOpen(true)}
+                className="text-xs font-semibold text-[#0066cc] px-3.5 py-1.5 rounded-full bg-[#0066cc]/10 hover:bg-[#0066cc]/15 active:bg-[#0066cc]/25 transition-all cursor-pointer"
+              >
+                Sign In
+              </button>
+            )}
+          </div>
+        </header>
+
+        {/* Screen Views */}
+        <main className="flex-1 w-full pb-16">
+          {activeTab === 'doctor_console' ? (
+            <DoctorConsoleScreen onBack={() => setActiveTab('profile')} />
+          ) : selectedDoctor ? (
+            <DoctorDetailScreen
+              doctor={selectedDoctor}
+              onBack={() => setSelectedDoctor(null)}
+              onSelectSlotForBooking={handleSelectSlotForBooking}
+            />
           ) : (
-            <button
-              onClick={() => setAuthModalOpen(true)}
-              className="text-xs font-semibold text-[#0066cc] px-3 py-1 rounded-full bg-[#0066cc]/10 active:bg-[#0066cc]/20 transition-all"
-            >
-              Sign In
-            </button>
+            <>
+              {activeTab === 'explore' && (
+                <ExploreScreen
+                  onSelectDoctor={(doc) => setSelectedDoctor(doc)}
+                  onQuickBook={handleQuickBook}
+                />
+              )}
+              {activeTab === 'queue' && (
+                <QueuePassScreen
+                  onExplorePress={() => setActiveTab('explore')}
+                  onOpenAuth={() => setAuthModalOpen(true)}
+                />
+              )}
+              {activeTab === 'checkin' && (
+                <CheckInScreen onOpenAuth={() => setAuthModalOpen(true)} />
+              )}
+              {activeTab === 'history' && (
+                <AppointmentsHistoryScreen
+                  onOpenAuth={() => setAuthModalOpen(true)}
+                  onExplorePress={() => setActiveTab('explore')}
+                />
+              )}
+              {activeTab === 'profile' && (
+                <ProfileScreen
+                  onOpenAuth={() => setAuthModalOpen(true)}
+                  onOpenDoctorConsole={() => setActiveTab('doctor_console')}
+                />
+              )}
+            </>
           )}
-        </div>
-      </header>
+        </main>
 
-      {/* Screen Views */}
-      <main className="flex-1 w-full max-w-lg mx-auto">
-        {activeTab === 'doctor_console' ? (
-          <DoctorConsoleScreen onBack={() => setActiveTab('profile')} />
-        ) : selectedDoctor ? (
-          <DoctorDetailScreen
-            doctor={selectedDoctor}
-            onBack={() => setSelectedDoctor(null)}
-            onSelectSlotForBooking={handleSelectSlotForBooking}
+        {/* Apple HIG Bottom Tab Bar (docked inside container frame) */}
+        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-[#e5e5ea] pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+          <div className="max-w-md mx-auto flex items-center justify-around h-14 px-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDoctor(null);
+                setActiveTab('explore');
+              }}
+              className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer ${
+                activeTab === 'explore' && !selectedDoctor
+                  ? 'text-[#0066cc]'
+                  : 'text-[#86868b] active:text-[#1d1d1f]'
+              }`}
+            >
+              <Search className="w-5 h-5 mb-0.5" />
+              <span className="text-[10px] font-semibold tracking-tight">Explore</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDoctor(null);
+                setActiveTab('queue');
+              }}
+              className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none relative cursor-pointer ${
+                activeTab === 'queue'
+                  ? 'text-[#0066cc]'
+                  : 'text-[#86868b] active:text-[#1d1d1f]'
+              }`}
+            >
+              <Ticket className="w-5 h-5 mb-0.5" />
+              <span className="text-[10px] font-semibold tracking-tight">Live Pass</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDoctor(null);
+                setActiveTab('checkin');
+              }}
+              className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer ${
+                activeTab === 'checkin'
+                  ? 'text-[#0066cc]'
+                  : 'text-[#86868b] active:text-[#1d1d1f]'
+              }`}
+            >
+              <QrCode className="w-5 h-5 mb-0.5" />
+              <span className="text-[10px] font-semibold tracking-tight">Check-In</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDoctor(null);
+                setActiveTab('history');
+              }}
+              className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer ${
+                activeTab === 'history'
+                  ? 'text-[#0066cc]'
+                  : 'text-[#86868b] active:text-[#1d1d1f]'
+              }`}
+            >
+              <Calendar className="w-5 h-5 mb-0.5" />
+              <span className="text-[10px] font-semibold tracking-tight">Visits</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDoctor(null);
+                setActiveTab('profile');
+              }}
+              className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer ${
+                activeTab === 'profile'
+                  ? 'text-[#0066cc]'
+                  : 'text-[#86868b] active:text-[#1d1d1f]'
+              }`}
+            >
+              <User className="w-5 h-5 mb-0.5" />
+              <span className="text-[10px] font-semibold tracking-tight">Account</span>
+            </button>
+          </div>
+        </nav>
+
+        {/* Booking Modal */}
+        {bookingParams.isOpen && bookingParams.doctor && bookingParams.slot && (
+          <BookingModal
+            isOpen={bookingParams.isOpen}
+            onClose={() =>
+              setBookingParams((prev) => ({ ...prev, isOpen: false }))
+            }
+            doctor={bookingParams.doctor}
+            clinicId={bookingParams.clinicId}
+            clinicName={bookingParams.clinicName}
+            slot={bookingParams.slot}
+            date={bookingParams.date}
+            onBookingSuccess={handleBookingSuccess}
           />
-        ) : (
-          <>
-            {activeTab === 'explore' && (
-              <ExploreScreen
-                onSelectDoctor={(doc) => setSelectedDoctor(doc)}
-                onQuickBook={handleQuickBook}
-              />
-            )}
-            {activeTab === 'queue' && (
-              <QueuePassScreen
-                onExplorePress={() => setActiveTab('explore')}
-                onOpenAuth={() => setAuthModalOpen(true)}
-              />
-            )}
-            {activeTab === 'checkin' && (
-              <CheckInScreen onOpenAuth={() => setAuthModalOpen(true)} />
-            )}
-            {activeTab === 'history' && (
-              <AppointmentsHistoryScreen
-                onOpenAuth={() => setAuthModalOpen(true)}
-                onExplorePress={() => setActiveTab('explore')}
-              />
-            )}
-            {activeTab === 'profile' && (
-              <ProfileScreen
-                onOpenAuth={() => setAuthModalOpen(true)}
-                onOpenDoctorConsole={() => setActiveTab('doctor_console')}
-              />
-            )}
-          </>
         )}
-      </main>
 
-      {/* Apple HIG Bottom Tab Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-[#e5e5ea] pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
-        <div className="max-w-lg mx-auto flex items-center justify-around h-15 px-2">
-          <button
-            onClick={() => {
-              setSelectedDoctor(null);
-              setActiveTab('explore');
-            }}
-            className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none ${
-              activeTab === 'explore' && !selectedDoctor
-                ? 'text-[#0066cc]'
-                : 'text-[#86868b] active:text-[#1d1d1f]'
-            }`}
-          >
-            <Search className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px] font-semibold tracking-tight">Explore</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setSelectedDoctor(null);
-              setActiveTab('queue');
-            }}
-            className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none relative ${
-              activeTab === 'queue'
-                ? 'text-[#0066cc]'
-                : 'text-[#86868b] active:text-[#1d1d1f]'
-            }`}
-          >
-            <Ticket className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px] font-semibold tracking-tight">Live Pass</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setSelectedDoctor(null);
-              setActiveTab('checkin');
-            }}
-            className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none ${
-              activeTab === 'checkin'
-                ? 'text-[#0066cc]'
-                : 'text-[#86868b] active:text-[#1d1d1f]'
-            }`}
-          >
-            <QrCode className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px] font-semibold tracking-tight">Check-In</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setSelectedDoctor(null);
-              setActiveTab('history');
-            }}
-            className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none ${
-              activeTab === 'history'
-                ? 'text-[#0066cc]'
-                : 'text-[#86868b] active:text-[#1d1d1f]'
-            }`}
-          >
-            <Calendar className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px] font-semibold tracking-tight">Visits</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setSelectedDoctor(null);
-              setActiveTab('profile');
-            }}
-            className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none ${
-              activeTab === 'profile'
-                ? 'text-[#0066cc]'
-                : 'text-[#86868b] active:text-[#1d1d1f]'
-            }`}
-          >
-            <User className="w-5 h-5 mb-0.5" />
-            <span className="text-[10px] font-semibold tracking-tight">Account</span>
-          </button>
-        </div>
-      </nav>
-
-      {/* Booking Modal */}
-      {bookingParams.isOpen && bookingParams.doctor && bookingParams.slot && (
-        <BookingModal
-          isOpen={bookingParams.isOpen}
-          onClose={() =>
-            setBookingParams((prev) => ({ ...prev, isOpen: false }))
-          }
-          doctor={bookingParams.doctor}
-          clinicId={bookingParams.clinicId}
-          clinicName={bookingParams.clinicName}
-          slot={bookingParams.slot}
-          date={bookingParams.date}
-          onBookingSuccess={handleBookingSuccess}
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
         />
-      )}
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-      />
+      </div>
     </div>
   );
 };
 
 export default function App() {
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }

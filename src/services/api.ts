@@ -121,15 +121,30 @@ export interface DoctorProfile {
   };
 }
 
+export interface PublicClinicDoctor {
+  id: string;
+  clinicId: string;
+  doctorId: string;
+  status?: string;
+  consultationFee?: number;
+  slots?: any;
+  doctor: DoctorProfile;
+}
+
 export interface ClinicProfile {
   id: string;
-  userId: string;
-  name: string;
+  userId?: string;
+  clinicName: string;
+  name?: string;
   address: string;
   city: string;
   state: string;
   phone?: string;
   checkinCode?: string;
+  isVerified?: boolean;
+  verificationStatus?: string;
+  _count?: { doctors: number };
+  doctors?: PublicClinicDoctor[];
 }
 
 export interface Appointment {
@@ -259,11 +274,32 @@ export const api = {
     return apiRequest('/auth/me', { method: 'GET' });
   },
 
+  async googleAuth(credential: string, role = 'PATIENT') {
+    return apiRequest('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential, role }),
+    });
+  },
+
   async updateProfile(data: any) {
     return apiRequest('/auth/profile', {
       method: 'PUT',
       body: JSON.stringify(data),
     });
+  },
+
+  // Clinics
+  async getPublicClinics(params?: { search?: string; city?: string; state?: string }) {
+    const query = new URLSearchParams();
+    if (params?.search) query.append('search', params.search);
+    if (params?.city && params.city !== 'All') query.append('city', params.city);
+    if (params?.state && params.state !== 'All') query.append('state', params.state);
+    const qs = query.toString() ? `?${query.toString()}` : '';
+    return apiRequest(`/clinics/public${qs}`, { method: 'GET' });
+  },
+
+  async getPublicClinicById(id: string) {
+    return apiRequest(`/clinics/public/${id}`, { method: 'GET' });
   },
 
   // Doctors

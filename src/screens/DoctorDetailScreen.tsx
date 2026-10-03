@@ -98,24 +98,27 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
         {/* Profile Card */}
         <AppleCard className="space-y-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-16 h-16 rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
+            <div className="w-16 h-16 min-w-[64px] min-h-[64px] max-w-[64px] max-h-[64px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
               {avatar ? (
                 <img
                   src={getFileUrl(avatar)}
                   alt={docName}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-full"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               ) : (
                 <User className="w-8 h-8 text-[#86868b]" />
               )}
             </div>
 
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <h2 className="text-lg font-bold text-[#1d1d1f] leading-snug">
-                  Dr. {docName}
+                <h2 className="text-lg font-bold text-[#1d1d1f] leading-snug truncate">
+                  {docName.toLowerCase().startsWith('dr.') ? docName : `Dr. ${docName}`}
                 </h2>
-                <ShieldCheck className="w-4 h-4 text-[#0066cc]" />
+                <ShieldCheck className="w-4 h-4 text-[#0066cc] shrink-0" />
               </div>
               <p className="text-sm font-semibold text-[#0066cc]">
                 {doctor.specialty}
