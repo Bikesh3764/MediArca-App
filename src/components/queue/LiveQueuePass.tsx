@@ -44,11 +44,17 @@ export const LiveQueuePass: React.FC<LiveQueuePassProps> = ({
 
   // Resolve Desk Contact Info
   const deskPhone =
+    (appointment as any).receptionistPhone ||
     (appointment.doctor as any)?.receptionists?.[0]?.phone ||
     (appointment.clinic as any)?.phone ||
-    '+91 98765 43210';
+    (appointment.clinic as any)?.contactPhone ||
+    '';
   const deskName =
-    (appointment.doctor as any)?.receptionists?.[0]?.name || 'Clinic Reception Desk';
+    (appointment as any).receptionistName ||
+    (appointment.doctor as any)?.receptionists?.[0]?.name ||
+    appointment.clinic?.clinicName ||
+    appointment.clinic?.name ||
+    'Clinic Reception Desk';
   const fee =
     (appointment as any).fee ||
     appointment.doctor?.consultationFee ||
@@ -296,9 +302,9 @@ export const LiveQueuePass: React.FC<LiveQueuePassProps> = ({
         {isCompleted && (
           <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl text-center">
             <p className="text-xs font-semibold text-slate-700">Consultation Completed</p>
-            {appointment.consultationNotes && (
+            {(appointment.consultationNotes || (appointment as any).clinicalNotes) && (
               <p className="text-xs text-slate-500 mt-1 italic">
-                "{appointment.consultationNotes}"
+                "{appointment.consultationNotes || (appointment as any).clinicalNotes}"
               </p>
             )}
           </div>

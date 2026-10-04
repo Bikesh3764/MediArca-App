@@ -1306,16 +1306,58 @@ export const api = {
   },
 
   async checkInWithQR(data: { clinicId: string; code: string; appointmentId?: string }): Promise<ApiResponse<any>> {
-    return apiRequest('/appointments/check-in', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return this.checkIn(data);
   },
 
-  async checkIn(appointmentId?: string, checkinCode?: string): Promise<ApiResponse<any>> {
+  async checkIn(
+    appointmentIdOrData?: string | { clinicId?: string; code?: string; appointmentId?: string },
+    checkinCodeOrUrl?: string,
+    clinicIdParam?: string
+  ): Promise<ApiResponse<any>> {
+    let appointmentId = typeof appointmentIdOrData === 'string' ? appointmentIdOrData : appointmentIdOrData?.appointmentId;
+    let code = typeof appointmentIdOrData === 'object' && appointmentIdOrData !== null
+      ? (appointmentIdOrData.code || (appointmentIdOrData as any).checkinCode)
+      : checkinCodeOrUrl;
+    let clinicId = typeof appointmentIdOrData === 'object' && appointmentIdOrData !== null
+      ? appointmentIdOrData.clinicId
+      : clinicIdParam;
+
+    const rawString = (code || '').trim();
+
+    // Check if rawString contains clinicId and code as URL parameters
+    if (rawString.includes('clinicId=') || rawString.includes('code=')) {
+      try {
+        const queryIndex = rawString.indexOf('?');
+        const queryStr = queryIndex !== -1 ? rawString.substring(queryIndex + 1) : rawString;
+        const searchParams = new URLSearchParams(queryStr);
+        const parsedClinic = searchParams.get('clinicId');
+        const parsedCode = searchParams.get('code');
+        if (parsedClinic) clinicId = parsedClinic;
+        if (parsedCode) code = parsedCode;
+      } catch {
+        const clinicMatch = rawString.match(/[?&]clinicId=([^&]+)/);
+        const codeMatch = rawString.match(/[?&]code=([^&]+)/);
+        if (clinicMatch) clinicId = decodeURIComponent(clinicMatch[1]);
+        if (codeMatch) code = decodeURIComponent(codeMatch[1]);
+      }
+    } else if (rawString.startsWith('{') && rawString.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(rawString);
+        if (parsed.clinicId) clinicId = parsed.clinicId;
+        if (parsed.code || parsed.checkinCode) code = parsed.code || parsed.checkinCode;
+        if (parsed.appointmentId && !appointmentId) appointmentId = parsed.appointmentId;
+      } catch {
+        // ignore parse error
+      }
+    }
+
     return apiRequest('/appointments/check-in', {
       method: 'POST',
-      body: JSON.stringify({ appointmentId, checkinCode }),
+      body: JSON.stringify({
+        clinicId: clinicId || '',
+        code: (code || '').trim(),
+        appointmentId: appointmentId || undefined,
+      }),
     });
   },
 

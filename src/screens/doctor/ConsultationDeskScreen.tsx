@@ -27,18 +27,39 @@ export const ConsultationDeskScreen: React.FC<ConsultationDeskScreenProps> = ({
   onBack,
   onCompleted,
 }) => {
-  const [vitals, setVitals] = useState({
-    bp: '',
-    pulse: '',
-    temp: '',
-    spo2: '',
-    weight: '',
-  });
+  const parseVitals = (rawVitals: any) => {
+    if (!rawVitals) return { bp: '', pulse: '', temp: '', spo2: '', weight: '' };
+    if (typeof rawVitals === 'object') {
+      return {
+        bp: rawVitals.bp || '',
+        pulse: rawVitals.pulse || '',
+        temp: rawVitals.temp || '',
+        spo2: rawVitals.spo2 || '',
+        weight: rawVitals.weight || '',
+      };
+    }
+    if (typeof rawVitals === 'string') {
+      try {
+        const parsed = JSON.parse(rawVitals);
+        return {
+          bp: parsed.bp || '',
+          pulse: parsed.pulse || '',
+          temp: parsed.temp || '',
+          spo2: parsed.spo2 || '',
+          weight: parsed.weight || '',
+        };
+      } catch {
+        return { bp: '', pulse: '', temp: '', spo2: '', weight: '' };
+      }
+    }
+    return { bp: '', pulse: '', temp: '', spo2: '', weight: '' };
+  };
 
+  const [vitals, setVitals] = useState(() => parseVitals(appointment.vitals));
   const [clinicalNotes, setClinicalNotes] = useState(appointment.clinicalNotes || appointment.consultationNotes || '');
-  const [diagnosis, setDiagnosis] = useState('');
-  const [advice, setAdvice] = useState('');
-  const [followUpDate, setFollowUpDate] = useState('');
+  const [diagnosis, setDiagnosis] = useState((appointment as any).diagnosis || '');
+  const [advice, setAdvice] = useState((appointment as any).advice || '');
+  const [followUpDate, setFollowUpDate] = useState((appointment as any).followUpDate || '');
 
   // Prescription items builder
   const [medicines, setMedicines] = useState<Array<{
@@ -47,9 +68,19 @@ export const ConsultationDeskScreen: React.FC<ConsultationDeskScreenProps> = ({
     frequency: string;
     duration: string;
     instructions: string;
-  }>>([
-    { name: '', dosage: '500mg', frequency: '1-0-1', duration: '5 days', instructions: 'After food' },
-  ]);
+  }>>(() => {
+    const rawMed = (appointment as any).medicines || (appointment as any).prescription?.medicines;
+    if (Array.isArray(rawMed) && rawMed.length > 0) {
+      return rawMed.map((m: any) => ({
+        name: m.name || '',
+        dosage: m.dosage || '500mg',
+        frequency: m.frequency || '1-0-1',
+        duration: m.duration || '5 days',
+        instructions: m.instructions || 'After food',
+      }));
+    }
+    return [{ name: '', dosage: '500mg', frequency: '1-0-1', duration: '5 days', instructions: 'After food' }];
+  });
 
   const [savingNotes, setSavingNotes] = useState(false);
   const [completing, setCompleting] = useState(false);

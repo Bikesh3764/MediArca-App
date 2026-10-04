@@ -77,8 +77,9 @@ export const QueuePassScreen: React.FC<QueuePassScreenProps> = ({
 
     // If active appointment exists, check it in
     const activeAppt = activeAppointments[0];
+    const clinicId = activeAppt?.clinicId || (activeAppt?.clinic as any)?.id;
     try {
-      const res = await api.checkIn(activeAppt?.id, scannedText);
+      const res = await api.checkIn(activeAppt?.id, scannedText, clinicId);
       if (res.success) {
         setScanMessage({
           type: 'success',

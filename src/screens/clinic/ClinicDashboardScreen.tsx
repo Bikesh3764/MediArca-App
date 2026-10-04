@@ -7,6 +7,7 @@ import {
   formatDoctorDegrees,
 } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { ClinicQrStandeeModal } from '../../components/common/ClinicQrStandeeModal';
 import { INDIAN_STATES } from '../../utils/indiaStates';
 import {
   Users,
@@ -98,6 +99,7 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
   } | null>(null);
   const [copiedCreds, setCopiedCreds] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [standeeModalOpen, setStandeeModalOpen] = useState(false);
 
   
 
@@ -242,6 +244,37 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
     navigator.clipboard?.writeText(code);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
+  };
+
+  const handleRespondReceptionist = async (receptionistId: string, action: 'ACCEPT' | 'REJECT') => {
+    try {
+      const res = await api.respondToReceptionistRequest(receptionistId, action);
+      if (res.success) {
+        setSuccessMsg(`Receptionist application ${action.toLowerCase()}ed.`);
+        setTimeout(() => setSuccessMsg(null), 3000);
+        loadClinicData(true);
+      } else {
+        setError(res.message || `Failed to ${action.toLowerCase()} application`);
+      }
+    } catch (err: any) {
+      setError(err.message || `Failed to ${action.toLowerCase()} application`);
+    }
+  };
+
+  const handleRemoveReceptionist = async (receptionistId: string, staffName: string) => {
+    if (!window.confirm(`Are you sure you want to remove front desk staff "${staffName}"?`)) return;
+    try {
+      const res = await api.removeClinicReceptionist(receptionistId);
+      if (res.success) {
+        setSuccessMsg('Receptionist desk removed successfully.');
+        setTimeout(() => setSuccessMsg(null), 3000);
+        loadClinicData(true);
+      } else {
+        setError(res.message || 'Failed to remove receptionist');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to remove receptionist');
+    }
   };
 
   const handleSaveClinicProfile = async (e: React.FormEvent) => {
@@ -716,6 +749,54 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
               </button>
             </div>
 
+            {/* Pending Staff Applications */}
+            {data?.incomingReceptionists && data.incomingReceptionists.length > 0 && (
+              <div className="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-amber-700" />
+                  <h3 className="font-semibold text-xs text-amber-900 uppercase tracking-wider">
+                    Incoming Staff Applications ({data.incomingReceptionists.length})
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {data.incomingReceptionists.map((applicant: any) => (
+                    <div
+                      key={applicant.id}
+                      className="bg-white rounded-xl p-3 border border-amber-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-xs text-[#1d1d1f]">{applicant.fullName}</h4>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-medium">
+                            Pending Review
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#86868b] mt-0.5">
+                          {applicant.email} {applicant.phone ? `• ${applicant.phone}` : ''}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        <button
+                          type="button"
+                          onClick={() => handleRespondReceptionist(applicant.id, 'ACCEPT')}
+                          className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium cursor-pointer transition-colors shadow-2xs"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRespondReceptionist(applicant.id, 'REJECT')}
+                          className="px-3 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-medium cursor-pointer transition-colors"
+                        >
+                          Decline
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {receptionists.length === 0 ? (
               <div className="bg-white rounded-2xl p-8 text-center border border-[#e5e5ea]">
                 <Users className="w-10 h-10 text-[#86868b] mx-auto mb-2 opacity-50" />
@@ -763,6 +844,14 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
 
                     <div className="flex items-center gap-2 self-end sm:self-center">
                       <span className="text-xs text-[#86868b]">Provisioned {rec.createdAt}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveReceptionist(rec.id, rec.fullName)}
+                        className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title="Remove Front Desk"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -783,14 +872,13 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
                 <p className="text-xs text-[#86868b]">{clinic.address}</p>
               </div>
 
-              {/* Render visual QR Code standee placeholder */}
+              {/* Render real scannable QR Code standee */}
               <div className="bg-white p-4 rounded-2xl border border-[#e5e5ea] shadow-xs inline-block mx-auto">
-                <div className="w-44 h-44 bg-[#1d1d1f] p-2 rounded-xl flex items-center justify-center text-white">
-                  <div className="w-full h-full border-4 border-white flex flex-col items-center justify-center p-2 text-center">
-                    <QrCode className="w-16 h-16 text-white mb-1" />
-                    <span className="text-[10px] font-mono tracking-widest uppercase">SCAN TO CHECK IN</span>
-                  </div>
-                </div>
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(`${window.location.origin}${window.location.pathname}#/clinic-checkin?clinicId=${clinic.id}&code=${clinic.checkinCode || 'CLINIC01'}`)}`}
+                  alt={`Clinic Check-In QR Code for ${clinic.clinicName}`}
+                  className="w-48 h-48 rounded-xl object-contain mx-auto"
+                />
               </div>
 
               <div className="bg-[#f5f5f7] py-2 px-4 rounded-full inline-block text-xs font-mono font-bold text-[#1d1d1f]">
@@ -802,14 +890,23 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
               </p>
             </div>
 
-            <div className="flex justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-3">
               <button
                 type="button"
                 onClick={handleCopyCheckinCode}
-                className="px-5 py-2.5 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-xs font-medium flex items-center gap-2 transition-colors shadow-xs"
+                className="px-5 py-2.5 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-xs font-medium flex items-center gap-2 transition-colors shadow-xs cursor-pointer"
               >
                 <Copy className="w-4 h-4" />
                 <span>{copiedCode ? 'Code Copied!' : 'Copy Fast Check-In Code'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStandeeModalOpen(true)}
+                className="px-5 py-2.5 rounded-full bg-[#1d1d1f] hover:bg-black text-white text-xs font-medium flex items-center gap-2 transition-colors shadow-xs cursor-pointer"
+              >
+                <QrCode className="w-4 h-4" />
+                <span>View Full Standee & Print</span>
               </button>
             </div>
           </div>
@@ -1132,6 +1229,19 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Standee Modal */}
+      {clinic && (
+        <ClinicQrStandeeModal
+          isOpen={standeeModalOpen}
+          onClose={() => setStandeeModalOpen(false)}
+          clinicId={clinic.id}
+          clinicName={clinic.clinicName}
+          clinicAddress={`${clinic.address || ''}${clinic.city ? `, ${clinic.city}` : ''}`}
+          clinicPhone={clinic.phone}
+          checkinCode={clinic.checkinCode || 'CLINIC01'}
+        />
       )}
     </div>
   );

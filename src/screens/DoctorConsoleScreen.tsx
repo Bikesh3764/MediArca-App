@@ -50,9 +50,15 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
   const [refreshing, setRefreshing] = useState(false);
   const [currentCabinStatus, setCurrentCabinStatus] = useState<
     'IN_CABIN' | 'STEPPED_OUT' | 'NOT_IN_CABIN'
-  >('IN_CABIN');
+  >((user?.doctorProfile?.cabinStatus as any) || 'IN_CABIN');
   const [notes, setNotes] = useState('');
   const [callingPatientId, setCallingPatientId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.doctorProfile?.cabinStatus) {
+      setCurrentCabinStatus(user.doctorProfile.cabinStatus as any);
+    }
+  }, [user]);
 
   // Standee Modal
   const [standeeModalOpen, setStandeeModalOpen] = useState(false);
@@ -119,6 +125,17 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
   const handleCallPatient = async (appointmentId: string) => {
     setCallingPatientId(appointmentId);
     try {
+      // 1. Ensure doctor presence is set to IN_CABIN so callPatient doesn't reject with 400
+      if (currentCabinStatus !== 'IN_CABIN') {
+        await handleUpdatePresence('IN_CABIN');
+      }
+
+      // 2. Auto check-in patient if arrival was not marked to prevent backend 400 rejection
+      const target = queue.find((p) => p.id === appointmentId);
+      if (target && !target.isCheckedIn) {
+        await api.checkInAppointmentDirect(appointmentId, true);
+      }
+
       const res = await api.callPatient(appointmentId);
       if (res.success) {
         fetchDoctorQueue(true);
@@ -330,13 +347,25 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
                     <h4 className="text-xs font-bold text-[#1d1d1f] truncate">
                       {patient.patientName}
                     </h4>
-                    <p className="text-[11px] text-[#86868b] truncate">
+                    <div className="text-[11px] text-[#86868b] truncate mt-0.5">
                       {patient.isCheckedIn ? (
-                        <span className="text-emerald-700 font-semibold">Checked In</span>
+                        <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          Checked In
+                        </span>
                       ) : (
-                        <span>Desk Pending</span>
+                        <button
+                          type="button"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await api.checkInAppointmentDirect(patient.id, true);
+                            fetchDoctorQueue(true);
+                          }}
+                          className="text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 font-medium hover:bg-amber-100 cursor-pointer"
+                        >
+                          Mark In Cabin
+                        </button>
                       )}
-                    </p>
+                    </div>
                   </div>
                 </div>
 

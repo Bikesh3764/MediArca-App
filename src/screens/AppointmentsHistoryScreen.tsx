@@ -304,12 +304,14 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
                   </div>
                 </div>
 
-                {appt.consultationNotes && (
+                {(appt.consultationNotes || (appt as any).clinicalNotes) && (
                   <div className="bg-[#fafafc] p-2.5 rounded-xl border border-[#f0f0f2] text-xs">
                     <span className="text-[10px] font-semibold text-[#86868b] uppercase tracking-wider block mb-0.5">
                       Doctor's Notes
                     </span>
-                    <p className="text-[#1d1d1f] leading-relaxed">{appt.consultationNotes}</p>
+                    <p className="text-[#1d1d1f] leading-relaxed">
+                      {appt.consultationNotes || (appt as any).clinicalNotes}
+                    </p>
                   </div>
                 )}
 

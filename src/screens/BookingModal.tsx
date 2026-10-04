@@ -191,9 +191,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const deskPhone =
     attachedReceptionist?.phone ||
     selectedClinic?.clinicPhone ||
+    (selectedClinic as any)?.phone ||
     (doctor as any).phone ||
-    '+91 98765 43210';
-  const deskName = attachedReceptionist?.name || 'Clinic Reception Desk';
+    '';
+  const deskName = attachedReceptionist?.name || selectedClinic?.clinicName || 'Clinic Reception Desk';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

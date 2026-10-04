@@ -313,12 +313,35 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
     }
   };
 
+  const handleCheckInDirect = async (apptId: string, isCheckedIn = true) => {
+    try {
+      const res = await api.checkInAppointmentDirect(apptId, isCheckedIn);
+      if (res.success) {
+        setQueueItems((prev) =>
+          prev.map((item) => (item.id === apptId ? { ...item, isCheckedIn } : item))
+        );
+        setSuccessMsg(isCheckedIn ? 'Patient arrival marked as Checked In' : 'Check-in status removed');
+        setTimeout(() => setSuccessMsg(null), 2500);
+      } else {
+        setError(res.message || 'Failed to update check-in status');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to update check-in status');
+    }
+  };
+
   const handleUpdateStatus = async (apptId: string, status: string) => {
     try {
+      if (status === 'IN_CONSULTATION') {
+        const currentItem = queueItems.find((q) => q.id === apptId);
+        if (currentItem && !currentItem.isCheckedIn) {
+          await api.checkInAppointmentDirect(apptId, true);
+        }
+      }
       const res = await api.updateAppointmentStatus(apptId, status);
       if (res.success) {
         setQueueItems((prev) =>
-          prev.map((item) => (item.id === apptId ? { ...item, status } : item))
+          prev.map((item) => (item.id === apptId ? { ...item, status, ...(status === 'IN_CONSULTATION' ? { isCheckedIn: true } : {}) } : item))
         );
         setSuccessMsg(`Token marked as ${status}`);
         setTimeout(() => setSuccessMsg(null), 2500);
@@ -813,7 +836,7 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
                           #{item.queueNumber}
                         </div>
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-semibold text-sm text-[#1d1d1f]">{item.patientName}</h4>
                             <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
                               item.status === 'COMPLETED'
@@ -824,6 +847,19 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
                             }`}>
                               {item.status}
                             </span>
+                            {item.isCheckedIn ? (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                Checked In
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleCheckInDirect(item.id, true)}
+                                className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 cursor-pointer transition-colors"
+                              >
+                                Mark Arrived
+                              </button>
+                            )}
                           </div>
                           <p className="text-xs text-[#86868b] mt-0.5">
                             {item.patientPhone} • {item.checkingWindow} • Est: {item.estimatedTime}

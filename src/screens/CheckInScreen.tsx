@@ -28,6 +28,8 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
     text: string;
   } | null>(null);
 
+  const [selectedApptId, setSelectedApptId] = useState<string | null>(null);
+
   const fetchActiveAppointments = async () => {
     if (!user) {
       setLoading(false);
@@ -53,15 +55,18 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
 
   const handleProcessCheckIn = async (code: string, appointmentId?: string) => {
     setStatusMessage(null);
-    const targetAppointmentId = appointmentId || appointments[0]?.id;
+    const targetId = appointmentId || selectedApptId || appointments[0]?.id;
+    const targetAppointment = appointments.find((a) => a.id === targetId) || appointments[0];
+    const targetClinicId = targetAppointment?.clinicId || (targetAppointment?.clinic as any)?.id;
 
     try {
-      const res = await api.checkIn(targetAppointmentId, code);
+      const res = await api.checkIn(targetAppointment?.id, code, targetClinicId);
       if (res.success) {
         setStatusMessage({
           type: 'success',
           text: 'Check-in confirmed! Doctor cabin notified of your arrival.',
         });
+        setSelectedApptId(null);
         fetchActiveAppointments();
       } else {
         setStatusMessage({
@@ -183,7 +188,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
                     </span>
                   </div>
                   <p className="text-[11px] text-[#86868b] mt-0.5">
-                    {appt.clinic?.clinicName || appt.clinic?.name || 'Clinic'} • {appt.date}
+                    {appt.clinic?.clinicName || appt.clinic?.name || 'Clinic'} • {appt.appointmentDate || appt.date}
                   </p>
                 </div>
 
@@ -195,7 +200,10 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
                   <AppleButton
                     size="sm"
                     variant="ghost"
-                    onClick={() => setScannerOpen(true)}
+                    onClick={() => {
+                      setSelectedApptId(appt.id);
+                      setScannerOpen(true);
+                    }}
                   >
                     Check In
                   </AppleButton>
