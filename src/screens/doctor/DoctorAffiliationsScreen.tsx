@@ -28,7 +28,6 @@ import {
   QrCode,
   Check,
   RefreshCw,
-  ExternalLink,
 } from 'lucide-react';
 
 interface DoctorAffiliationsScreenProps {
@@ -44,7 +43,6 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
   const [data, setData] = useState<DoctorAffiliationsData | null>(null);
   const [publicClinics, setPublicClinics] = useState<ClinicProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [publicLoading, setPublicLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -171,7 +169,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
   const handleDetachClinic = async (clinicId: string, clinicName: string) => {
     if (
       !window.confirm(
-        `Detach your medical practice from ${clinicName}? Patients will no longer be able to book you at this facility.`
+        `Detach your practice from ${clinicName}? Patients will no longer be able to book appointments with you at this venue.`
       )
     ) {
       return;
@@ -194,14 +192,14 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
 
   // Unlink receptionist
   const handleRemoveReceptionist = async (receptionistId: string, staffName: string) => {
-    if (!window.confirm(`Revoke queue management access for ${staffName}?`)) return;
+    if (!window.confirm(`Revoke desk queue management access for ${staffName}?`)) return;
 
     setError(null);
     setSuccessMsg(null);
     try {
       const res = await api.removeDoctorReceptionist(receptionistId);
       if (res.success) {
-        setSuccessMsg(`Access revoked for ${staffName}.`);
+        setSuccessMsg(`Queue access revoked for ${staffName}.`);
         await loadAffiliations(true);
       } else {
         setError(res.message || 'Failed to unlink receptionist');
@@ -281,7 +279,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
     <div className="min-h-screen bg-[#f5f5f7] pb-24 text-[#1d1d1f]">
       {/* Sticky Apple Top Header */}
       <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-3">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             type="button"
             onClick={onBack}
@@ -290,7 +288,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
             <ChevronLeft className="w-4 h-4" />
             <span>Console</span>
           </button>
-          <h1 className="font-bold text-sm text-[#1d1d1f]">Clinics & Staff Affiliations</h1>
+          <h1 className="font-bold text-sm text-[#1d1d1f] tracking-tight">Clinics & Staff Affiliations</h1>
           <button
             type="button"
             onClick={() => loadAffiliations(false)}
@@ -303,7 +301,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 pt-4 space-y-4">
+      <main className="max-w-2xl mx-auto px-4 pt-4 space-y-4">
         {/* Banner Alerts */}
         {error && (
           <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2.5 animate-fadeIn shadow-2xs">
@@ -333,39 +331,47 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
           </div>
         )}
 
-        {/* Top 3 KPI Cards */}
-        <div className="grid grid-cols-3 gap-2.5">
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#86868b]">
-              <Building2 className="w-3.5 h-3.5 text-[#0066cc]" />
-              <span>Clinics</span>
+        {/* Top KPI Unified Summary Bar - Clean Apple HIG */}
+        <div className="bg-white rounded-2xl border border-[#e5e5ea] shadow-xs p-4">
+          <div className="grid grid-cols-3 divide-x divide-[#e5e5ea] text-center">
+            {/* Clinics */}
+            <div className="px-2">
+              <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-wider block">
+                Clinics
+              </span>
+              <div className="text-xl font-bold text-[#1d1d1f] mt-1 tracking-tight">
+                {approvedClinics.length}
+              </div>
+              <span className="text-[10px] text-[#0066cc] font-medium mt-0.5 inline-block">
+                Active Facilities
+              </span>
             </div>
-            <div className="text-xl font-bold text-[#1d1d1f] mt-1 tracking-tight">
-              {approvedClinics.length}
-            </div>
-            <div className="text-[10px] text-[#86868b] mt-0.5">Active facilities</div>
-          </div>
 
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#86868b]">
-              <Users className="w-3.5 h-3.5 text-amber-600" />
-              <span>Desk Staff</span>
+            {/* Front Desk Staff */}
+            <div className="px-2">
+              <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-wider block">
+                Desk Staff
+              </span>
+              <div className="text-xl font-bold text-[#1d1d1f] mt-1 tracking-tight">
+                {receptionists.length}
+              </div>
+              <span className="text-[10px] text-amber-600 font-medium mt-0.5 inline-block">
+                Linked Staff
+              </span>
             </div>
-            <div className="text-xl font-bold text-[#1d1d1f] mt-1 tracking-tight">
-              {receptionists.length}
-            </div>
-            <div className="text-[10px] text-[#86868b] mt-0.5">Linked receptionists</div>
-          </div>
 
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#86868b]">
-              <IndianRupee className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Revenue</span>
+            {/* Revenue */}
+            <div className="px-2">
+              <span className="text-[10px] font-bold text-[#86868b] uppercase tracking-wider block">
+                Revenue
+              </span>
+              <div className="text-xl font-bold text-emerald-700 mt-1 tracking-tight">
+                ₹{totalRevenue.toLocaleString('en-IN')}
+              </div>
+              <span className="text-[10px] text-emerald-600 font-medium mt-0.5 inline-block">
+                Attributed
+              </span>
             </div>
-            <div className="text-xl font-bold text-emerald-700 mt-1 tracking-tight">
-              ₹{totalRevenue.toLocaleString('en-IN')}
-            </div>
-            <div className="text-[10px] text-[#86868b] mt-0.5">Attributed revenue</div>
           </div>
         </div>
 
@@ -373,15 +379,15 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
         {incomingRequests.length > 0 && (
           <div className="bg-white rounded-2xl border border-[#0066cc]/30 p-4 shadow-xs space-y-3">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center">
+              <div className="w-7 h-7 rounded-xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center">
                 <Building2 className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="text-xs font-bold text-[#1d1d1f] uppercase tracking-wider">
-                  Incoming Clinic Invitations ({incomingRequests.length})
+                  Incoming Invitations ({incomingRequests.length})
                 </h3>
                 <p className="text-[11px] text-[#86868b]">
-                  Verified healthcare clinics that have invited you to practice
+                  Verified healthcare facilities inviting you to practice
                 </p>
               </div>
             </div>
@@ -392,20 +398,18 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                   key={req.affiliationId}
                   className="p-3.5 rounded-xl border border-[#0066cc]/20 bg-[#f0f8ff]/50 space-y-3"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h4 className="font-bold text-sm text-[#1d1d1f]">{req.clinicName}</h4>
-                      <p className="text-xs text-[#86868b] flex items-center gap-1 mt-0.5">
-                        <MapPin className="w-3 h-3 text-[#0066cc]" />
-                        <span>{req.address}{req.city ? `, ${req.city}` : ''}</span>
+                  <div>
+                    <h4 className="font-bold text-sm text-[#1d1d1f]">{req.clinicName}</h4>
+                    <p className="text-xs text-[#86868b] flex items-center gap-1 mt-0.5">
+                      <MapPin className="w-3 h-3 text-[#0066cc]" />
+                      <span>{req.address}{req.city ? `, ${req.city}` : ''}</span>
+                    </p>
+                    {req.phone && (
+                      <p className="text-[11px] text-[#86868b] flex items-center gap-1 mt-0.5">
+                        <Phone className="w-3 h-3 text-[#86868b]" />
+                        <span>{req.phone}</span>
                       </p>
-                      {req.phone && (
-                        <p className="text-[11px] text-[#86868b] flex items-center gap-1 mt-0.5">
-                          <Phone className="w-3 h-3 text-[#86868b]" />
-                          <span>{req.phone}</span>
-                        </p>
-                      )}
-                    </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2 pt-2 border-t border-[#0066cc]/15">
@@ -416,7 +420,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                       className="flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5"
                     >
                       <Check className="w-3.5 h-3.5" />
-                      <span>Accept Invitation</span>
+                      <span>Accept</span>
                     </AppleButton>
 
                     <AppleButton
@@ -441,7 +445,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
             <div className="flex items-center gap-2">
               <Clock3 className="w-4 h-4 text-amber-600" />
               <h3 className="text-xs font-bold text-amber-900 uppercase tracking-wider">
-                Pending Clinic Approvals ({pendingClinics.length})
+                Pending Approvals ({pendingClinics.length})
               </h3>
             </div>
 
@@ -451,11 +455,11 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                   key={req.affiliationId || req.clinicId}
                   className="p-3 rounded-xl border border-amber-200/80 bg-amber-50/50 flex items-center justify-between text-xs"
                 >
-                  <div>
-                    <h4 className="font-bold text-[#1d1d1f]">{req.clinicName}</h4>
-                    <p className="text-[11px] text-[#86868b]">{req.address}{req.city ? `, ${req.city}` : ''}</p>
+                  <div className="min-w-0 pr-2">
+                    <h4 className="font-bold text-[#1d1d1f] truncate">{req.clinicName}</h4>
+                    <p className="text-[11px] text-[#86868b] truncate">{req.address}{req.city ? `, ${req.city}` : ''}</p>
                   </div>
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
                     Awaiting Clinic
                   </span>
                 </div>
@@ -468,52 +472,39 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
         {rejectedClinics.length > 0 && (
           <div className="bg-white rounded-2xl border border-rose-200 p-4 shadow-xs space-y-3">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+              <div className="w-7 h-7 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
                 <X className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="text-xs font-bold text-rose-900 uppercase tracking-wider">
-                  Declined / Rejected Affiliations ({rejectedClinics.length})
+                  Declined Affiliations ({rejectedClinics.length})
                 </h3>
-                <p className="text-[11px] text-[#86868b]">
-                  Facilities that declined or ended your practice affiliation
-                </p>
               </div>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {rejectedClinics.map((req) => (
                 <div
                   key={req.affiliationId || req.clinicId}
-                  className="p-3.5 rounded-xl border border-rose-200/80 bg-rose-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  className="p-3 rounded-xl border border-rose-200/80 bg-rose-50/40 flex items-center justify-between gap-2 text-xs"
                 >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-[#1d1d1f] truncate">{req.clinicName}</h4>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
-                        Declined
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-[#86868b] mt-0.5 truncate">
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-bold text-[#1d1d1f] truncate">{req.clinicName}</h4>
+                    <p className="text-[11px] text-[#86868b] truncate">
                       {req.address}{req.city ? `, ${req.city}` : ''}
                     </p>
-                    {req.phone && (
-                      <p className="text-[10px] text-[#86868b]">Phone: {req.phone}</p>
-                    )}
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <AppleButton
-                      size="sm"
-                      variant="primary"
-                      disabled={affiliatingId === req.clinicId}
-                      onClick={() => handleAffiliateClinic(req.clinicId)}
-                      className="text-xs py-1.5 px-3 flex items-center gap-1 bg-[#0066cc]"
-                    >
-                      <RefreshCw className={`w-3 h-3 ${affiliatingId === req.clinicId ? 'animate-spin' : ''}`} />
-                      <span>Re-apply</span>
-                    </AppleButton>
-                  </div>
+                  <AppleButton
+                    size="sm"
+                    variant="primary"
+                    disabled={affiliatingId === req.clinicId}
+                    onClick={() => handleAffiliateClinic(req.clinicId)}
+                    className="text-xs py-1 px-3 flex items-center gap-1 bg-[#0066cc] shrink-0"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${affiliatingId === req.clinicId ? 'animate-spin' : ''}`} />
+                    <span>Re-apply</span>
+                  </AppleButton>
                 </div>
               ))}
             </div>
@@ -525,8 +516,8 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Building2 className="w-4 h-4 text-[#0066cc]" />
-              <h2 className="font-bold text-sm text-[#1d1d1f]">Affiliated Clinics & Hospitals</h2>
-              <span className="text-xs font-semibold px-2 py-0.2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f]">
+              <h2 className="font-bold text-sm text-[#1d1d1f]">Affiliated Clinics</h2>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f]">
                 {approvedClinics.length}
               </span>
             </div>
@@ -535,7 +526,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
               size="sm"
               variant="primary"
               onClick={() => setShowAddClinicModal(true)}
-              className="flex items-center gap-1.5 text-xs py-1.5 px-3"
+              className="flex items-center gap-1.5 text-xs py-1 px-3"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Affiliate Clinic</span>
@@ -548,13 +539,13 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
             </div>
           ) : approvedClinics.length === 0 ? (
             <div className="bg-white rounded-2xl p-6 text-center border border-dashed border-[#e5e5ea] space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#0066cc]/8 text-[#0066cc] flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center mx-auto">
                 <Building2 className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="font-bold text-sm text-[#1d1d1f]">No Clinics Affiliated Yet</h3>
                 <p className="text-xs text-[#86868b] mt-1 max-w-sm mx-auto">
-                  Affiliate your practice with verified clinics to receive appointment bookings, configure shift schedules, and manage token queues.
+                  Affiliate with verified clinics to accept patient bookings, configure shift schedules, and manage tokens.
                 </p>
               </div>
               <AppleButton
@@ -579,7 +570,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                 return (
                   <div
                     key={clinic.affiliationId}
-                    className="bg-white rounded-2xl p-4 border border-[#e5e5ea] shadow-xs space-y-3.5 hover:border-[#0066cc]/30 transition-all"
+                    className="bg-white rounded-2xl p-4 border border-[#e5e5ea] shadow-xs space-y-3 hover:border-[#0066cc]/30 transition-all"
                   >
                     {/* Header */}
                     <div className="flex items-start justify-between gap-3">
@@ -613,21 +604,21 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                       </button>
                     </div>
 
-                    {/* Stats Row */}
-                    <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-[#fafafc] border border-[#e5e5ea] text-center">
-                      <div>
+                    {/* Clean Apple Horizontal Stats Bar */}
+                    <div className="grid grid-cols-3 divide-x divide-[#e5e5ea] p-2.5 rounded-xl bg-[#fafafc] border border-[#e5e5ea] text-center">
+                      <div className="px-1">
                         <span className="text-[10px] font-semibold text-[#86868b] block">Consultation Fee</span>
                         <span className="text-sm font-bold text-[#0066cc] mt-0.5 block">
                           ₹{clinic.consultationFee ?? user?.doctorProfile?.consultationFee ?? 500}
                         </span>
                       </div>
-                      <div className="border-x border-[#e5e5ea]">
+                      <div className="px-1">
                         <span className="text-[10px] font-semibold text-[#86868b] block">Bookings</span>
                         <span className="text-sm font-bold text-[#1d1d1f] mt-0.5 block">
                           {clinic.bookingCount || 0}
                         </span>
                       </div>
-                      <div>
+                      <div className="px-1">
                         <span className="text-[10px] font-semibold text-[#86868b] block">Revenue</span>
                         <span className="text-sm font-bold text-emerald-700 mt-0.5 block">
                           ₹{(clinic.revenue || 0).toLocaleString('en-IN')}
@@ -635,12 +626,12 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                       </div>
                     </div>
 
-                    {/* Schedule and Working Days status bar */}
-                    <div className="space-y-1.5 text-xs px-1 text-[#86868b]">
+                    {/* Schedule and Working Days info */}
+                    <div className="space-y-1 text-xs px-0.5 text-[#86868b]">
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-1.5 font-medium">
                           <Calendar className="w-3.5 h-3.5 text-[#0066cc]" />
-                          <span>Working Days:</span>
+                          <span>Days:</span>
                         </span>
                         <span className="font-semibold text-[#1d1d1f] truncate max-w-[200px]">
                           {clinic.workingDays && clinic.workingDays.length > 0
@@ -651,7 +642,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-1.5 font-medium">
                           <Clock className="w-3.5 h-3.5 text-[#0066cc]" />
-                          <span>Practice Shifts:</span>
+                          <span>Shifts:</span>
                         </span>
                         <span className="font-semibold text-[#1d1d1f] truncate max-w-[200px]">
                           {shiftsSummary}
@@ -659,7 +650,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                       </div>
                     </div>
 
-                    {/* Action buttons */}
+                    {/* Clean Action buttons */}
                     <div className="pt-2 border-t border-[#f5f5f7] flex items-center gap-2">
                       <AppleButton
                         size="sm"
@@ -701,13 +692,13 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
           )}
         </div>
 
-        {/* SECTION 2: AUTHORIZED CLINIC DESK STAFF */}
+        {/* SECTION 2: AUTHORIZED FRONT DESK STAFF */}
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-amber-600" />
-              <h2 className="font-bold text-sm text-[#1d1d1f]">Authorized Front Desk Staff</h2>
-              <span className="text-xs font-semibold px-2 py-0.2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f]">
+              <h2 className="font-bold text-sm text-[#1d1d1f]">Front Desk Staff</h2>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f]">
                 {receptionists.length}
               </span>
             </div>
@@ -715,10 +706,10 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
 
           {receptionists.length === 0 ? (
             <div className="bg-white rounded-2xl p-6 text-center border border-[#e5e5ea] text-xs text-[#86868b] space-y-1">
-              <Users className="w-8 h-8 text-[#86868b] mx-auto mb-1 opacity-50" />
-              <p className="font-semibold text-[#1d1d1f]">No Desk Staff Assigned</p>
+              <Users className="w-7 h-7 text-[#86868b] mx-auto mb-1 opacity-40" />
+              <p className="font-bold text-[#1d1d1f]">No Desk Staff Assigned</p>
               <p className="text-[11px] text-[#86868b]">
-                Front desk receptionists are provisioned and assigned by your affiliated clinic administrators.
+                Front desk receptionists are provisioned and assigned by your affiliated clinic facilities.
               </p>
             </div>
           ) : (
@@ -751,7 +742,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                   <button
                     type="button"
                     onClick={() => handleRemoveReceptionist(rec.receptionistId, rec.fullName)}
-                    className="p-2 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors shrink-0"
+                    className="p-2 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors shrink-0 cursor-pointer"
                     title="Remove access"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -771,7 +762,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
             <div className="p-4 border-b border-[#e5e5ea] flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-base text-[#1d1d1f]">Affiliate with a Clinic</h3>
-                <p className="text-xs text-[#86868b]">Select from verified facilities or submit direct request</p>
+                <p className="text-xs text-[#86868b]">Select from verified facilities or enter details</p>
               </div>
               <button
                 type="button"
@@ -791,7 +782,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
               <button
                 type="button"
                 onClick={() => setAffiliateTab('search')}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition-all ${
+                className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                   affiliateTab === 'search'
                     ? 'bg-white text-[#0066cc] shadow-xs'
                     : 'text-[#86868b] hover:text-[#1d1d1f]'
@@ -802,7 +793,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
               <button
                 type="button"
                 onClick={() => setAffiliateTab('direct')}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition-all ${
+                className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer ${
                   affiliateTab === 'direct'
                     ? 'bg-white text-[#0066cc] shadow-xs'
                     : 'text-[#86868b] hover:text-[#1d1d1f]'
@@ -822,8 +813,8 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                     type="text"
                     value={clinicSearchQuery}
                     onChange={(e) => setClinicSearchQuery(e.target.value)}
-                    placeholder="Search by clinic name or city..."
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[#e5e5ea] text-xs bg-[#f5f5f7] focus:bg-white focus:outline-none focus:border-[#0066cc] transition-all"
+                    placeholder="Search clinic name or city..."
+                    className="w-full h-11 pl-9 pr-4 rounded-xl border border-[#e5e5ea] text-xs bg-[#f5f5f7] focus:bg-white focus:outline-none focus:border-[#0066cc] transition-all"
                   />
                 </div>
 
@@ -892,7 +883,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                                 variant="secondary"
                                 disabled={affiliatingId === c.id}
                                 onClick={() => handleAffiliateClinic(c.id)}
-                                className="text-xs py-1.5 px-3 flex items-center gap-1 text-rose-700 border-rose-200 hover:bg-rose-50"
+                                className="text-xs py-1 px-3 flex items-center gap-1 text-rose-700 border-rose-200 hover:bg-rose-50"
                               >
                                 <RefreshCw className={`w-3 h-3 ${affiliatingId === c.id ? 'animate-spin' : ''}`} />
                                 <span>Re-apply</span>
@@ -903,7 +894,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                                 variant="primary"
                                 disabled={affiliatingId === c.id}
                                 onClick={() => handleAffiliateClinic(c.id)}
-                                className="text-xs py-1.5 px-3 flex items-center gap-1"
+                                className="text-xs py-1 px-3 flex items-center gap-1"
                               >
                                 {affiliatingId === c.id ? (
                                   'Sending...'
@@ -937,7 +928,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                     onChange={(e) => setDirectClinicInput(e.target.value)}
                     placeholder="e.g. contact@cityclinic.com or Clinic ID"
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
+                    className="w-full h-11 px-3.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
                   />
                   <p className="text-[11px] text-[#86868b] pt-1">
                     Enter the official MediArca registered email of the facility you are joining.

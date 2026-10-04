@@ -225,51 +225,6 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
           </div>
         </div>
 
-        {/* Practicing Clinics, Shifts & Consultation Fees Card (Exact Parity with Web Platform) */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#e5e5ea] shadow-xs space-y-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-[#0066cc]" />
-                <h3 className="text-sm font-bold text-[#1d1d1f] tracking-tight">
-                  Practicing Clinics, Shifts & Consultation Fees
-                </h3>
-              </div>
-              <p className="text-xs text-[#86868b] leading-relaxed">
-                Consultation fees, working hours (e.g. Shift 1: 09:00–13:00, Shift 2: 15:00–19:00), and patient quotas are configured per affiliated clinic facility, matching real-world clinical practice.
-              </p>
-            </div>
-          </div>
-
-          <div className="pt-2 border-t border-[#f5f5f7] flex flex-col sm:flex-row gap-2">
-            {onNavigateToAffiliations && (
-              <AppleButton
-                type="button"
-                variant="primary"
-                size="sm"
-                onClick={onNavigateToAffiliations}
-                className="flex-1 flex items-center justify-center gap-1.5 text-xs py-2 shadow-xs"
-              >
-                <Building2 className="w-3.5 h-3.5" />
-                <span>Manage Clinic Affiliations</span>
-              </AppleButton>
-            )}
-
-            {onNavigateToSchedule && (
-              <AppleButton
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={onNavigateToSchedule}
-                className="flex-1 flex items-center justify-center gap-1.5 text-xs py-2 border-[#0066cc]/30 text-[#0066cc]"
-              >
-                <Clock className="w-3.5 h-3.5 text-[#0066cc]" />
-                <span>Configure Shifts & Fees</span>
-              </AppleButton>
-            )}
-          </div>
-        </div>
-
         {/* Profile Form (Credentials & Professional Identity) */}
         <form onSubmit={handleSave} className="bg-white rounded-2xl p-5 border border-[#e5e5ea] shadow-xs space-y-4">
           <div className="border-b border-[#f5f5f7] pb-2">

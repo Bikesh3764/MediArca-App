@@ -196,52 +196,6 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
       </div>
 
       <div className="p-4 space-y-4 max-w-md mx-auto w-full">
-        {/* Quick Action Navigation Bar (Clinics, Schedule, Standee) */}
-        <div className="grid grid-cols-2 gap-2.5">
-          {onOpenAffiliations && (
-            <button
-              type="button"
-              onClick={onOpenAffiliations}
-              className="p-3 rounded-2xl bg-white border border-[#e5e5ea] shadow-xs hover:border-[#0066cc]/40 transition-all text-left flex items-center justify-between cursor-pointer active:scale-98"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center shrink-0">
-                  <Building2 className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-[#1d1d1f] truncate">Clinics & Staff</div>
-                  <div className="text-[10px] text-[#86868b]">
-                    {affiliatedClinicsCount} {affiliatedClinicsCount === 1 ? 'clinic' : 'clinics'}
-                  </div>
-                </div>
-              </div>
-              {pendingRequestsCount > 0 && (
-                <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
-                  {pendingRequestsCount}
-                </span>
-              )}
-            </button>
-          )}
-
-          {onOpenSchedule && (
-            <button
-              type="button"
-              onClick={() => onOpenSchedule()}
-              className="p-3 rounded-2xl bg-white border border-[#e5e5ea] shadow-xs hover:border-[#0066cc]/40 transition-all text-left flex items-center justify-between cursor-pointer active:scale-98"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                  <Clock className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs font-bold text-[#1d1d1f] truncate">Shifts & Fees</div>
-                  <div className="text-[10px] text-[#86868b]">Set timings & fee</div>
-                </div>
-              </div>
-            </button>
-          )}
-        </div>
-
         {/* Presence Controls Card */}
         <AppleCard className="space-y-3">
           <div className="flex items-center justify-between">
