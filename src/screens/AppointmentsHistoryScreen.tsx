@@ -158,7 +158,6 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-[#1d1d1f]">My Visits</h2>
-            <p className="text-xs text-[#86868b]">Consultation tokens & records</p>
           </div>
         </div>
 
@@ -232,8 +231,8 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
             </h4>
             <p className="text-xs text-[#86868b] mt-1 mb-5">
               {activeTab === 'upcoming'
-                ? 'Book a consultation to get your zero-wait queue token.'
-                : 'Completed consultation history and records will appear here.'}
+                ? 'No upcoming visits scheduled.'
+                : 'No past visits found.'}
             </p>
             {activeTab === 'upcoming' && (
               <AppleButton variant="primary" size="md" onClick={onExplorePress}>

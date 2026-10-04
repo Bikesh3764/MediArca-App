@@ -21,6 +21,8 @@ import {
   User as UserIcon,
   ChevronRight,
   Clock,
+  LogOut,
+  Sparkles,
 } from 'lucide-react';
 
 interface DoctorProfileScreenProps {
@@ -36,7 +38,7 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
   onNavigateToAffiliations,
   onNavigateToSchedule,
 }) => {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
 
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [phone, setPhone] = useState(user?.phone || '');
@@ -139,17 +141,8 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
     <div className="min-h-screen bg-[#f5f5f7] pb-24 text-[#1d1d1f]">
       {/* Sticky Apple Top Header */}
       <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-3">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#86868b] hover:text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span>Console</span>
-          </button>
-          <h1 className="font-bold text-sm text-[#1d1d1f]">Doctor Professional Profile</h1>
-          <div className="w-12" />
+        <div className="max-w-md mx-auto text-center">
+          <h1 className="font-bold text-sm text-[#1d1d1f]">Doctor Profile</h1>
         </div>
       </header>
 
@@ -342,10 +335,39 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
               className="w-full flex items-center justify-center gap-2 shadow-xs"
             >
               <Save className="w-4 h-4" />
-              <span>{saving ? 'Saving Credentials...' : 'Save Doctor Profile'}</span>
+              <span>{saving ? 'Saving...' : 'Save Doctor Profile'}</span>
             </AppleButton>
           </div>
         </form>
+
+        {/* Workspace & Sign Out Section */}
+        <div className="space-y-2 pt-2">
+          {onOpenRoleSwitcher && (
+            <button
+              type="button"
+              onClick={onOpenRoleSwitcher}
+              className="w-full py-2.5 px-4 rounded-2xl bg-white border border-[#e5e5ea] text-[#1d1d1f] text-xs font-semibold flex items-center justify-between hover:bg-[#f5f5f7] active:scale-[0.99] transition-all cursor-pointer shadow-2xs"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#0066cc]" />
+                <span>Switch Platform Workspace</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-[#86868b]" />
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={logout}
+            className="w-full py-2.5 px-4 rounded-2xl bg-rose-50 border border-rose-200/60 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center justify-between active:scale-[0.99] transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <LogOut className="w-4 h-4 text-rose-600" />
+              <span>Sign Out of Doctor Account</span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-rose-400" />
+          </button>
+        </div>
       </main>
     </div>
   );

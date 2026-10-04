@@ -321,21 +321,11 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
               type="button"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="p-2 rounded-full bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[#1d1d1f] transition-colors"
+              className="p-2 rounded-full bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[#1d1d1f] transition-colors cursor-pointer"
               title="Refresh"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
-            {onOpenRoleSwitcher && (
-              <button
-                type="button"
-                onClick={onOpenRoleSwitcher}
-                className="px-3 py-1.5 rounded-full bg-[#0066cc]/10 hover:bg-[#0066cc]/20 text-[#0066cc] text-xs font-medium flex items-center gap-1.5 transition-colors"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Switch Role</span>
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -581,9 +571,6 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
                     <h3 className="text-xs font-bold text-[#1d1d1f] uppercase tracking-wider">
                       Incoming Doctor Affiliation Requests ({incomingDoctorRequests.length})
                     </h3>
-                    <p className="text-[11px] text-[#86868b]">
-                      Doctors requesting to practice at your clinic facility
-                    </p>
                   </div>
                 </div>
 
@@ -657,11 +644,11 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
               <div className="bg-white rounded-2xl p-8 text-center border border-[#e5e5ea]">
                 <Stethoscope className="w-10 h-10 text-[#86868b] mx-auto mb-2 opacity-50" />
                 <p className="text-sm font-semibold text-[#1d1d1f]">No doctors affiliated yet</p>
-                <p className="text-xs text-[#86868b] mt-1 mb-4">Onboard your first physician using their MediArca email.</p>
+                <p className="text-xs text-[#86868b] mt-1 mb-4">No practicing doctors listed.</p>
                 <button
                   type="button"
                   onClick={() => setShowDoctorModal(true)}
-                  className="px-4 py-2 rounded-full bg-[#0066cc] text-white text-xs font-medium"
+                  className="px-4 py-2 rounded-full bg-[#0066cc] text-white text-xs font-medium cursor-pointer"
                 >
                   Onboard Doctor
                 </button>
@@ -722,7 +709,7 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
               <button
                 type="button"
                 onClick={() => setShowRecModal(true)}
-                className="px-3.5 py-1.5 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
+                className="px-3.5 py-1.5 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 <span>Provision Desk</span>
@@ -733,11 +720,11 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
               <div className="bg-white rounded-2xl p-8 text-center border border-[#e5e5ea]">
                 <Users className="w-10 h-10 text-[#86868b] mx-auto mb-2 opacity-50" />
                 <p className="text-sm font-semibold text-[#1d1d1f]">No receptionist desks provisioned</p>
-                <p className="text-xs text-[#86868b] mt-1 mb-4">Create front-desk credentials so staff can issue tokens and manage queues.</p>
+                <p className="text-xs text-[#86868b] mt-1 mb-4">No front-desk staff added yet.</p>
                 <button
                   type="button"
                   onClick={() => setShowRecModal(true)}
-                  className="px-4 py-2 rounded-full bg-[#0066cc] text-white text-xs font-medium"
+                  className="px-4 py-2 rounded-full bg-[#0066cc] text-white text-xs font-medium cursor-pointer"
                 >
                   Provision Desk
                 </button>
@@ -811,7 +798,7 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
               </div>
 
               <p className="text-[11px] text-[#86868b]">
-                Patients scan this standee on entry with MediArca App to automatically confirm presence and claim their queue position.
+                Patients scan this standee at clinic entrance to check in.
               </p>
             </div>
 
@@ -929,24 +916,8 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
               </div>
             </form>
 
-            {/* Quick Actions & Logout Card */}
-            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-3">
-              <h3 className="font-semibold text-xs text-[#86868b] uppercase tracking-wider">Workspace & Account</h3>
-              
-              {onOpenRoleSwitcher && (
-                <button
-                  type="button"
-                  onClick={onOpenRoleSwitcher}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[#1d1d1f] text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-600" />
-                    <span>Switch Platform Workspace</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-[#86868b]" />
-                </button>
-              )}
-
+            {/* Account Sign Out Card */}
+            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs">
               <button
                 type="button"
                 onClick={logout}

@@ -482,21 +482,11 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
                 loadReceptionistData(true);
               }}
               disabled={refreshing}
-              className="p-2 rounded-full bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[#1d1d1f] transition-colors"
+              className="p-2 rounded-full bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[#1d1d1f] transition-colors cursor-pointer"
               title="Refresh"
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
-            {onOpenRoleSwitcher && (
-              <button
-                type="button"
-                onClick={onOpenRoleSwitcher}
-                className="px-3 py-1.5 rounded-full bg-[#0066cc]/10 hover:bg-[#0066cc]/20 text-[#0066cc] text-xs font-medium flex items-center gap-1.5 transition-colors"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Switch Role</span>
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -667,7 +657,6 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-semibold text-base text-[#1d1d1f]">Issue Walk-In Token</h2>
-                <p className="text-xs text-[#86868b]">Register physical patient at clinic front desk</p>
               </div>
               {walkinPreview && (
                 <div className="bg-blue-50 border border-blue-200/60 rounded-2xl px-3.5 py-2 text-right">
@@ -882,11 +871,8 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold text-[#1d1d1f]">
-                  Pending Online Appointments ({pendingList.length})
+                  Pending Approvals ({pendingList.length})
                 </h2>
-                <p className="text-xs text-[#86868b]">
-                  Collect consultation fee at desk & confirm queue token
-                </p>
               </div>
               <button
                 type="button"
@@ -900,14 +886,14 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
 
             {pendingLoading ? (
               <div className="p-10 text-center text-xs text-[#86868b] bg-white rounded-3xl border border-[#e5e5ea]">
-                Loading incoming online requests...
+                Loading incoming requests...
               </div>
             ) : pendingList.length === 0 ? (
               <div className="bg-white rounded-3xl p-8 text-center border border-[#e5e5ea]">
                 <ShieldCheck className="w-12 h-12 text-[#0066cc] mx-auto mb-2 opacity-80" />
-                <p className="text-sm font-bold text-[#1d1d1f]">No Pending Online Bookings</p>
-                <p className="text-xs text-[#86868b] mt-1 max-w-xs mx-auto">
-                  Patient online booking requests awaiting payment and front-desk confirmation appear here in real-time.
+                <p className="text-sm font-bold text-[#1d1d1f]">No Pending Bookings</p>
+                <p className="text-xs text-[#86868b] mt-1">
+                  Online bookings awaiting confirmation will appear here.
                 </p>
               </div>
             ) : (
@@ -1042,7 +1028,6 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
               <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
                 <div>
                   <h3 className="font-semibold text-base text-[#1d1d1f]">Doctor Cabin Controls</h3>
-                  <p className="text-xs text-[#86868b]">Control active practitioner availability and break status</p>
                 </div>
                 <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200/60 flex items-center justify-center text-indigo-700">
                   <Stethoscope className="w-5 h-5" />
@@ -1199,7 +1184,6 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
                 <Lock className="w-4 h-4 text-[#0066cc]" />
                 <h3 className="font-semibold text-sm text-[#1d1d1f]">Update Desk Password</h3>
               </div>
-              <p className="text-xs text-[#86868b]">Keep your receptionist terminal secure with a strong password.</p>
 
               <form onSubmit={handleChangePassword} className="space-y-3">
                 <div>
@@ -1236,24 +1220,8 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
               </form>
             </div>
 
-            {/* Workspace & Sign Out Card */}
+            {/* Sign Out Card */}
             <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-3">
-              <h3 className="font-semibold text-xs text-[#86868b] uppercase tracking-wider">Workspace & Account</h3>
-
-              {onOpenRoleSwitcher && (
-                <button
-                  type="button"
-                  onClick={onOpenRoleSwitcher}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[#1d1d1f] text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-600" />
-                    <span>Switch Platform Workspace</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-[#86868b]" />
-                </button>
-              )}
-
               <button
                 type="button"
                 onClick={logout}

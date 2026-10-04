@@ -15,30 +15,17 @@ import {
   Trash2,
   AlertCircle,
   CheckCircle2,
-  ChevronLeft,
 } from 'lucide-react';
 
 interface ManageScheduleScreenProps {
-  onBack: () => void;
+  onBack?: () => void;
   initialClinicId?: string;
   onNavigateToAffiliations?: () => void;
 }
 
-const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const DAY_INDEX_MAP: Record<string, number> = {
-  Sun: 0,
-  Mon: 1,
-  Tue: 2,
-  Wed: 3,
-  Thu: 4,
-  Fri: 5,
-  Sat: 6,
-};
-
 const FEE_PRESETS = [300, 500, 700, 1000, 1500];
 
 export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
-  onBack,
   initialClinicId,
 }) => {
   const { user, refreshUser } = useAuth();
@@ -49,15 +36,6 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-
-  const [workingDays, setWorkingDays] = useState<string[]>([
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-  ]);
 
   const [slots, setSlots] = useState<DoctorSlot[]>([
     {
@@ -72,6 +50,9 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
 
   const [consultationFee, setConsultationFee] = useState<number>(500);
 
+  const selectedClinicIdRef = React.useRef(selectedClinicId);
+  selectedClinicIdRef.current = selectedClinicId;
+
   const syncClinicData = useCallback(
     (clinic: DoctorAffiliationClinic) => {
       if (clinic.slots && clinic.slots.length > 0) {
@@ -85,19 +66,16 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
       } else if (user?.doctorProfile) {
         setSlots(parseDoctorSlots(user.doctorProfile));
       } else {
-        setSlots([]);
-      }
-
-      if (clinic.workingDays && Array.isArray(clinic.workingDays)) {
-        setWorkingDays(clinic.workingDays);
-      } else if (clinic.daysOfWeek && Array.isArray(clinic.daysOfWeek)) {
-        const mapped = clinic.daysOfWeek.map((idx: number) => {
-          const found = Object.entries(DAY_INDEX_MAP).find(([, val]) => val === idx);
-          return found ? found[0] : 'Mon';
-        });
-        setWorkingDays(mapped);
-      } else {
-        setWorkingDays([]);
+        setSlots([
+          {
+            id: 'slot_1',
+            name: 'Shift 1',
+            startTime: '09:00',
+            endTime: '13:00',
+            maxPatients: 25,
+            avgConsultationMinutes: 20,
+          },
+        ]);
       }
 
       setConsultationFee(clinic.consultationFee ?? user?.doctorProfile?.consultationFee ?? 500);
@@ -116,10 +94,11 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
       setClinics(activeClinics);
 
       let targetClinic: DoctorAffiliationClinic | undefined;
+      const currentId = selectedClinicIdRef.current || initialClinicId;
 
-      if (initialClinicId && activeClinics.some((c) => c.clinicId === initialClinicId)) {
-        targetClinic = activeClinics.find((c) => c.clinicId === initialClinicId);
-        setSelectedClinicId(initialClinicId);
+      if (currentId && activeClinics.some((c) => c.clinicId === currentId)) {
+        targetClinic = activeClinics.find((c) => c.clinicId === currentId);
+        setSelectedClinicId(currentId);
       } else if (activeClinics.length > 0) {
         targetClinic = activeClinics[0];
         setSelectedClinicId(activeClinics[0].clinicId);
@@ -129,12 +108,12 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
         syncClinicData(targetClinic);
       } else if (user?.doctorProfile) {
         setSlots(parseDoctorSlots(user.doctorProfile));
-        setConsultationFee(user.doctorProfile.consultationFee || 500);
+        setConsultationFee(user.doctorProfile.consultationFee ?? 500);
       }
     } catch {
       if (user?.doctorProfile) {
         setSlots(parseDoctorSlots(user.doctorProfile));
-        setConsultationFee(user.doctorProfile.consultationFee || 500);
+        setConsultationFee(user.doctorProfile.consultationFee ?? 500);
       }
     } finally {
       setLoading(false);
@@ -143,7 +122,7 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
 
   useEffect(() => {
     loadDoctorAffiliations();
-  }, [loadDoctorAffiliations]);
+  }, [initialClinicId]);
 
   const selectedClinic = clinics.find((c) => c.clinicId === selectedClinicId);
 
@@ -217,25 +196,6 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
     setSlots((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleToggleDay = (day: string) => {
-    setError(null);
-    setWorkingDays((prev) => {
-      if (prev.includes(day)) {
-        return prev.filter((d) => d !== day);
-      } else {
-        return DAYS_OF_WEEK.filter((d) => prev.includes(d) || d === day);
-      }
-    });
-  };
-
-  const handleSelectPresetDays = (preset: 'all' | 'weekdays' | 'mon-sat' | 'none') => {
-    setError(null);
-    if (preset === 'all') setWorkingDays([...DAYS_OF_WEEK]);
-    else if (preset === 'weekdays') setWorkingDays(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
-    else if (preset === 'mon-sat') setWorkingDays(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']);
-    else if (preset === 'none') setWorkingDays([]);
-  };
-
   const totalMaxDailyPatients = slots.reduce((sum, s) => sum + (Number(s.maxPatients) || 0), 0);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -274,16 +234,16 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
 
     try {
       const payload = {
-        clinicId: selectedClinic ? selectedClinic.clinicId : undefined,
-        consultationFee: Number(consultationFee),
-        workingDays,
-        daysOfWeek: workingDays.map((d) => DAY_INDEX_MAP[d] ?? 1),
+        ...(selectedClinic ? { clinicId: selectedClinic.clinicId } : {}),
         slots: slots.map((s) => ({
-          ...s,
-          days: workingDays,
+          id: s.id,
+          name: s.name,
+          startTime: s.startTime,
+          endTime: s.endTime,
           maxPatients: Number(s.maxPatients),
           avgConsultationMinutes: Number(s.avgConsultationMinutes),
         })),
+        consultationFee: Number(consultationFee),
       };
 
       const res = await api.updateDoctorSchedule(payload);
@@ -299,18 +259,16 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
                     ...c,
                     slots,
                     consultationFee: Number(consultationFee),
-                    workingDays,
-                    daysOfWeek: workingDays.map((d) => DAY_INDEX_MAP[d] ?? 1),
                   }
                 : c
             )
           );
         }
       } else {
-        setError(res.message || 'Failed to update');
+        setError(res.message || 'Failed to update schedule');
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to update');
+      setError(err.message || 'Failed to update schedule');
     } finally {
       setSaving(false);
     }
@@ -318,19 +276,10 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] pb-24 text-[#1d1d1f]">
-      {/* Sticky Header */}
+      {/* Header - No console/back button */}
       <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-3">
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex items-center gap-1 text-xs font-semibold text-[#86868b] hover:text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span>Back</span>
-          </button>
+        <div className="max-w-md mx-auto text-center">
           <h1 className="font-bold text-sm text-[#1d1d1f]">Schedule & Fee</h1>
-          <div className="w-8" />
         </div>
       </header>
 
@@ -397,76 +346,8 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
                 </h3>
               </div>
               <span className="text-[11px] font-semibold text-[#0066cc] bg-[#0066cc]/10 px-2.5 py-1 rounded-full">
-                {slots.length} Shift{slots.length === 1 ? '' : 's'} • {workingDays.length} Days
+                {slots.length} Shift{slots.length === 1 ? '' : 's'}
               </span>
-            </div>
-
-            {/* Working Days Card */}
-            <div className="bg-white rounded-2xl p-4 border border-[#e5e5ea] space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#86868b] uppercase tracking-wider">
-                  Working Days
-                </span>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => handleSelectPresetDays('all')}
-                    className="px-2 py-0.5 rounded-lg bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[10px] font-semibold text-[#1d1d1f] cursor-pointer"
-                  >
-                    All 7
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectPresetDays('mon-sat')}
-                    className="px-2 py-0.5 rounded-lg bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[10px] font-semibold text-[#1d1d1f] cursor-pointer"
-                  >
-                    Mon–Sat
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectPresetDays('weekdays')}
-                    className="px-2 py-0.5 rounded-lg bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[10px] font-semibold text-[#1d1d1f] cursor-pointer"
-                  >
-                    Mon–Fri
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectPresetDays('none')}
-                    className="px-2 py-0.5 rounded-lg bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[10px] font-semibold text-amber-700 cursor-pointer"
-                  >
-                    None
-                  </button>
-                </div>
-              </div>
-
-              {/* 7 Day Buttons */}
-              <div className="grid grid-cols-7 gap-1.5">
-                {DAYS_OF_WEEK.map((day) => {
-                  const isSelected = workingDays.includes(day);
-                  return (
-                    <button
-                      key={day}
-                      type="button"
-                      onClick={() => handleToggleDay(day)}
-                      className={`h-10 rounded-xl text-xs font-bold transition-all text-center select-none active:scale-95 cursor-pointer ${
-                        isSelected
-                          ? 'bg-[#0066cc] text-white shadow-xs'
-                          : 'bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[#86868b] border border-[#e5e5ea]'
-                      }`}
-                    >
-                      {day}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="text-[11px] text-[#86868b] text-right">
-                {workingDays.length > 0 ? (
-                  <span>{workingDays.length} days active</span>
-                ) : (
-                  <span className="text-amber-600 font-semibold">Off Duty (0 days)</span>
-                )}
-              </div>
             </div>
 
             {/* Shifts Builder */}

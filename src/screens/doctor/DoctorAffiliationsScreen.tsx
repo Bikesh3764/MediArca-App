@@ -279,16 +279,9 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
     <div className="min-h-screen bg-[#f5f5f7] pb-24 text-[#1d1d1f]">
       {/* Sticky Apple Top Header */}
       <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-3">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#86868b] hover:text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span>Console</span>
-          </button>
-          <h1 className="font-bold text-sm text-[#1d1d1f] tracking-tight">Clinics & Staff Affiliations</h1>
+        <div className="max-w-md mx-auto flex items-center justify-between">
+          <div className="w-7" />
+          <h1 className="font-bold text-sm text-[#1d1d1f] tracking-tight">Clinics & Staff</h1>
           <button
             type="button"
             onClick={() => loadAffiliations(false)}
@@ -626,28 +619,15 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                       </div>
                     </div>
 
-                    {/* Schedule and Working Days info */}
-                    <div className="space-y-1 text-xs px-0.5 text-[#86868b]">
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 font-medium">
-                          <Calendar className="w-3.5 h-3.5 text-[#0066cc]" />
-                          <span>Days:</span>
-                        </span>
-                        <span className="font-semibold text-[#1d1d1f] truncate max-w-[200px]">
-                          {clinic.workingDays && clinic.workingDays.length > 0
-                            ? clinic.workingDays.join(', ')
-                            : 'Mon – Sat'}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 font-medium">
-                          <Clock className="w-3.5 h-3.5 text-[#0066cc]" />
-                          <span>Shifts:</span>
-                        </span>
-                        <span className="font-semibold text-[#1d1d1f] truncate max-w-[200px]">
-                          {shiftsSummary}
-                        </span>
-                      </div>
+                    {/* Schedule info */}
+                    <div className="text-xs px-0.5 text-[#86868b] flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <Clock className="w-3.5 h-3.5 text-[#0066cc]" />
+                        <span>Shifts:</span>
+                      </span>
+                      <span className="font-semibold text-[#1d1d1f] truncate max-w-[200px]">
+                        {shiftsSummary}
+                      </span>
                     </div>
 
                     {/* Clean Action buttons */}

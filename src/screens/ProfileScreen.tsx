@@ -106,7 +106,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea] flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-[#1d1d1f]">Account</h2>
-          <p className="text-xs text-[#86868b]">Personal health profile & workspace</p>
         </div>
         {onOpenRoleSwitcher && (
           <button
@@ -459,34 +458,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </button>
               </div>
             </div>
-
-            {onOpenRoleSwitcher && (
-              <AppleCard className="p-0 overflow-hidden border-[#e5e5ea] text-left mt-2 shadow-2xs">
-                <button
-                  type="button"
-                  onClick={onOpenRoleSwitcher}
-                  className="w-full p-4 flex items-center justify-between hover:bg-[#f5f5f7] active:bg-[#e5e5ea] transition-all cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center shrink-0">
-                      <Sparkles className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-[#1d1d1f]">Switch Workspace</span>
-                        <span className="text-[10px] font-semibold text-[#0066cc] bg-[#0066cc]/10 px-1.5 py-0.5 rounded-full">
-                          4 Roles
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-[#86868b] mt-0.5">
-                        Doctor Console, Clinic Operations, Reception Desk
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-[#86868b]" />
-                </button>
-              </AppleCard>
-            )}
           </div>
         )}
       </div>
