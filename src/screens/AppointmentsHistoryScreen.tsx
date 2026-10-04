@@ -138,7 +138,11 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
   }
 
   const upcomingAppointments = appointments.filter(
-    (a) => a.status === 'WAITING' || a.status === 'IN_CONSULTATION' || a.status === 'PENDING_APPROVAL'
+    (a) =>
+      a.status === 'WAITING' ||
+      a.status === 'IN_CONSULTATION' ||
+      a.status === 'PENDING' ||
+      a.status === 'PENDING_APPROVAL'
   );
 
   const pastAppointments = appointments.filter(
@@ -239,6 +243,7 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
           </div>
         ) : (
           displayedList.map((appt) => {
+            const isPending = appt.status === 'PENDING' || appt.status === 'PENDING_APPROVAL';
             const isCompleted = appt.status === 'COMPLETED';
             const isCancelled = appt.status === 'CANCELLED' || appt.status === 'REJECTED';
             const isWaiting = appt.status === 'WAITING';
@@ -254,7 +259,7 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
                 <div className="flex items-start justify-between">
                   <div>
                     <span className="text-xs font-black text-[#0066cc]">
-                      Token #{String(appt.queueNumber).padStart(2, '0')}
+                      {isPending ? 'Estimated ' : ''}Token #{String(isPending ? (appt.estimatedQueueNumber || (appt.queueNumber > 0 ? appt.queueNumber : 1)) : appt.queueNumber).padStart(2, '0')}
                     </span>
                     <h4 className="text-sm font-bold text-[#1d1d1f] mt-0.5">
                       {docName.toLowerCase().startsWith('dr.') ? docName : `Dr. ${docName}`}
@@ -270,6 +275,8 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
                         ? 'bg-[#f5f5f7] text-[#1d1d1f] border-[#e5e5ea]'
                         : isCancelled
                         ? 'bg-rose-50 text-rose-700 border-rose-200'
+                        : isPending
+                        ? 'bg-amber-50 text-amber-800 border-amber-200'
                         : isInCabin
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         : 'bg-blue-50 text-[#0066cc] border-blue-200'
@@ -279,6 +286,8 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
                       ? 'Completed'
                       : isCancelled
                       ? 'Cancelled'
+                      : isPending
+                      ? 'Pending Payment'
                       : isInCabin
                       ? 'In Cabin'
                       : 'Waiting'}

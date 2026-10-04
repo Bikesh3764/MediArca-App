@@ -1,0 +1,12 @@
+[
+  "Step 1: Navigating to http://localhost:5173...",
+  "Captured Role Gateway Screen screenshot",
+  "Step 2: Selecting Patient role...",
+  "Entered Patient Explore screen",
+  "Step 3: Clicking on first Doctor card / Book Visit button...",
+  "Step 4: Testing 1-Click Demo Doctor switch...",
+  "Captured Doctor Console screen",
+  "Step 5: Testing Receptionist desk...",
+  "Captured Receptionist Desk screen",
+  "✅ Playwright audit finished successfully!"
+]

@@ -62,9 +62,13 @@ export const QueuePassScreen: React.FC<QueuePassScreenProps> = ({
     return () => clearInterval(interval);
   }, [user]);
 
-  // Active appointments are WAITING or IN_CONSULTATION
+  // Active appointments are WAITING, IN_CONSULTATION, or PENDING (awaiting front-desk confirmation)
   const activeAppointments = appointments.filter(
-    (a) => a.status === 'WAITING' || a.status === 'IN_CONSULTATION'
+    (a) =>
+      a.status === 'WAITING' ||
+      a.status === 'IN_CONSULTATION' ||
+      a.status === 'PENDING' ||
+      a.status === 'PENDING_APPROVAL'
   );
 
   const handleScanSuccess = async (scannedText: string) => {

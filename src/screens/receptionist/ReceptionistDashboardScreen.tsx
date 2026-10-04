@@ -8,7 +8,7 @@ import {
   getLocalDateString,
   AppNotification,
 } from '../../services/api';
-import { sanitizeIndianPhone, isValidIndianPhone } from '../../utils/phoneUtils';
+import { sanitizeIndianPhone, isValidIndianPhone, formatDisplayPhone } from '../../utils/phoneUtils';
 import { useAuth } from '../../context/AuthContext';
 import {
   Users,
@@ -104,6 +104,20 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
   // Pending Approvals State
   const [pendingList, setPendingList] = useState<Appointment[]>([]);
   const [pendingLoading, setPendingLoading] = useState(false);
+
+  // Reschedule / Shift Date Modal State
+  const [rescheduleTarget, setRescheduleTarget] = useState<{
+    id: string;
+    patientName: string;
+    doctorName: string;
+    currentDate: string;
+    slotId?: string;
+    doctorId?: string;
+  } | null>(null);
+  const [rescheduleDate, setRescheduleDate] = useState<string>('');
+  const [rescheduleSlotId, setRescheduleSlotId] = useState<string>('');
+  const [rescheduling, setRescheduling] = useState(false);
+  const [rescheduleError, setRescheduleError] = useState<string | null>(null);
 
   // Cabin Presence State
   const [updatingCabin, setUpdatingCabin] = useState(false);
@@ -340,6 +354,30 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
       }
     } catch (err: any) {
       setError(err.message || 'Failed to reject appointment');
+    }
+  };
+
+  const handleConfirmReschedule = async () => {
+    if (!rescheduleTarget || !rescheduleDate) return;
+    setRescheduling(true);
+    setRescheduleError(null);
+    try {
+      const res = await api.rescheduleAppointment(rescheduleTarget.id, {
+        newDate: rescheduleDate,
+        newSlotId: rescheduleSlotId || undefined,
+      });
+      if (res.success) {
+        setPendingList((prev) => prev.filter((p) => p.id !== rescheduleTarget.id));
+        setRescheduleTarget(null);
+        setSuccessMsg('Appointment shifted successfully to new date!');
+        setTimeout(() => setSuccessMsg(null), 3000);
+      } else {
+        setRescheduleError(res.message || 'Failed to shift appointment date');
+      }
+    } catch (err: any) {
+      setRescheduleError(err.message || 'Error updating appointment date');
+    } finally {
+      setRescheduling(false);
     }
   };
 
@@ -840,51 +878,158 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
 
         {/* TAB 3: ONLINE APPROVALS */}
         {activeTab === 'pending' && (
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-[#1d1d1f]">Pending Online Appointments ({pendingList.length})</h2>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-[#1d1d1f]">
+                  Pending Online Appointments ({pendingList.length})
+                </h2>
+                <p className="text-xs text-[#86868b]">
+                  Collect consultation fee at desk & confirm queue token
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={loadPendingApprovals}
+                className="px-3 py-1.5 rounded-full bg-white border border-[#e5e5ea] text-xs font-semibold text-[#0066cc] hover:bg-[#f5f5f7] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Refresh</span>
+              </button>
+            </div>
+
             {pendingLoading ? (
-              <div className="p-8 text-center text-xs text-[#86868b]">Loading requests...</div>
+              <div className="p-10 text-center text-xs text-[#86868b] bg-white rounded-3xl border border-[#e5e5ea]">
+                Loading incoming online requests...
+              </div>
             ) : pendingList.length === 0 ? (
-              <div className="bg-white rounded-2xl p-8 text-center border border-[#e5e5ea]">
-                <ShieldCheck className="w-10 h-10 text-[#86868b] mx-auto mb-2 opacity-50" />
-                <p className="text-sm font-semibold text-[#1d1d1f]">No pending online bookings</p>
-                <p className="text-xs text-[#86868b] mt-1">App bookings requiring front-desk confirmation appear here.</p>
+              <div className="bg-white rounded-3xl p-8 text-center border border-[#e5e5ea]">
+                <ShieldCheck className="w-12 h-12 text-[#0066cc] mx-auto mb-2 opacity-80" />
+                <p className="text-sm font-bold text-[#1d1d1f]">No Pending Online Bookings</p>
+                <p className="text-xs text-[#86868b] mt-1 max-w-xs mx-auto">
+                  Patient online booking requests awaiting payment and front-desk confirmation appear here in real-time.
+                </p>
               </div>
             ) : (
-              <div className="space-y-2">
-                {pendingList.map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-white rounded-2xl p-4 border border-[#e5e5ea] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div>
-                      <h4 className="font-semibold text-sm text-[#1d1d1f]">{item.patientName || 'Patient'}</h4>
-                      <p className="text-xs text-[#86868b] mt-0.5">
-                        Dr. {item.doctor?.user?.fullName} • {item.appointmentDate} • {item.checkingWindow}
-                      </p>
-                      {item.reasonForVisit && (
-                        <p className="text-xs text-[#1d1d1f] mt-1 italic">"{item.reasonForVisit}"</p>
-                      )}
-                    </div>
+              <div className="space-y-3">
+                {pendingList.map((item) => {
+                  const docName = item.doctor?.user?.fullName || 'Doctor';
+                  const specialty = item.doctor?.specialty || 'General Practitioner';
+                  const fee = (item as any).fee || (item as any).consultationFee || item.doctor?.consultationFee || 500;
+                  const patientPhone = item.patientPhone || (item.patient as any)?.phone || '';
+                  const estToken = item.estimatedQueueNumber || (item.queueNumber > 0 ? item.queueNumber : 1);
 
-                    <div className="flex items-center gap-2 self-end sm:self-center">
-                      <button
-                        type="button"
-                        onClick={() => handleRejectAppointment(item.id)}
-                        className="px-3.5 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-medium transition-colors"
-                      >
-                        Reject
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleApproveAppointment(item.id)}
-                        className="px-4 py-1.5 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-xs font-medium transition-colors"
-                      >
-                        Approve Token
-                      </button>
+                  return (
+                    <div
+                      key={item.id}
+                      className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-4 transition-all"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        {/* Demographics & Token */}
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-base text-[#1d1d1f]">
+                              {item.patientName || 'Patient'}
+                            </h4>
+                            <span className="text-xs font-bold text-[#0066cc] bg-[#0066cc]/10 px-2.5 py-0.5 rounded-full border border-[#0066cc]/20">
+                              Estimated Token #{estToken}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-[#86868b]">
+                            {item.patientAge ? `${item.patientAge} yrs` : ''}
+                            {item.patientAge && item.patientGender ? ' · ' : ''}
+                            {item.patientGender || (item as any).gender || 'Not specified'}
+                          </p>
+
+                          {patientPhone && (
+                            <a
+                              href={`tel:${patientPhone.replace(/\s+/g, '')}`}
+                              className="inline-flex items-center gap-1.5 text-xs text-[#0066cc] font-semibold hover:underline mt-0.5"
+                            >
+                              <Phone className="w-3.5 h-3.5" />
+                              <span>{formatDisplayPhone(patientPhone)}</span>
+                            </a>
+                          )}
+                        </div>
+
+                        {/* Fee Badge */}
+                        <div className="sm:text-right flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-[#f0f0f2]">
+                          <span className="text-base font-black text-[#1d1d1f]">₹{fee}</span>
+                          <span className="text-[11px] text-[#86868b] font-medium">Fee to Collect</span>
+                        </div>
+                      </div>
+
+                      {/* Doctor & Slot Details */}
+                      <div className="p-3 rounded-2xl bg-[#f5f5f7] border border-[#e5e5ea] flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <span className="font-semibold text-[#1d1d1f]">
+                          Dr. {docName} ({specialty})
+                        </span>
+                        <span className="text-[#86868b]">
+                          {item.appointmentDate} · {item.checkingWindow || 'Scheduled Shift'}
+                        </span>
+                      </div>
+
+                      {/* Reason & Symptoms */}
+                      {(item.reasonForVisit || item.symptoms) && (
+                        <div className="text-xs text-[#48484a] space-y-0.5">
+                          {item.reasonForVisit && (
+                            <p>
+                              <strong className="text-[#1d1d1f]">Reason:</strong> {item.reasonForVisit}
+                            </p>
+                          )}
+                          {item.symptoms && (
+                            <p>
+                              <strong className="text-[#1d1d1f]">Symptoms:</strong> {item.symptoms}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-2 border-t border-[#f0f0f2]">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRescheduleTarget({
+                              id: item.id,
+                              patientName: item.patientName || 'Patient',
+                              doctorName: docName,
+                              currentDate: item.appointmentDate,
+                              slotId: item.slotId,
+                              doctorId: item.doctorId,
+                            });
+                            setRescheduleDate(item.appointmentDate);
+                            setRescheduleSlotId(item.slotId || '');
+                            setRescheduleError(null);
+                          }}
+                          className="px-4 py-2.5 rounded-full text-xs font-semibold text-[#0066cc] bg-blue-50/70 hover:bg-blue-100/70 border border-blue-200/60 transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>Shift Date</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRejectAppointment(item.id)}
+                          className="px-4 py-2.5 rounded-full text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          <span>Decline</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleApproveAppointment(item.id)}
+                          className="px-5 py-2.5 rounded-full text-xs font-bold text-white bg-[#0066cc] hover:bg-[#0071e3] transition-all active:scale-95 flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Confirm & Issue Token (₹{fee})</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1162,6 +1307,90 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
                 className="px-4 py-2 rounded-full bg-[#f5f5f7] text-xs font-medium text-[#1d1d1f]"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shift Date / Reschedule Modal */}
+      {rescheduleTarget && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md bg-white rounded-t-[28px] sm:rounded-[24px] p-5 sm:p-6 shadow-2xl border border-[#e5e5ea] space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f2]">
+              <div>
+                <h3 className="text-base font-bold text-[#1d1d1f]">Shift Appointment Date</h3>
+                <p className="text-xs text-[#86868b]">{rescheduleTarget.patientName} · {rescheduleTarget.doctorName}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRescheduleTarget(null)}
+                className="p-1.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {rescheduleError && (
+              <div className="p-3 rounded-xl bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-200 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{rescheduleError}</span>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-[#1d1d1f] mb-1.5">
+                  Select New Consultation Date
+                </label>
+                <input
+                  type="date"
+                  min={getLocalDateString()}
+                  value={rescheduleDate}
+                  onChange={(e) => setRescheduleDate(e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-[#e5e5ea] text-xs font-medium bg-[#f5f5f7] text-[#1d1d1f] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] transition-all cursor-pointer"
+                />
+              </div>
+
+              {(() => {
+                const doc = doctors.find((d) => d.doctorId === rescheduleTarget.doctorId) || doctors[0];
+                if (!doc || !doc.slots || doc.slots.length === 0) return null;
+                return (
+                  <div>
+                    <label className="block text-xs font-semibold text-[#1d1d1f] mb-1.5">
+                      Select Shift
+                    </label>
+                    <select
+                      value={rescheduleSlotId}
+                      onChange={(e) => setRescheduleSlotId(e.target.value)}
+                      className="w-full h-11 px-3.5 rounded-xl border border-[#e5e5ea] text-xs bg-[#f5f5f7] text-[#1d1d1f] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0066cc]/20 focus:border-[#0066cc] transition-all cursor-pointer"
+                    >
+                      {doc.slots.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} ({s.startTime} – {s.endTime})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setRescheduleTarget(null)}
+                className="flex-1 py-2.5 rounded-full bg-[#f5f5f7] text-xs font-semibold text-[#1d1d1f] hover:bg-[#e5e5ea] transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={rescheduling || !rescheduleDate}
+                onClick={handleConfirmReschedule}
+                className="flex-1 py-2.5 rounded-full bg-[#0066cc] text-xs font-bold text-white hover:bg-[#0071e3] transition-all active:scale-95 disabled:opacity-50 cursor-pointer shadow-xs"
+              >
+                {rescheduling ? 'Shifting...' : 'Confirm Shift Date'}
               </button>
             </div>
           </div>

@@ -987,7 +987,7 @@ const MainApp: React.FC = () => {
         </nav>
 
         {/* Booking Modal */}
-        {bookingParams.isOpen && bookingParams.doctor && bookingParams.slot && (
+        {bookingParams.isOpen && bookingParams.doctor && (
           <BookingModal
             isOpen={bookingParams.isOpen}
             onClose={() =>
@@ -1000,6 +1000,11 @@ const MainApp: React.FC = () => {
             date={bookingParams.date}
             consultationFee={bookingParams.consultationFee}
             onBookingSuccess={handleBookingSuccess}
+            onViewPasses={() => {
+              setBookingParams((prev) => ({ ...prev, isOpen: false }));
+              setSelectedDoctor(null);
+              setPatientTab('queue');
+            }}
           />
         )}
 

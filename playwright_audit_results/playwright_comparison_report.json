@@ -1,0 +1,34 @@
+{
+  "webPagesFound": [],
+  "mobileScreensAudited": [],
+  "featureGaps": [],
+  "screenshots": [
+    "web_01_home.png",
+    "web_04_receptionist_desk.png",
+    "web_05_doctor_console.png",
+    "mobile_01_gateway.png",
+    "mobile_02_explore.png",
+    "mobile_04_receptionist.png"
+  ],
+  "webReceptionistAudit": {
+    "title": "",
+    "buttons": [],
+    "hasIssueTokenBtn": false,
+    "hasWalkInBooking": false
+  },
+  "mobileReceptionistAudit": {
+    "buttons": [
+      "Sign In",
+      "Clinics",
+      "Doctors",
+      "Refresh",
+      "Explore",
+      "Live Pass",
+      "Check-In",
+      "Visits",
+      "Account"
+    ],
+    "hasConfirmFeeButton": false,
+    "tabs": []
+  }
+}
