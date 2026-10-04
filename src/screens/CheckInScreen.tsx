@@ -89,14 +89,14 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea]">
         <h2 className="text-lg font-bold text-[#1d1d1f]">Check-In</h2>
         <p className="text-xs text-[#86868b]">
-          Verify your physical presence at the clinic
+          Confirm your arrival at the clinic
         </p>
       </div>
 
       <div className="p-4 space-y-4 max-w-md mx-auto w-full">
         {statusMessage && (
           <div
-            className={`p-3.5 rounded-2xl text-xs font-medium border flex items-center gap-2 ${
+            className={`p-3.5 rounded-2xl text-xs font-semibold border flex items-center gap-2 ${
               statusMessage.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                 : 'bg-red-50 text-red-800 border-red-200'
@@ -112,16 +112,16 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
         )}
 
         {/* Scan Standee Hero Card */}
-        <AppleCard className="text-center p-6 space-y-4">
-          <div className="w-16 h-16 rounded-full bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center mx-auto">
-            <QrCode className="w-8 h-8" />
+        <AppleCard className="text-center p-5 sm:p-6 space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center mx-auto">
+            <QrCode className="w-7 h-7" />
           </div>
           <div>
             <h3 className="text-base font-bold text-[#1d1d1f]">
               Scan Reception QR
             </h3>
             <p className="text-xs text-[#86868b] mt-1 max-w-xs mx-auto">
-              Scan the desk QR code to check in and notify the doctor.
+              Scan the desk QR standee to confirm your arrival.
             </p>
           </div>
 
@@ -132,7 +132,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
             icon={<QrCode className="w-4 h-4" />}
             onClick={() => setScannerOpen(true)}
           >
-            Open Camera Scanner
+            Scan Standee QR
           </AppleButton>
         </AppleCard>
 
@@ -161,7 +161,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
               loading={submitting}
               disabled={!manualCode.trim()}
             >
-              Verify
+              Verify Code
             </AppleButton>
           </form>
         </AppleCard>

@@ -161,16 +161,16 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
       {/* Top Header & Sticky Search Area */}
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/95 backdrop-blur-md px-4 pt-3 pb-2.5 border-b border-[#e5e5ea] space-y-2.5">
         {/* Apple Segmented Switcher: Clinics vs Doctors */}
-        <div className="bg-[#e5e5ea]/80 p-0.5 rounded-full flex items-center max-w-xs mx-auto shadow-2xs">
+        <div className="bg-[#e5e5ea]/80 p-0.5 rounded-full flex items-center max-w-xs mx-auto">
           <button
             type="button"
             onClick={() => {
               setActiveSection('clinics');
               setSelectedClinic(null);
             }}
-            className={`flex-1 py-1.5 px-4 text-xs font-semibold rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-1.5 px-4 text-xs font-semibold rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${
               activeSection === 'clinics'
-                ? 'bg-white text-[#1d1d1f] shadow-xs'
+                ? 'bg-white text-[#1d1d1f]'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
@@ -183,9 +183,9 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
               setActiveSection('doctors');
               setSelectedClinic(null);
             }}
-            className={`flex-1 py-1.5 px-4 text-xs font-semibold rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+            className={`flex-1 py-1.5 px-4 text-xs font-semibold rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${
               activeSection === 'doctors'
-                ? 'bg-white text-[#1d1d1f] shadow-xs'
+                ? 'bg-white text-[#1d1d1f]'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
@@ -201,12 +201,12 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
             type="text"
             placeholder={
               activeSection === 'clinics'
-                ? 'Search clinic or city...'
-                : 'Search doctor or specialty...'
+                ? 'Search clinics or locations...'
+                : 'Search doctors or specialties...'
             }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white text-[#1d1d1f] text-sm rounded-full pl-10 pr-10 py-2 border border-[#d2d2d7] focus:border-[#0066cc] outline-none shadow-2xs transition-all placeholder:text-[#86868b]"
+            className="w-full bg-white text-[#1d1d1f] text-sm rounded-full pl-10 pr-10 py-2 border border-[#d2d2d7] focus:border-[#0066cc] outline-none transition-all placeholder:text-[#86868b]"
           />
           {searchQuery && (
             <button
@@ -234,9 +234,9 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                 key={spec}
                 type="button"
                 onClick={() => setSelectedSpecialty(spec)}
-                className={`shrink-0 text-xs font-medium px-3.5 py-1.5 rounded-full transition-all select-none cursor-pointer ${
+                className={`shrink-0 text-xs font-semibold px-3.5 py-1.5 rounded-full transition-all select-none cursor-pointer active:scale-95 ${
                   selectedSpecialty === spec
-                    ? 'bg-[#0066cc] text-white shadow-2xs'
+                    ? 'bg-[#0066cc] text-white'
                     : 'bg-white text-[#1d1d1f] border border-[#e5e5ea] active:bg-[#f0f0f0]'
                 }`}
               >
@@ -262,7 +262,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
             type="button"
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-1 text-xs text-[#0066cc] font-medium active:opacity-60 cursor-pointer"
+            className="flex items-center gap-1 text-xs text-[#0066cc] font-semibold active:opacity-60 cursor-pointer"
           >
             <RefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} />
             Refresh
@@ -296,7 +296,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedClinic(null)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#e5e5ea] text-xs font-semibold text-[#1d1d1f] hover:bg-[#f5f5f7] transition-colors cursor-pointer mb-1 shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#e5e5ea] text-xs font-semibold text-[#1d1d1f] active:scale-95 active:bg-[#f5f5f7] transition-all cursor-pointer mb-1"
               >
                 <ArrowLeft className="w-3.5 h-3.5 text-[#0066cc]" />
                 All Clinics
@@ -354,7 +354,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3 min-w-0">
                           {/* Doctor Avatar with fixed dimensions */}
-                          <div className="w-13 h-13 min-w-[52px] min-h-[52px] max-w-[52px] max-h-[52px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
+                          <div className="w-[52px] h-[52px] min-w-[52px] min-h-[52px] max-w-[52px] max-h-[52px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
                             {avatar ? (
                               <img
                                 src={getFileUrl(avatar)}
@@ -515,7 +515,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 min-w-0">
                         {/* Doctor Avatar */}
-                        <div className="w-13 h-13 min-w-[52px] min-h-[52px] max-w-[52px] max-h-[52px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
+                        <div className="w-[52px] h-[52px] min-w-[52px] min-h-[52px] max-w-[52px] max-h-[52px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
                           {avatar ? (
                             <img
                               src={getFileUrl(avatar)}
@@ -584,7 +584,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       <button
                         type="button"
                         onClick={() => onSelectDoctor(doctor)}
-                        className="p-2 rounded-full bg-[#f5f5f7] text-[#1d1d1f] active:bg-[#e5e5ea] hover:bg-[#e5e5ea] transition-colors cursor-pointer"
+                        className="p-2 rounded-full bg-[#f5f5f7] text-[#1d1d1f] active:scale-95 active:bg-[#e5e5ea] hover:bg-[#e5e5ea] transition-all cursor-pointer"
                       >
                         <ChevronRight className="w-4 h-4 text-[#86868b]" />
                       </button>

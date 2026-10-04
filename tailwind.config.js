@@ -54,9 +54,7 @@ export default {
         ],
       },
       boxShadow: {
-        'apple-card': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-        'apple-float': '0 20px 40px -15px rgba(0, 0, 0, 0.07)',
-        'apple-soft': '0 2px 8px rgba(0, 0, 0, 0.04)',
+        'apple-product': '3px 5px 30px rgba(0, 0, 0, 0.22)',
       },
     },
   },

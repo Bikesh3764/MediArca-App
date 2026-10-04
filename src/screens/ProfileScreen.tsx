@@ -61,7 +61,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     {user.fullName}
                   </h3>
                   <p className="text-xs text-[#86868b] truncate">{user.email}</p>
-                  <span className="inline-block mt-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-[#0066cc]/10 text-[#0066cc] border border-[#0066cc]/20">
+                  <span className="inline-block mt-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] border border-[#e5e5ea]">
                     {user.role}
                   </span>
                 </div>
@@ -217,13 +217,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </>
         ) : (
           <div className="text-center py-10 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-white shadow-2xs border border-[#e5e5ea] flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 rounded-full bg-white border border-[#e5e5ea] flex items-center justify-center mx-auto">
               <User className="w-8 h-8 text-[#86868b]" />
             </div>
             <div>
               <h3 className="text-base font-bold text-[#1d1d1f]">Guest Account</h3>
               <p className="text-xs text-[#86868b] max-w-xs mx-auto mt-1 leading-relaxed">
-                Sign in to manage appointments, access live queue passes, and view visits.
+                Sign in to manage visits, live queue passes, and account settings.
               </p>
             </div>
             <AppleButton

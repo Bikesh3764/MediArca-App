@@ -15,7 +15,7 @@ export const DoctorPresenceBadge: React.FC<DoctorPresenceBadgeProps> = ({
   const isSteppedOut = status === 'STEPPED_OUT';
 
   const dotSize = size === 'sm' ? 'w-2 h-2' : 'w-2.5 h-2.5';
-  const textClasses = size === 'sm' ? 'text-[11px] font-medium' : 'text-xs font-medium';
+  const textClasses = size === 'sm' ? 'text-[11px] font-semibold' : 'text-xs font-semibold';
 
   if (isAvailable) {
     return (

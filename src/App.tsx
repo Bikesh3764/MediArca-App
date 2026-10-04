@@ -114,12 +114,12 @@ const MainApp: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('profile')}
-                className="flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-medium text-[#1d1d1f] cursor-pointer"
+                className="flex items-center gap-1.5 pl-1.5 pr-2.5 sm:pr-3 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
               >
-                <div className="w-4 h-4 rounded-full bg-[#0066cc] text-white flex items-center justify-center text-[9px] font-bold">
+                <div className="w-5 h-5 rounded-full bg-[#0066cc] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
                   {user.fullName ? user.fullName[0].toUpperCase() : 'U'}
                 </div>
-                <span className="truncate max-w-[80px]">
+                <span className="truncate max-w-[65px] sm:max-w-[90px]">
                   {user.fullName.split(' ')[0]}
                 </span>
               </button>
@@ -127,7 +127,7 @@ const MainApp: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setAuthModalOpen(true)}
-                className="text-xs font-semibold text-white px-3.5 py-1.5 rounded-full bg-[#0066cc] active:scale-95 active:bg-[#0055b3] transition-all cursor-pointer shadow-[0_2px_8px_rgba(0,102,204,0.25)]"
+                className="text-xs font-semibold text-white px-3.5 py-1.5 rounded-full bg-[#0066cc] active:scale-95 active:bg-[#0055b3] transition-all cursor-pointer"
               >
                 Sign In
               </button>

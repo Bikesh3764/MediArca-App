@@ -113,10 +113,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-md bg-white rounded-t-[28px] sm:rounded-[24px] shadow-2xl p-6 border border-[#e5e5ea] max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-md bg-white rounded-t-[28px] sm:rounded-[24px] p-5 sm:p-6 border border-[#e5e5ea] max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] active:bg-[#e5e5ea]"
+          className="absolute top-4 right-4 p-1.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] active:scale-95 active:bg-[#e5e5ea] transition-all cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -172,7 +172,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-xs font-medium border border-red-100 flex items-center gap-2">
+          <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-xs font-semibold border border-red-100 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -193,7 +193,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 }}
                 className={`flex-1 py-2 text-xs font-semibold rounded-xl border transition-all cursor-pointer active:scale-95 ${
                   !isForOther
-                    ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs'
+                    ? 'bg-[#0066cc] text-white border-[#0066cc]'
                     : 'bg-[#f5f5f7] text-[#1d1d1f] border-transparent hover:bg-[#e5e5ea]'
                 }`}
               >
@@ -207,7 +207,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 }}
                 className={`flex-1 py-2 text-xs font-semibold rounded-xl border transition-all cursor-pointer active:scale-95 ${
                   isForOther
-                    ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs'
+                    ? 'bg-[#0066cc] text-white border-[#0066cc]'
                     : 'bg-[#f5f5f7] text-[#1d1d1f] border-transparent hover:bg-[#e5e5ea]'
                 }`}
               >
@@ -257,20 +257,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setReasonForVisit(e.target.value)}
           />
 
-          {/* Fee & Zero paywall badge */}
+          {/* Fee & Counter Payment badge */}
           <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#fafafc] border border-[#e5e5ea]">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <ShieldCheck className="w-4 h-4 text-[#0066cc]" />
               <div>
                 <p className="text-xs font-semibold text-[#1d1d1f]">
-                  Consultation Fee: ₹{doctor.consultationFee || 500}
+                  Fee: ₹{doctor.consultationFee || 500}
                 </p>
                 <p className="text-[11px] text-[#86868b]">
                   Pay at clinic counter after visit
                 </p>
               </div>
             </div>
-            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            <span className="text-[11px] font-semibold text-[#1d1d1f] bg-[#f5f5f7] px-2.5 py-0.5 rounded-full border border-[#e5e5ea]">
               Pay at Desk
             </span>
           </div>

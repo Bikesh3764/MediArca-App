@@ -115,12 +115,12 @@ export const QueuePassScreen: React.FC<QueuePassScreenProps> = ({
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[75vh] p-6 text-center pb-safe">
-        <div className="w-16 h-16 rounded-2xl bg-white shadow-2xs border border-[#e5e5ea] flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-white border border-[#e5e5ea] flex items-center justify-center mb-4">
           <Ticket className="w-8 h-8 text-[#0066cc]" />
         </div>
-        <h3 className="text-lg font-bold text-[#1d1d1f]">Live Queue Pass</h3>
+        <h3 className="text-lg font-bold text-[#1d1d1f]">Live Pass</h3>
         <p className="text-xs text-[#86868b] max-w-xs mt-1 mb-5">
-          Sign in to access your digital token, live cabin updates, and desk check-in.
+          Sign in to view your live queue position and tokens.
         </p>
         <AppleButton
           variant="primary"
@@ -140,7 +140,7 @@ export const QueuePassScreen: React.FC<QueuePassScreenProps> = ({
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea] flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-[#1d1d1f] leading-tight">Live Pass</h2>
-          <p className="text-[11px] text-[#86868b]">Real-time queue & cabin updates</p>
+          <p className="text-[11px] text-[#86868b]">Live queue and cabin status</p>
         </div>
 
         <button
@@ -155,7 +155,7 @@ export const QueuePassScreen: React.FC<QueuePassScreenProps> = ({
       <div className="p-4 space-y-4">
         {scanMessage && (
           <div
-            className={`p-3.5 rounded-2xl text-xs font-medium border flex items-center gap-2 ${
+            className={`p-3.5 rounded-2xl text-xs font-semibold border flex items-center gap-2 ${
               scanMessage.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                 : 'bg-red-50 text-red-800 border-red-200'
@@ -189,12 +189,12 @@ export const QueuePassScreen: React.FC<QueuePassScreenProps> = ({
           </div>
         ) : (
           <div className="text-center py-12 px-4 max-w-sm mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-white shadow-2xs border border-[#e5e5ea] flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-white border border-[#e5e5ea] flex items-center justify-center mx-auto mb-4">
               <Ticket className="w-8 h-8 text-[#86868b]" />
             </div>
             <h3 className="text-base font-bold text-[#1d1d1f]">No Active Pass</h3>
             <p className="text-xs text-[#86868b] mt-1 mb-5 leading-relaxed">
-              Book an appointment to track your live queue position and cabin arrival.
+              Book an appointment to track your live queue position.
             </p>
             <AppleButton
               variant="primary"

@@ -136,7 +136,7 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
               onClick={() => handleUpdatePresence('IN_CABIN')}
               className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                 currentCabinStatus === 'IN_CABIN'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                  ? 'bg-emerald-600 text-white border-emerald-600'
                   : 'bg-[#fafafc] text-[#1d1d1f] border-[#e5e5ea] hover:bg-[#f5f5f7]'
               }`}
             >
@@ -147,7 +147,7 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
               onClick={() => handleUpdatePresence('STEPPED_OUT', 15)}
               className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                 currentCabinStatus === 'STEPPED_OUT'
-                  ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                  ? 'bg-amber-500 text-white border-amber-500'
                   : 'bg-[#fafafc] text-[#1d1d1f] border-[#e5e5ea] hover:bg-[#f5f5f7]'
               }`}
             >
@@ -158,7 +158,7 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
               onClick={() => handleUpdatePresence('NOT_IN_CABIN')}
               className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                 currentCabinStatus === 'NOT_IN_CABIN'
-                  ? 'bg-[#1d1d1f] text-white border-[#1d1d1f] shadow-xs'
+                  ? 'bg-[#1d1d1f] text-white border-[#1d1d1f]'
                   : 'bg-[#fafafc] text-[#1d1d1f] border-[#e5e5ea] hover:bg-[#f5f5f7]'
               }`}
             >
@@ -192,7 +192,7 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
 
             <div className="pt-1">
               <textarea
-                placeholder="Prescription or consultation summary notes..."
+                placeholder="Consultation summary or prescription..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="w-full text-xs p-3 rounded-xl bg-white border border-emerald-200 focus:border-emerald-500 outline-none resize-none h-20"
@@ -240,21 +240,21 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
             waitingPatients.map((patient) => (
               <div
                 key={patient.id}
-                className="bg-white p-3.5 rounded-2xl border border-[#e5e5ea] flex items-center justify-between"
+                className="bg-white p-3.5 rounded-2xl border border-[#e5e5ea] flex items-center justify-between gap-2"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-base font-black text-[#0066cc] w-7">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="text-base font-black text-[#0066cc] w-7 shrink-0">
                     #{String(patient.queueNumber).padStart(2, '0')}
                   </span>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#1d1d1f]">
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-bold text-[#1d1d1f] truncate">
                       {patient.patientName}
                     </h4>
-                    <p className="text-[11px] text-[#86868b]">
+                    <p className="text-[11px] text-[#86868b] truncate">
                       {patient.isCheckedIn ? (
-                        <span className="text-emerald-700 font-medium">Checked In</span>
+                        <span className="text-emerald-700 font-semibold">Checked In</span>
                       ) : (
-                        <span>Desk Check-in Pending</span>
+                        <span>Desk Pending</span>
                       )}
                     </p>
                   </div>

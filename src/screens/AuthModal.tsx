@@ -314,9 +314,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 setActiveRole('PATIENT');
                 setError(null);
               }}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer active:scale-95 ${
                 activeRole === 'PATIENT'
-                  ? 'bg-white text-[#1d1d1f] shadow-xs'
+                  ? 'bg-white text-[#1d1d1f]'
                   : 'text-[#86868b] hover:text-[#1d1d1f]'
               }`}
             >
@@ -328,9 +328,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 setActiveRole('DOCTOR');
                 setError(null);
               }}
-              className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer ${
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all cursor-pointer active:scale-95 ${
                 activeRole === 'DOCTOR'
-                  ? 'bg-white text-[#1d1d1f] shadow-xs'
+                  ? 'bg-white text-[#1d1d1f]'
                   : 'text-[#86868b] hover:text-[#1d1d1f]'
               }`}
             >
@@ -350,7 +350,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <button
                 type="button"
                 onClick={handleSimulatedGoogleLogin}
-                className="text-xs font-semibold text-[#0066cc] hover:underline self-start flex items-center gap-1.5 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-rose-200 shadow-2xs"
+                className="text-xs font-semibold text-[#0066cc] hover:underline self-start flex items-center gap-1.5 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-rose-200 active:scale-95"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#0066cc]" />
                 <span>Continue with Demo Google Account</span>
@@ -380,7 +380,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type="button"
                     onClick={handleSimulatedGoogleLogin}
                     disabled={loading || Boolean(quickLoggingEmail)}
-                    className="w-full h-11 px-4 rounded-full border border-[#e5e5ea] bg-white hover:bg-[#fbfbfd] text-[#1d1d1f] text-xs font-medium transition-all shadow-2xs active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                    className="w-full h-11 px-4 rounded-full border border-[#e5e5ea] bg-white hover:bg-[#fbfbfd] text-[#1d1d1f] text-xs font-semibold transition-all active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
                   >
                     <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -400,7 +400,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="w-full border-t border-[#e5e5ea]" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-2.5 text-[#86868b] font-medium">or continue with email</span>
+                <span className="bg-white px-2.5 text-[#86868b] font-normal">or email</span>
               </div>
             </div>
 
@@ -463,10 +463,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   type="button"
                   onClick={() => handleQuickLogin('john.doe@gmail.com', 'patient123', 'PATIENT')}
                   disabled={Boolean(quickLoggingEmail)}
-                  className={`py-2 px-3 rounded-xl border text-xs font-medium transition-all text-center cursor-pointer active:scale-95 ${
+                  className={`py-2 px-3 rounded-xl border text-xs transition-all text-center cursor-pointer active:scale-95 ${
                     activeRole === 'PATIENT'
-                      ? 'bg-[#0066cc]/10 text-[#0066cc] border-[#0066cc]/30 font-semibold shadow-2xs'
-                      : 'bg-[#f5f5f7] hover:bg-[#ebebee] text-[#1d1d1f] border-[#e5e5ea]'
+                      ? 'bg-[#0066cc]/10 text-[#0066cc] border-[#0066cc]/30 font-semibold'
+                      : 'bg-[#f5f5f7] hover:bg-[#ebebee] text-[#1d1d1f] border-[#e5e5ea] font-normal'
                   }`}
                 >
                   <div className="font-semibold flex items-center justify-center gap-1.5">
@@ -482,10 +482,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   type="button"
                   onClick={() => handleQuickLogin('dr.sarah@mediarca.com', 'doctor123', 'DOCTOR')}
                   disabled={Boolean(quickLoggingEmail)}
-                  className={`py-2 px-3 rounded-xl border text-xs font-medium transition-all text-center cursor-pointer active:scale-95 ${
+                  className={`py-2 px-3 rounded-xl border text-xs transition-all text-center cursor-pointer active:scale-95 ${
                     activeRole === 'DOCTOR'
-                      ? 'bg-[#0066cc]/10 text-[#0066cc] border-[#0066cc]/30 font-semibold shadow-2xs'
-                      : 'bg-[#f5f5f7] hover:bg-[#ebebee] text-[#1d1d1f] border-[#e5e5ea]'
+                      ? 'bg-[#0066cc]/10 text-[#0066cc] border-[#0066cc]/30 font-semibold'
+                      : 'bg-[#f5f5f7] hover:bg-[#ebebee] text-[#1d1d1f] border-[#e5e5ea] font-normal'
                   }`}
                 >
                   <div className="font-semibold flex items-center justify-center gap-1.5">
@@ -504,7 +504,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleQuickLogin('receptionist@mediarca.com', 'receptionist123')}
-                  className="text-[#0066cc] hover:underline font-medium cursor-pointer"
+                  className="text-[#0066cc] hover:underline font-semibold cursor-pointer"
                 >
                   Desk
                 </button>
@@ -512,7 +512,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleQuickLogin('clinic@mediarca.com', 'clinic123')}
-                  className="text-[#0066cc] hover:underline font-medium cursor-pointer"
+                  className="text-[#0066cc] hover:underline font-semibold cursor-pointer"
                 >
                   Clinic
                 </button>
@@ -520,7 +520,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleQuickLogin('admin@mediarca.com', 'admin123')}
-                  className="text-[#0066cc] hover:underline font-medium cursor-pointer"
+                  className="text-[#0066cc] hover:underline font-semibold cursor-pointer"
                 >
                   Admin
                 </button>
@@ -577,7 +577,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   setError(null);
                   setMode('signup');
                 }}
-                className="text-xs text-[#0066cc] font-medium hover:underline cursor-pointer"
+                className="text-xs text-[#0066cc] font-semibold hover:underline cursor-pointer"
               >
                 Don't have an account? Sign Up
               </button>
@@ -694,7 +694,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="w-full border-t border-[#e5e5ea]" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-2 text-[#86868b] font-medium">or</span>
+                <span className="bg-white px-2 text-[#86868b] font-normal">or</span>
               </div>
             </div>
 
@@ -715,7 +715,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   type="button"
                   onClick={handleSimulatedGoogleLogin}
                   disabled={loading}
-                  className="w-full h-11 px-4 rounded-full border border-[#e5e5ea] bg-white hover:bg-[#fbfbfd] text-[#1d1d1f] text-xs font-medium transition-all shadow-2xs active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                  className="w-full h-11 px-4 rounded-full border border-[#e5e5ea] bg-white hover:bg-[#fbfbfd] text-[#1d1d1f] text-xs font-semibold transition-all active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
                 >
                   <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -735,7 +735,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   setError(null);
                   setMode('login');
                 }}
-                className="text-xs text-[#0066cc] font-medium hover:underline cursor-pointer"
+                className="text-xs text-[#0066cc] font-semibold hover:underline cursor-pointer"
               >
                 Already have an account? Sign In
               </button>
@@ -782,7 +782,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 type="button"
                 onClick={handleResendOtp}
                 disabled={resendCooldown > 0}
-                className="text-[#0066cc] font-medium disabled:opacity-50 cursor-pointer"
+                className="text-[#0066cc] font-semibold disabled:opacity-50 cursor-pointer"
               >
                 {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend Code'}
               </button>

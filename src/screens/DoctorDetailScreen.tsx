@@ -86,11 +86,11 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea] flex items-center justify-between">
         <button
           onClick={onBack}
-          className="p-2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:bg-[#f0f0f0]"
+          className="p-2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:scale-95 active:bg-[#f0f0f0] transition-all cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
-        <span className="text-sm font-bold text-[#1d1d1f]">Doctor Profile</span>
+        <span className="text-sm font-bold text-[#1d1d1f]">Doctor</span>
         <div className="w-8" />
       </div>
 
@@ -167,6 +167,31 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
           )}
         </AppleCard>
 
+        {/* Multi-Clinic Selector if practicing at multiple clinics */}
+        {schedules.length > 1 && (
+          <div>
+            <span className="text-xs font-semibold text-[#86868b] block mb-2 px-1">
+              Select Clinic
+            </span>
+            <div className="flex gap-2 overflow-x-auto py-1 no-scrollbar -mx-4 px-4">
+              {schedules.map((s: any) => (
+                <button
+                  key={s.clinicId}
+                  type="button"
+                  onClick={() => setSelectedClinicId(s.clinicId)}
+                  className={`shrink-0 text-xs px-3.5 py-1.5 rounded-full border transition-all cursor-pointer active:scale-95 ${
+                    selectedClinicId === s.clinicId
+                      ? 'bg-[#0066cc] text-white border-[#0066cc] font-semibold'
+                      : 'bg-white text-[#1d1d1f] border-[#e5e5ea] active:bg-[#f5f5f7]'
+                  }`}
+                >
+                  {s.clinicName}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Date Selector */}
         <div>
           <span className="text-xs font-semibold text-[#86868b] block mb-2 px-1">
@@ -178,9 +203,9 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
                 key={d.dateString}
                 type="button"
                 onClick={() => setSelectedDate(d.dateString)}
-                className={`py-2.5 px-3 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 ${
+                className={`py-2.5 px-2 sm:px-3 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 ${
                   selectedDate === d.dateString
-                    ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs font-semibold'
+                    ? 'bg-[#0066cc] text-white border-[#0066cc] font-semibold'
                     : 'bg-white text-[#1d1d1f] border-[#e5e5ea] active:bg-[#f5f5f7]'
                 }`}
               >

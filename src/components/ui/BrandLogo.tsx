@@ -34,7 +34,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   if (theme === 'dark') {
     return (
       <div
-        className={`inline-flex items-center justify-center bg-white rounded-xl px-2 py-0.5 shadow-xs ${className}`}
+        className={`inline-flex items-center justify-center bg-white rounded-xl px-2 py-0.5 border border-[#e5e5ea] ${className}`}
       >
         <img
           src={imgSrc}

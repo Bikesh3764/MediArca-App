@@ -54,12 +54,12 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[75vh] p-6 text-center pb-safe">
-        <div className="w-16 h-16 rounded-2xl bg-white shadow-2xs border border-[#e5e5ea] flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-white border border-[#e5e5ea] flex items-center justify-center mb-4">
           <Calendar className="w-8 h-8 text-[#0066cc]" />
         </div>
         <h3 className="text-lg font-bold text-[#1d1d1f]">Visit History</h3>
         <p className="text-xs text-[#86868b] max-w-xs mt-1 mb-5">
-          Sign in to view your consultation history and queue tokens.
+          Sign in to view your past consultations and tokens.
         </p>
         <AppleButton
           variant="primary"
@@ -77,7 +77,7 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
     <div className="flex flex-col min-h-full pb-safe">
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea]">
         <h2 className="text-lg font-bold text-[#1d1d1f]">Visits</h2>
-        <p className="text-xs text-[#86868b]">Past and upcoming consultations</p>
+        <p className="text-xs text-[#86868b]">Past and scheduled consultations</p>
       </div>
 
       <div className="p-4 space-y-3.5">
@@ -95,12 +95,12 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
           </div>
         ) : appointments.length === 0 ? (
           <div className="text-center py-12 px-4 max-w-sm mx-auto">
-            <div className="w-14 h-14 rounded-2xl bg-white shadow-2xs border border-[#e5e5ea] flex items-center justify-center mx-auto mb-3">
+            <div className="w-14 h-14 rounded-2xl bg-white border border-[#e5e5ea] flex items-center justify-center mx-auto mb-3">
               <Calendar className="w-6 h-6 text-[#86868b]" />
             </div>
             <h4 className="text-base font-bold text-[#1d1d1f]">No Visits Yet</h4>
             <p className="text-xs text-[#86868b] mt-1 mb-5">
-              Your consultation records will appear here.
+              Past consultations will appear here.
             </p>
             <AppleButton variant="primary" size="md" onClick={onExplorePress}>
               Find a Doctor

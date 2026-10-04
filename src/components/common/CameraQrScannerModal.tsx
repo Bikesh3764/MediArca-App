@@ -134,19 +134,19 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] active:bg-[#e5e5ea]"
+            className="p-1.5 rounded-full bg-[#f5f5f7] text-[#1d1d1f] active:scale-95 active:bg-[#e5e5ea] transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab switcher: Camera vs Manual Code */}
-        <div className="flex p-2 bg-[#f5f5f7] mx-4 mt-3 rounded-xl gap-1">
+        <div className="flex p-1 bg-[#f5f5f7] mx-4 mt-3 rounded-xl gap-1">
           <button
             onClick={() => setActiveTab('camera')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer active:scale-95 ${
               activeTab === 'camera'
-                ? 'bg-white text-[#1d1d1f] shadow-sm'
+                ? 'bg-white text-[#1d1d1f]'
                 : 'text-[#86868b]'
             }`}
           >
@@ -154,9 +154,9 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('manual')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer active:scale-95 ${
               activeTab === 'manual'
-                ? 'bg-white text-[#1d1d1f] shadow-sm'
+                ? 'bg-white text-[#1d1d1f]'
                 : 'text-[#86868b]'
             }`}
           >
@@ -178,8 +178,8 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
               <canvas ref={canvasRef} className="hidden" />
 
               {/* Viewfinder crosshairs */}
-              <div className="absolute inset-8 border-2 border-white/60 rounded-xl pointer-events-none flex items-center justify-center">
-                <div className="w-full h-0.5 bg-[#0066cc]/80 shadow-[0_0_8px_#0066cc] animate-pulse" />
+              <div className="absolute inset-8 border border-white/60 rounded-xl pointer-events-none flex items-center justify-center">
+                <div className="w-full h-0.5 bg-[#0066cc] animate-pulse" />
               </div>
 
               {cameraError && (
