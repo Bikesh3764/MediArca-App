@@ -126,13 +126,15 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
               <p className="text-xs text-[#86868b] mt-0.5">
                 {doctor.qualifications}
               </p>
-              <div className="mt-2">
-                <DoctorPresenceBadge
-                  status={doctor.cabinStatus}
-                  steppedOutUntil={doctor.steppedOutUntil}
-                  size="sm"
-                />
-              </div>
+              {doctor.cabinStatus === 'IN_CABIN' && (
+                <div className="mt-2">
+                  <DoctorPresenceBadge
+                    status={doctor.cabinStatus}
+                    steppedOutUntil={doctor.steppedOutUntil}
+                    size="sm"
+                  />
+                </div>
+              )}
             </div>
           </div>
 

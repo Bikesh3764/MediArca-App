@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { api, DoctorProfile, ClinicProfile, getFileUrl } from '../services/api';
 import { AppleCard } from '../components/ui/AppleCard';
 import { AppleButton } from '../components/ui/AppleButton';
-import { DoctorPresenceBadge } from '../components/ui/DoctorPresenceBadge';
 import clinicLobbyBg from '../assets/clinic-lobby-bg.jpg';
 import doctorHeroAlt from '../assets/doctor-hero-alt.jpg';
 import {
@@ -354,12 +353,12 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       className="p-3 sm:p-3.5 group flex gap-3.5 items-stretch"
                     >
                       {/* Big Doctor Photo on Left (Flipkart Style) */}
-                      <div className="relative w-24 sm:w-28 h-28 sm:h-32 min-w-[96px] sm:min-w-[112px] rounded-2xl overflow-hidden bg-[#f0f0f2] border border-[#e5e5ea] shrink-0 self-center sm:self-auto flex items-center justify-center">
+                      <div className="relative w-28 sm:w-32 h-24 sm:h-28 min-w-[112px] sm:min-w-[128px] rounded-2xl overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 self-center flex items-center justify-center p-1">
                         {avatar ? (
                           <img
                             src={getFileUrl(avatar)}
                             alt={docName}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                               const fallback = e.currentTarget.parentElement?.querySelector('.doc-fallback-img');
@@ -370,7 +369,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                         <img
                           src={doctorHeroAlt}
                           alt={docName}
-                          className={`doc-fallback-img w-full h-full object-cover ${avatar ? 'hidden' : 'block'}`}
+                          className={`doc-fallback-img w-full h-full object-contain rounded-xl ${avatar ? 'hidden' : 'block'}`}
                         />
                       </div>
 
@@ -381,11 +380,9 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                             <h4 className="text-[15px] sm:text-base font-bold text-[#1d1d1f] leading-snug truncate">
                               {docName}
                             </h4>
-                            <DoctorPresenceBadge
-                              status={doc.cabinStatus}
-                              steppedOutUntil={doc.steppedOutUntil}
-                              size="sm"
-                            />
+                            <span className="text-[10px] font-semibold text-[#1d1d1f] bg-[#f5f5f7] px-2 py-0.5 rounded-full border border-[#e5e5ea] shrink-0 whitespace-nowrap">
+                              {doc.experienceYears || 1} yrs exp
+                            </span>
                           </div>
 
                           <p className="text-xs font-semibold text-[#0066cc] mt-0.5 truncate">
@@ -393,7 +390,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                           </p>
 
                           <p className="text-[11px] text-[#86868b] mt-0.5 truncate">
-                            {doc.qualifications} • {doc.experienceYears} yrs exp
+                            {doc.qualifications}
                           </p>
                         </div>
 
@@ -448,13 +445,13 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       className="p-3 sm:p-3.5 group flex gap-3.5 items-stretch"
                     >
                       {/* Big Clinic Photo on Left (Flipkart Style) */}
-                      <div className="relative w-24 sm:w-28 h-24 sm:h-28 min-w-[96px] sm:min-w-[112px] rounded-2xl overflow-hidden bg-[#f0f0f2] border border-[#e5e5ea] shrink-0 self-center sm:self-auto flex items-center justify-center">
+                      <div className="relative w-28 sm:w-32 h-24 sm:h-28 min-w-[112px] sm:min-w-[128px] rounded-2xl overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 self-center flex items-center justify-center p-1">
                         <img
                           src={clinicLobbyBg}
                           alt={name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
                         />
-                        <div className="absolute top-1.5 left-1.5 p-1 rounded-lg bg-black/40 backdrop-blur-md text-white">
+                        <div className="absolute top-2 left-2 p-1 rounded-lg bg-black/40 backdrop-blur-md text-white">
                           <Building2 className="w-3 h-3" />
                         </div>
                       </div>
@@ -528,12 +525,12 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                     className="p-3 sm:p-3.5 group flex gap-3.5 items-stretch"
                   >
                     {/* Big Doctor Photo on Left (Flipkart Style) */}
-                    <div className="relative w-24 sm:w-28 h-28 sm:h-32 min-w-[96px] sm:min-w-[112px] rounded-2xl overflow-hidden bg-[#f0f0f2] border border-[#e5e5ea] shrink-0 self-center sm:self-auto flex items-center justify-center">
+                    <div className="relative w-28 sm:w-32 h-24 sm:h-28 min-w-[112px] sm:min-w-[128px] rounded-2xl overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 self-center flex items-center justify-center p-1">
                       {avatar ? (
                         <img
                           src={getFileUrl(avatar)}
                           alt={docName}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
                             const fallback = e.currentTarget.parentElement?.querySelector('.doc-main-fallback-img');
@@ -544,7 +541,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       <img
                         src={doctorHeroAlt}
                         alt={docName}
-                        className={`doc-main-fallback-img w-full h-full object-cover ${avatar ? 'hidden' : 'block'}`}
+                        className={`doc-main-fallback-img w-full h-full object-contain rounded-xl ${avatar ? 'hidden' : 'block'}`}
                       />
                     </div>
 
@@ -555,11 +552,9 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                           <h3 className="text-[15px] sm:text-base font-bold text-[#1d1d1f] leading-snug truncate">
                             {docName}
                           </h3>
-                          <DoctorPresenceBadge
-                            status={doctor.cabinStatus}
-                            steppedOutUntil={doctor.steppedOutUntil}
-                            size="sm"
-                          />
+                          <span className="text-[10px] font-semibold text-[#1d1d1f] bg-[#f5f5f7] px-2 py-0.5 rounded-full border border-[#e5e5ea] shrink-0 whitespace-nowrap">
+                            {doctor.experienceYears || 1} yrs exp
+                          </span>
                         </div>
 
                         <p className="text-xs font-semibold text-[#0066cc] mt-0.5 truncate">
@@ -567,7 +562,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                         </p>
 
                         <p className="text-[11px] text-[#86868b] mt-0.5 truncate">
-                          {doctor.qualifications} • {doctor.experienceYears} yrs exp
+                          {doctor.qualifications}
                         </p>
 
                         <p className="text-[11px] text-[#48484a] flex items-center gap-1 mt-1 truncate">
