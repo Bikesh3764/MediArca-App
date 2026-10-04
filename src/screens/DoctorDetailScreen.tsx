@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { DoctorProfile, DoctorSlot, getFileUrl } from '../services/api';
+import { DoctorProfile, DoctorSlot, getFileUrl, calculateSlotMetrics } from '../services/api';
 import { AppleCard } from '../components/ui/AppleCard';
 import { AppleButton } from '../components/ui/AppleButton';
 import { DoctorPresenceBadge } from '../components/ui/DoctorPresenceBadge';
@@ -12,6 +12,8 @@ import {
   CheckCircle2,
   User,
   ShieldCheck,
+  Users,
+  Ticket,
 } from 'lucide-react';
 
 interface DoctorDetailScreenProps {
@@ -242,40 +244,60 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
 
             {/* Slots */}
             <div className="space-y-2.5">
-              {activeSchedule.slots.map((slot: DoctorSlot) => (
-                <div
-                  key={slot.id}
-                  className="flex items-center justify-between p-3 rounded-xl bg-[#fafafc] border border-[#e5e5ea]"
-                >
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[#0066cc]" />
-                    <div>
-                      <p className="text-xs font-bold text-[#1d1d1f]">
-                        {slot.name}
-                      </p>
-                      <p className="text-[11px] text-[#86868b]">
-                        {slot.startTime} - {slot.endTime}
-                      </p>
+              {activeSchedule.slots.map((slot: DoctorSlot) => {
+                const metrics = calculateSlotMetrics(
+                  slot.startTime,
+                  slot.endTime,
+                  slot.maxPatients || 30
+                );
+                const avgMinutes = slot.avgConsultationMinutes || metrics.avgConsultationMinutes;
+
+                return (
+                  <div
+                    key={slot.id}
+                    className="p-3.5 rounded-2xl bg-[#fafafc] border border-[#e5e5ea] space-y-2.5 transition-all hover:border-[#0066cc]/40"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-[#0066cc]" />
+                        <span className="text-xs font-bold text-[#1d1d1f]">
+                          {slot.name}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-semibold text-[#0066cc] bg-[#0066cc]/10 px-2 py-0.5 rounded-full border border-[#0066cc]/20 flex items-center gap-1">
+                        <Ticket className="w-3 h-3" />
+                        Queue Token
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-[#f0f0f2]">
+                      <div className="text-[11px] text-[#86868b] flex items-center gap-2">
+                        <span>{slot.startTime} – {slot.endTime}</span>
+                        <span>•</span>
+                        <span>Max {slot.maxPatients || 30} cap</span>
+                        <span>•</span>
+                        <span>~{avgMinutes} min/patient</span>
+                      </div>
+
+                      <AppleButton
+                        size="sm"
+                        variant="primary"
+                        onClick={() =>
+                          onSelectSlotForBooking({
+                            doctor,
+                            clinicId: activeSchedule.clinicId,
+                            clinicName: activeSchedule.clinicName,
+                            slot,
+                            date: selectedDate,
+                          })
+                        }
+                      >
+                        Book Visit
+                      </AppleButton>
                     </div>
                   </div>
-
-                  <AppleButton
-                    size="sm"
-                    variant="primary"
-                    onClick={() =>
-                      onSelectSlotForBooking({
-                        doctor,
-                        clinicId: activeSchedule.clinicId,
-                        clinicName: activeSchedule.clinicName,
-                        slot,
-                        date: selectedDate,
-                      })
-                    }
-                  >
-                    Book
-                  </AppleButton>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </AppleCard>
         </div>

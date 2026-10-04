@@ -7,6 +7,7 @@ import {
   formatDoctorDegrees,
 } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { INDIAN_STATES } from '../../utils/indiaStates';
 import {
   Users,
   IndianRupee,
@@ -25,24 +26,55 @@ import {
   Sparkles,
   Stethoscope,
   ChevronRight,
+  TrendingUp,
+  LogOut,
+  Save,
+  Phone,
+  MapPin,
+  User,
+  Shield,
+  Building,
 } from 'lucide-react';
+
+export type ClinicTab = 'kpi' | 'doctors' | 'receptionists' | 'standee' | 'profile';
 
 interface ClinicDashboardScreenProps {
   onOpenRoleSwitcher?: () => void;
+  activeTab?: ClinicTab;
+  onTabChange?: (tab: ClinicTab) => void;
 }
 
 export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
   onOpenRoleSwitcher,
+  activeTab: propActiveTab,
+  onTabChange,
 }) => {
-  const { user } = useAuth();
+  const { user, refreshUser, logout } = useAuth();
   const [data, setData] = useState<ClinicDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Active Tab: 'doctors' | 'receptionists' | 'standee' | 'appointments'
-  const [activeTab, setActiveTab] = useState<'doctors' | 'receptionists' | 'standee' | 'appointments'>('doctors');
+  // Active Tab: 'kpi' | 'doctors' | 'receptionists' | 'standee' | 'profile'
+  const [localActiveTab, setLocalActiveTab] = useState<ClinicTab>('kpi');
+  const activeTab = propActiveTab || localActiveTab;
+  const setActiveTab = (tab: ClinicTab) => {
+    setLocalActiveTab(tab);
+    if (onTabChange) onTabChange(tab);
+  };
+
+  // Clinic Profile State
+  const [clinicName, setClinicName] = useState(
+    user?.clinicProfile?.clinicName || user?.fullName || 'Metropolis Polyclinic & Diagnostic'
+  );
+  const [clinicPhone, setClinicPhone] = useState(user?.clinicProfile?.phone || '+91 98200 55001');
+  const [clinicAddress, setClinicAddress] = useState(
+    user?.clinicProfile?.address || 'Floor 3, 100 Hill Road, Bandra West'
+  );
+  const [clinicCity, setClinicCity] = useState(user?.clinicProfile?.city || 'Mumbai');
+  const [clinicState, setClinicState] = useState(user?.clinicProfile?.state || 'Maharashtra');
+  const [savingProfile, setSavingProfile] = useState(false);
 
   // Doctor Onboarding Modal
   const [showDoctorModal, setShowDoctorModal] = useState(false);
@@ -308,6 +340,33 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
+  const handleSaveClinicProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingProfile(true);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      const res = await api.updateClinicProfile({
+        clinicName: clinicName.trim(),
+        phone: clinicPhone.trim(),
+        address: clinicAddress.trim(),
+        city: clinicCity.trim(),
+        state: clinicState.trim(),
+      });
+      if (res.success) {
+        setSuccessMsg('Clinic profile saved successfully.');
+        await refreshUser();
+        setTimeout(() => setSuccessMsg(null), 3000);
+      } else {
+        setError(res.message || 'Failed to update clinic profile.');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to update clinic profile.');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center">
@@ -323,9 +382,9 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] pb-24 text-[#1d1d1f]">
-      {/* Top Bar */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      {/* Sub Bar */}
+      <div className="bg-white border-b border-[#e5e5ea] px-4 py-3">
+        <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-200/60 flex items-center justify-center text-teal-700">
               <Building2 className="w-5 h-5" />
@@ -363,9 +422,9 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
             )}
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 pt-4 space-y-4">
+      <main className="max-w-md mx-auto px-4 pt-4 space-y-4">
         {/* Banner Alerts */}
         {error && (
           <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2 animate-fade-in">
@@ -383,72 +442,23 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
           </div>
         )}
 
-        {/* Clinic KPI Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-2 text-[#86868b] text-xs">
-              <Stethoscope className="w-4 h-4 text-teal-600" />
-              <span>Doctors</span>
-            </div>
-            <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{data?.totalDoctors || doctors.length}</div>
-            <div className="text-[10px] text-teal-700 font-medium mt-0.5">Active Roster</div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-2 text-[#86868b] text-xs">
-              <CalendarCheck className="w-4 h-4 text-blue-600" />
-              <span>Bookings</span>
-            </div>
-            <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{data?.totalBookings || 71}</div>
-            <div className="text-[10px] text-blue-700 font-medium mt-0.5">Total Consults</div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-2 text-[#86868b] text-xs">
-              <IndianRupee className="w-4 h-4 text-emerald-600" />
-              <span>Revenue</span>
-            </div>
-            <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">₹{(data?.totalRevenue || 52450).toLocaleString('en-IN')}</div>
-            <div className="text-[10px] text-emerald-700 font-medium mt-0.5">Gross Clinical</div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-2 text-[#86868b] text-xs">
-              <Users className="w-4 h-4 text-amber-600" />
-              <span>Desks</span>
-            </div>
-            <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{receptionists.length}</div>
-            <div className="text-[10px] text-amber-700 font-medium mt-0.5">Front Staff</div>
-          </div>
-        </div>
-
-        {/* Check-In Code Quick Card */}
-        <div className="bg-white rounded-2xl p-4 border border-[#e5e5ea] shadow-xs flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200/50 flex items-center justify-center text-[#0066cc]">
-              <QrCode className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-xs text-[#86868b]">Clinic Fast Check-In Code</div>
-              <div className="text-base font-bold text-[#1d1d1f] tracking-wider">{clinic.checkinCode || 'METRO01'}</div>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleCopyCheckinCode}
-            className="px-3 py-1.5 rounded-full bg-[#f5f5f7] hover:bg-[#e5e5ea] text-xs font-medium text-[#1d1d1f] flex items-center gap-1.5 transition-colors"
-          >
-            {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copiedCode ? 'Copied' : 'Copy'}</span>
-          </button>
-        </div>
-
         {/* Tab Controls */}
         <div className="flex items-center gap-1 p-1 bg-[#e5e5ea]/60 rounded-2xl overflow-x-auto text-xs font-medium">
           <button
             type="button"
+            onClick={() => setActiveTab('kpi')}
+            className={`flex-1 min-w-[80px] py-2 px-2.5 rounded-xl transition-all text-center ${
+              activeTab === 'kpi'
+                ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
+                : 'text-[#86868b] hover:text-[#1d1d1f]'
+            }`}
+          >
+            Operations
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab('doctors')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
+            className={`flex-1 min-w-[80px] py-2 px-2.5 rounded-xl transition-all text-center ${
               activeTab === 'doctors'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
@@ -459,39 +469,177 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('receptionists')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
+            className={`flex-1 min-w-[80px] py-2 px-2.5 rounded-xl transition-all text-center ${
               activeTab === 'receptionists'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
-            Front Desks ({receptionists.length})
+            Desks ({receptionists.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('standee')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
+            className={`flex-1 min-w-[80px] py-2 px-2.5 rounded-xl transition-all text-center ${
               activeTab === 'standee'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
-            QR Standee
+            Standee
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('appointments')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
-              activeTab === 'appointments'
+            onClick={() => setActiveTab('profile')}
+            className={`flex-1 min-w-[80px] py-2 px-2.5 rounded-xl transition-all text-center ${
+              activeTab === 'profile'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
-            Visits ({appointments.length})
+            Profile
           </button>
         </div>
 
-        {/* TAB 1: DOCTORS ROSTER */}
+        {/* TAB 1: OPERATIONS KPI & REVENUE */}
+        {activeTab === 'kpi' && (
+          <div className="space-y-4">
+            {/* Clinic KPI Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
+                <div className="flex items-center gap-2 text-[#86868b] text-xs">
+                  <Stethoscope className="w-4 h-4 text-teal-600" />
+                  <span>Doctors</span>
+                </div>
+                <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{data?.totalDoctors || doctors.length}</div>
+                <div className="text-[10px] text-teal-700 font-medium mt-0.5">Active Roster</div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
+                <div className="flex items-center gap-2 text-[#86868b] text-xs">
+                  <CalendarCheck className="w-4 h-4 text-blue-600" />
+                  <span>Bookings</span>
+                </div>
+                <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{data?.totalBookings || 71}</div>
+                <div className="text-[10px] text-blue-700 font-medium mt-0.5">Total Consults</div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
+                <div className="flex items-center gap-2 text-[#86868b] text-xs">
+                  <IndianRupee className="w-4 h-4 text-emerald-600" />
+                  <span>Revenue</span>
+                </div>
+                <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">₹{(data?.totalRevenue || 52450).toLocaleString('en-IN')}</div>
+                <div className="text-[10px] text-emerald-700 font-medium mt-0.5">Gross Clinical</div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
+                <div className="flex items-center gap-2 text-[#86868b] text-xs">
+                  <Users className="w-4 h-4 text-amber-600" />
+                  <span>Desks</span>
+                </div>
+                <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{receptionists.length}</div>
+                <div className="text-[10px] text-amber-700 font-medium mt-0.5">Front Staff</div>
+              </div>
+            </div>
+
+            {/* Check-In Code Quick Card */}
+            <div className="bg-white rounded-2xl p-4 border border-[#e5e5ea] shadow-xs flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200/50 flex items-center justify-center text-[#0066cc]">
+                  <QrCode className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs text-[#86868b]">Clinic Fast Check-In Code</div>
+                  <div className="text-base font-bold text-[#1d1d1f] tracking-wider">{clinic.checkinCode || 'METRO01'}</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyCheckinCode}
+                className="px-3 py-1.5 rounded-full bg-[#f5f5f7] hover:bg-[#e5e5ea] text-xs font-medium text-[#1d1d1f] flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedCode ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
+
+            {/* Doctor Revenue Breakdown Table */}
+            <div className="bg-white rounded-2xl p-4 border border-[#e5e5ea] shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-[#1d1d1f]">Doctor Performance & Revenue</h3>
+                <span className="text-xs text-[#86868b]">{doctors.length} Doctors</span>
+              </div>
+
+              {doctors.length === 0 ? (
+                <p className="text-xs text-[#86868b] py-3 text-center">No doctor records available.</p>
+              ) : (
+                <div className="space-y-2">
+                  {doctors.map((doc) => (
+                    <div
+                      key={doc.doctorId}
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-[#f5f5f7] border border-[#e5e5ea] text-xs"
+                    >
+                      <div>
+                        <div className="font-semibold text-[#1d1d1f]">{doc.fullName}</div>
+                        <div className="text-[#86868b] text-[11px]">{doc.specialty} • Fee: ₹{doc.consultationFee}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-emerald-700">₹{(doc.revenue || 0).toLocaleString('en-IN')}</div>
+                        <div className="text-[10px] text-[#86868b]">{doc.completedCount || 0} visits done</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Recent Clinic Visits Ledger */}
+            <div className="bg-white rounded-2xl p-4 border border-[#e5e5ea] shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-[#1d1d1f]">Today’s Visits Ledger</h3>
+                <span className="text-xs text-[#86868b]">{appointments.length} Consults</span>
+              </div>
+
+              {appointments.length === 0 ? (
+                <div className="text-center py-6 text-xs text-[#86868b]">
+                  No appointments logged today yet.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {appointments.map((appt) => (
+                    <div
+                      key={appt.id}
+                      className="p-3 rounded-xl bg-[#f5f5f7] border border-[#e5e5ea] flex items-center justify-between text-xs"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-blue-50 border border-blue-200 text-[#0066cc] font-bold flex items-center justify-center text-[11px]">
+                          #{appt.queueNumber}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-[#1d1d1f]">{appt.patientName}</div>
+                          <div className="text-[11px] text-[#86868b]">{appt.doctorName} • {appt.estimatedTime}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                          appt.status === 'COMPLETED'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-blue-50 text-blue-700 border border-blue-200'
+                        }`}>
+                          {appt.status}
+                        </span>
+                        <div className="font-bold text-[#1d1d1f] mt-0.5">₹{appt.fee}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: DOCTORS ROSTER */}
         {activeTab === 'doctors' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -681,49 +829,137 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
           </div>
         )}
 
-        {/* TAB 4: APPOINTMENTS LOG */}
-        {activeTab === 'appointments' && (
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-[#1d1d1f]">Today’s Clinic Visits</h2>
-            {appointments.length === 0 ? (
-              <div className="bg-white rounded-2xl p-8 text-center border border-[#e5e5ea]">
-                <Clock className="w-10 h-10 text-[#86868b] mx-auto mb-2 opacity-50" />
-                <p className="text-sm font-semibold text-[#1d1d1f]">No appointments today</p>
-                <p className="text-xs text-[#86868b] mt-1">Bookings from reception and app appear here automatically.</p>
+        {/* TAB 5: CLINIC PROFILE & ACCOUNT SETTINGS */}
+        {activeTab === 'profile' && (
+          <div className="space-y-4">
+            {/* Clinic Info Header Card */}
+            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 shrink-0">
+                <Building2 className="w-7 h-7" />
               </div>
-            ) : (
-              <div className="space-y-2">
-                {appointments.map((appt) => (
-                  <div
-                    key={appt.id}
-                    className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-200/60 flex items-center justify-center font-bold text-sm text-[#0066cc]">
-                        #{appt.queueNumber}
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-sm text-[#1d1d1f]">{appt.patientName}</h4>
-                        <p className="text-xs text-[#86868b]">{appt.doctorName} • {appt.estimatedTime}</p>
-                      </div>
-                    </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-bold text-base text-[#1d1d1f] truncate">{clinicName}</h2>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 shrink-0">
+                    {clinic.verificationStatus || 'VERIFIED'}
+                  </span>
+                </div>
+                <p className="text-xs text-[#86868b] mt-0.5">{clinicCity}, {clinicState}</p>
+                <div className="mt-1 flex items-center gap-2 text-[11px] text-[#0066cc]">
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>Check-In Code: <strong>{clinic.checkinCode || 'METRO01'}</strong></span>
+                </div>
+              </div>
+            </div>
 
-                    <div className="text-right">
-                      <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-medium ${
-                        appt.status === 'COMPLETED'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : appt.status === 'IN_CONSULTATION'
-                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                          : 'bg-amber-50 text-amber-700 border border-amber-200'
-                      }`}>
-                        {appt.status}
-                      </span>
-                      <div className="text-xs font-semibold text-[#1d1d1f] mt-1">₹{appt.fee}</div>
-                    </div>
-                  </div>
-                ))}
+            {/* Clinic Details Form */}
+            <form onSubmit={handleSaveClinicProfile} className="bg-white rounded-3xl p-6 border border-[#e5e5ea] shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-[#f0f0f0]">
+                <h3 className="font-semibold text-sm text-[#1d1d1f]">Facility Information</h3>
+                <span className="text-xs text-[#86868b]">Clinical Operations</span>
               </div>
-            )}
+
+              <div>
+                <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Clinical Facility Name</label>
+                <input
+                  type="text"
+                  value={clinicName}
+                  onChange={(e) => setClinicName(e.target.value)}
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Contact Phone</label>
+                <input
+                  type="tel"
+                  value={clinicPhone}
+                  onChange={(e) => setClinicPhone(e.target.value)}
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Street Address</label>
+                <input
+                  type="text"
+                  value={clinicAddress}
+                  onChange={(e) => setClinicAddress(e.target.value)}
+                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">City</label>
+                  <input
+                    type="text"
+                    value={clinicCity}
+                    onChange={(e) => setClinicCity(e.target.value)}
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">State / UT</label>
+                  <select
+                    value={clinicState}
+                    onChange={(e) => setClinicState(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm bg-white focus:outline-none focus:border-[#0066cc]"
+                  >
+                    {INDIAN_STATES.map((st) => (
+                      <option key={st} value={st}>{st}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={savingProfile}
+                  className="w-full py-3 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-xs font-medium flex items-center justify-center gap-2 transition-colors shadow-xs cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{savingProfile ? 'Saving...' : 'Save Facility Details'}</span>
+                </button>
+              </div>
+            </form>
+
+            {/* Quick Actions & Logout Card */}
+            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-3">
+              <h3 className="font-semibold text-xs text-[#86868b] uppercase tracking-wider">Workspace & Account</h3>
+              
+              {onOpenRoleSwitcher && (
+                <button
+                  type="button"
+                  onClick={onOpenRoleSwitcher}
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[#1d1d1f] text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-600" />
+                    <span>Switch Platform Workspace</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#86868b]" />
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={logout}
+                className="w-full py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <LogOut className="w-4 h-4 text-rose-600" />
+                  <span>Sign Out of Clinic Account</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-rose-400" />
+              </button>
+            </div>
           </div>
         )}
       </main>

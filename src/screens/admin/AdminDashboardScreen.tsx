@@ -5,6 +5,7 @@ import {
   ContactMessageItem,
   formatDoctorDegrees,
 } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import {
   Users,
   ShieldCheck,
@@ -22,15 +23,27 @@ import {
   Stethoscope,
   Eye,
   Check,
+  TrendingUp,
+  Activity,
+  LogOut,
+  ChevronRight,
+  User,
 } from 'lucide-react';
 
-interface AdminDashboardScreenProps {
+export type AdminTab = 'kpi' | 'doctors' | 'clinics' | 'appointments' | 'messages';
+
+export interface AdminDashboardScreenProps {
   onOpenRoleSwitcher?: () => void;
+  activeTab?: AdminTab;
+  onTabChange?: (tab: AdminTab) => void;
 }
 
 export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
   onOpenRoleSwitcher,
+  activeTab: propActiveTab,
+  onTabChange,
 }) => {
+  const { user, logout } = useAuth();
   const [stats, setStats] = useState<{
     totalPatients: number;
     totalDoctors: number;
@@ -48,7 +61,15 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'doctors' | 'clinics' | 'appointments' | 'messages'>('doctors');
+  
+  // Tab sync: 'kpi' | 'doctors' | 'clinics' | 'appointments' | 'messages'
+  const [localActiveTab, setLocalActiveTab] = useState<AdminTab>('kpi');
+  const activeTab = propActiveTab || localActiveTab;
+  const setActiveTab = (tab: AdminTab) => {
+    setLocalActiveTab(tab);
+    onTabChange?.(tab);
+  };
+
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -342,9 +363,9 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] pb-24 text-[#1d1d1f]">
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      {/* Sub Bar */}
+      <div className="bg-white border-b border-[#e5e5ea] px-4 py-3">
+        <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200/60 flex items-center justify-center text-rose-700">
               <Shield className="w-5 h-5" />
@@ -385,9 +406,9 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
             )}
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 pt-4 space-y-4">
+      <main className="max-w-md mx-auto px-4 pt-4 space-y-4">
         {/* Banner Alerts */}
         {error && (
           <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2 animate-fade-in">
@@ -405,51 +426,23 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
           </div>
         )}
 
-        {/* Platform KPIs */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-2 text-[#86868b] text-xs">
-              <Users className="w-4 h-4 text-blue-600" />
-              <span>Patients</span>
-            </div>
-            <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{s.totalPatients}</div>
-            <div className="text-[10px] text-blue-700 font-medium mt-0.5">National Citizens</div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-2 text-[#86868b] text-xs">
-              <Stethoscope className="w-4 h-4 text-indigo-600" />
-              <span>Doctors</span>
-            </div>
-            <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{s.totalDoctors}</div>
-            <div className="text-[10px] text-amber-700 font-medium mt-0.5">{s.pendingDoctors} Pending Review</div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-2 text-[#86868b] text-xs">
-              <Building2 className="w-4 h-4 text-teal-600" />
-              <span>Clinics</span>
-            </div>
-            <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{s.totalClinics || 16}</div>
-            <div className="text-[10px] text-amber-700 font-medium mt-0.5">{s.pendingClinics || 2} Pending Inspection</div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-3.5 border border-[#e5e5ea] shadow-xs">
-            <div className="flex items-center gap-2 text-[#86868b] text-xs">
-              <Calendar className="w-4 h-4 text-emerald-600" />
-              <span>Appointments</span>
-            </div>
-            <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{s.totalAppointments}</div>
-            <div className="text-[10px] text-emerald-700 font-medium mt-0.5">{s.todayAppointments} Today</div>
-          </div>
-        </div>
-
         {/* Tab Controls */}
         <div className="flex items-center gap-1 p-1 bg-[#e5e5ea]/60 rounded-2xl overflow-x-auto text-xs font-medium">
           <button
             type="button"
+            onClick={() => setActiveTab('kpi')}
+            className={`flex-1 min-w-[75px] py-2 px-2 rounded-xl transition-all text-center ${
+              activeTab === 'kpi'
+                ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
+                : 'text-[#86868b] hover:text-[#1d1d1f]'
+            }`}
+          >
+            KPIs
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab('doctors')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
+            className={`flex-1 min-w-[75px] py-2 px-2 rounded-xl transition-all text-center ${
               activeTab === 'doctors'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
@@ -460,7 +453,7 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('clinics')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
+            className={`flex-1 min-w-[75px] py-2 px-2 rounded-xl transition-all text-center ${
               activeTab === 'clinics'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
@@ -471,7 +464,7 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('appointments')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
+            className={`flex-1 min-w-[75px] py-2 px-2 rounded-xl transition-all text-center ${
               activeTab === 'appointments'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
@@ -482,15 +475,111 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('messages')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
+            className={`flex-1 min-w-[75px] py-2 px-2 rounded-xl transition-all text-center ${
               activeTab === 'messages'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
-            Support Inbox ({contactMessages.length})
+            Inbox ({contactMessages.length})
           </button>
         </div>
+
+        {/* TAB 1: PLATFORM KPIS & SYSTEM HEALTH */}
+        {activeTab === 'kpi' && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
+                <div>
+                  <h3 className="font-semibold text-base text-[#1d1d1f]">Platform Operations KPI</h3>
+                  <p className="text-xs text-[#86868b]">Real-time system health and network velocity metrics</p>
+                </div>
+                <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200/60 flex items-center justify-center text-rose-700">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+              </div>
+
+              {/* 4 Metric Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-[#f5f5f7] rounded-2xl p-3.5 border border-[#e5e5ea]/80">
+                  <div className="flex items-center gap-1.5 text-[#86868b] text-xs">
+                    <Users className="w-4 h-4 text-blue-600" />
+                    <span>Patients</span>
+                  </div>
+                  <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{s.totalPatients}</div>
+                  <div className="text-[10px] text-blue-700 font-medium mt-0.5">National Citizens</div>
+                </div>
+
+                <div className="bg-[#f5f5f7] rounded-2xl p-3.5 border border-[#e5e5ea]/80">
+                  <div className="flex items-center gap-1.5 text-[#86868b] text-xs">
+                    <Stethoscope className="w-4 h-4 text-indigo-600" />
+                    <span>Doctors</span>
+                  </div>
+                  <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{s.totalDoctors}</div>
+                  <div className="text-[10px] text-amber-700 font-medium mt-0.5">{s.pendingDoctors} Pending Review</div>
+                </div>
+
+                <div className="bg-[#f5f5f7] rounded-2xl p-3.5 border border-[#e5e5ea]/80">
+                  <div className="flex items-center gap-1.5 text-[#86868b] text-xs">
+                    <Building2 className="w-4 h-4 text-teal-600" />
+                    <span>Clinics</span>
+                  </div>
+                  <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{s.totalClinics || 16}</div>
+                  <div className="text-[10px] text-amber-700 font-medium mt-0.5">{s.pendingClinics || 2} Pending Inspection</div>
+                </div>
+
+                <div className="bg-[#f5f5f7] rounded-2xl p-3.5 border border-[#e5e5ea]/80">
+                  <div className="flex items-center gap-1.5 text-[#86868b] text-xs">
+                    <Calendar className="w-4 h-4 text-emerald-600" />
+                    <span>Appointments</span>
+                  </div>
+                  <div className="text-xl font-bold text-[#1d1d1f] mt-1.5">{s.totalAppointments}</div>
+                  <div className="text-[10px] text-emerald-700 font-medium mt-0.5">{s.todayAppointments} Today</div>
+                </div>
+              </div>
+
+              {/* System Infrastructure Status */}
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/60 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-xs font-semibold text-emerald-900">MediArca Cloud Engine Online</span>
+                  </div>
+                  <span className="text-[11px] font-mono text-emerald-700 font-medium">Latency: 38ms</span>
+                </div>
+                <p className="text-[11px] text-emerald-800 leading-relaxed">
+                  Real-time queue synchronization, OTP SMS gateway, Cloudflare R2 file storage, and Supabase PostgreSQL data cluster operating at optimal performance.
+                </p>
+              </div>
+
+              {/* Action shortcuts */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('doctors')}
+                  className="p-3 rounded-2xl border border-[#e5e5ea] hover:bg-[#f5f5f7] flex items-center justify-between text-left transition-colors"
+                >
+                  <div>
+                    <div className="text-xs font-semibold text-[#1d1d1f]">Verify Doctors</div>
+                    <div className="text-[10px] text-[#86868b]">{s.pendingDoctors} awaiting approval</div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#86868b]" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('clinics')}
+                  className="p-3 rounded-2xl border border-[#e5e5ea] hover:bg-[#f5f5f7] flex items-center justify-between text-left transition-colors"
+                >
+                  <div>
+                    <div className="text-xs font-semibold text-[#1d1d1f]">Inspect Clinics</div>
+                    <div className="text-[10px] text-[#86868b]">{s.pendingClinics || 2} awaiting audit</div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#86868b]" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* TAB 1: DOCTORS VERIFICATION */}
         {activeTab === 'doctors' && (
@@ -692,6 +781,53 @@ export const AdminDashboardScreen: React.FC<AdminDashboardScreenProps> = ({
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Admin Profile & Terminal Management */}
+            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-4 mt-6">
+              <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
+                <div>
+                  <h3 className="font-semibold text-base text-[#1d1d1f]">Administrator Console</h3>
+                  <p className="text-xs text-[#86868b]">Authenticated root session and portal controls</p>
+                </div>
+                <div className="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-200/60 flex items-center justify-center text-purple-700">
+                  <Shield className="w-5 h-5" />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#f5f5f7] flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-sm">
+                    {user?.fullName ? user.fullName[0].toUpperCase() : 'A'}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-[#1d1d1f]">{user?.fullName || 'Root Administrator'}</h4>
+                    <p className="text-xs text-[#86868b]">{user?.email || 'admin@mediarca.com'}</p>
+                    <span className="inline-block mt-0.5 text-[10px] px-2 py-0.5 rounded-full font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                      SUPER_ADMIN ACCESS
+                    </span>
+                  </div>
+                </div>
+                {onOpenRoleSwitcher && (
+                  <button
+                    type="button"
+                    onClick={onOpenRoleSwitcher}
+                    className="px-3.5 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/60 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                    <span>Switch</span>
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={logout}
+                className="w-full py-3 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <LogOut className="w-4 h-4 text-rose-600" />
+                <span>Sign Out of Administrator Terminal</span>
+              </button>
             </div>
           </div>
         )}

@@ -1721,6 +1721,18 @@ export const api = {
     return apiRequest('/clinics/my-clinic', { method: 'GET' });
   },
 
+  async updateClinicProfile(body: any): Promise<ApiResponse<any>> {
+    const res = await apiRequest('/clinics/profile', {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+    if (res.success) return res;
+    return apiRequest('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ clinicProfile: body }),
+    });
+  },
+
   async addDoctorToClinic(data: { doctorEmail?: string; doctorId?: string }): Promise<ApiResponse<any>> {
     return apiRequest('/clinics/doctors', {
       method: 'POST',

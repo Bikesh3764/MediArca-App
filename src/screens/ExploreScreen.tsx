@@ -307,7 +307,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
             )}
             {maxFee < 3000 && (
               <span className="inline-flex items-center gap-1 bg-[#0066cc]/10 text-[#0066cc] font-medium px-2.5 py-1 rounded-full shrink-0 border border-[#0066cc]/20">
-                Fee ≤ ₹{maxFee}
+                {maxFee === 0 ? 'Free (₹0)' : `Fee ≤ ₹${maxFee}`}
                 <button
                   type="button"
                   onClick={() => setMaxFee(3000)}
@@ -785,12 +785,12 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       Max Consultation Fee
                     </label>
                     <span className="text-sm font-bold text-[#0066cc]">
-                      {maxFee >= 3000 ? 'Any Fee' : `Up to ₹${maxFee}`}
+                      {maxFee >= 3000 ? 'Any Fee' : maxFee === 0 ? 'Free (₹0)' : `Up to ₹${maxFee}`}
                     </span>
                   </div>
                   <input
                     type="range"
-                    min="200"
+                    min="0"
                     max="3000"
                     step="100"
                     value={maxFee}
@@ -798,7 +798,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                     className="w-full accent-[#0066cc]"
                   />
                   <div className="flex justify-between text-[11px] text-[#86868b] mt-1">
-                    <span>₹200</span>
+                    <span>₹0</span>
                     <span>₹1500</span>
                     <span>₹3000+</span>
                   </div>

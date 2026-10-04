@@ -6,8 +6,10 @@ import {
   Appointment,
   QueuePreview,
   getLocalDateString,
+  AppNotification,
 } from '../../services/api';
 import { sanitizeIndianPhone, isValidIndianPhone } from '../../utils/phoneUtils';
+import { useAuth } from '../../context/AuthContext';
 import {
   Users,
   UserPlus,
@@ -28,23 +30,42 @@ import {
   Phone,
   User,
   ShieldCheck,
+  Bell,
+  LogOut,
+  Ticket,
+  ChevronRight,
 } from 'lucide-react';
+
+export type ReceptionistTab = 'walkin' | 'queue' | 'pending' | 'cabin' | 'notifications';
 
 interface ReceptionistDashboardScreenProps {
   onOpenRoleSwitcher?: () => void;
+  activeTab?: ReceptionistTab;
+  onTabChange?: (tab: ReceptionistTab) => void;
 }
 
 export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenProps> = ({
   onOpenRoleSwitcher,
+  activeTab: propActiveTab,
+  onTabChange,
 }) => {
+  const { logout } = useAuth();
   const [data, setData] = useState<ReceptionistDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Active Tab: 'walkin' | 'queue' | 'pending' | 'cabin' | 'password'
-  const [activeTab, setActiveTab] = useState<'walkin' | 'queue' | 'pending' | 'cabin' | 'password'>('walkin');
+  // Active Tab: 'walkin' | 'queue' | 'pending' | 'cabin' | 'notifications'
+  const [localActiveTab, setLocalActiveTab] = useState<ReceptionistTab>('walkin');
+  const activeTab = propActiveTab || localActiveTab;
+  const setActiveTab = (tab: ReceptionistTab) => {
+    setLocalActiveTab(tab);
+    if (onTabChange) onTabChange(tab);
+  };
+
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);
 
   // Selected Doctor for Walk-in and Queue
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('doc_sarah_01');
@@ -196,9 +217,65 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
     }
   }, [getDemoReceptionistData]);
 
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await api.getNotifications();
+      if (res.success && res.data) {
+        const notifs = res.data.notifications || [];
+        setNotifications(notifs);
+        setUnreadNotifCount(res.data.unreadCount ?? notifs.filter((n: any) => !n.isRead).length);
+      } else {
+        setNotifications([
+          {
+            id: 'notif_01',
+            userId: 'usr_rec_1',
+            title: 'New Online Token Booked',
+            message: 'Aarav Sharma booked Shift 1 with Dr. Sarah Jenkins (Token #04).',
+            type: 'APPOINTMENT',
+            isRead: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          {
+            id: 'notif_02',
+            userId: 'usr_rec_1',
+            title: 'Patient Fast Check-In',
+            message: 'Riya Gupta checked in via QR Standee METRO01 (Token #02).',
+            type: 'QUEUE',
+            isRead: true,
+            createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+            updatedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+          },
+        ]);
+        setUnreadNotifCount(1);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleMarkNotifRead = async (id: string) => {
+    try {
+      await api.markNotificationRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+      );
+      setUnreadNotifCount((prev) => Math.max(0, prev - 1));
+    } catch {}
+  };
+
+  const handleMarkAllNotifsRead = async () => {
+    try {
+      await api.markAllNotificationsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadNotifCount(0);
+    } catch {}
+  };
+
   useEffect(() => {
     loadReceptionistData();
-  }, [loadReceptionistData]);
+    fetchNotifications();
+  }, [loadReceptionistData, fetchNotifications]);
 
   // Load Queue when doctor or date changes
   const loadDoctorQueue = useCallback(async () => {
@@ -481,9 +558,9 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] pb-24 text-[#1d1d1f]">
-      {/* Top Navigation */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      {/* Sub Bar */}
+      <div className="bg-white border-b border-[#e5e5ea] px-4 py-3">
+        <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200/60 flex items-center justify-center text-amber-700">
               <Users className="w-5 h-5" />
@@ -524,9 +601,9 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
             )}
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 pt-4 space-y-4">
+      <main className="max-w-md mx-auto px-4 pt-4 space-y-4">
         {/* Banner Alerts */}
         {error && (
           <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2 animate-fade-in">
@@ -632,18 +709,18 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
           <button
             type="button"
             onClick={() => setActiveTab('walkin')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
+            className={`flex-1 min-w-[75px] py-2 px-2 rounded-xl transition-all text-center ${
               activeTab === 'walkin'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
-            Walk-In Token
+            Token Desk
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('queue')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
+            className={`flex-1 min-w-[75px] py-2 px-2 rounded-xl transition-all text-center ${
               activeTab === 'queue'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
@@ -654,7 +731,7 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
           <button
             type="button"
             onClick={() => setActiveTab('pending')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
+            className={`flex-1 min-w-[75px] py-2 px-2 rounded-xl transition-all text-center ${
               activeTab === 'pending'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
@@ -664,14 +741,25 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab('password')}
-            className={`flex-1 min-w-[90px] py-2 px-3 rounded-xl transition-all text-center ${
-              activeTab === 'password'
+            onClick={() => setActiveTab('cabin')}
+            className={`flex-1 min-w-[75px] py-2 px-2 rounded-xl transition-all text-center ${
+              activeTab === 'cabin'
                 ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
-            Desk Password
+            Cabin
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('notifications')}
+            className={`flex-1 min-w-[75px] py-2 px-2 rounded-xl transition-all text-center ${
+              activeTab === 'notifications'
+                ? 'bg-white text-[#1d1d1f] shadow-xs font-semibold'
+                : 'text-[#86868b] hover:text-[#1d1d1f]'
+            }`}
+          >
+            Alerts {unreadNotifCount > 0 ? `(${unreadNotifCount})` : ''}
           </button>
         </div>
 
@@ -942,48 +1030,237 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
           </div>
         )}
 
-        {/* TAB 4: DESK PASSWORD */}
-        {activeTab === 'password' && (
-          <div className="bg-white rounded-3xl p-6 border border-[#e5e5ea] shadow-xs max-w-md mx-auto space-y-4">
-            <div className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-[#0066cc]" />
-              <h3 className="font-semibold text-base text-[#1d1d1f]">Update Front Desk Password</h3>
+        {/* TAB 4: DOCTOR CABIN CONTROLS */}
+        {activeTab === 'cabin' && (
+          <div className="space-y-4">
+            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
+                <div>
+                  <h3 className="font-semibold text-base text-[#1d1d1f]">Doctor Cabin Controls</h3>
+                  <p className="text-xs text-[#86868b]">Control active practitioner availability and break status</p>
+                </div>
+                <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200/60 flex items-center justify-center text-indigo-700">
+                  <Stethoscope className="w-5 h-5" />
+                </div>
+              </div>
+
+              {doctors.length === 0 ? (
+                <p className="text-xs text-[#86868b] py-4 text-center">No affiliated doctors found for this desk.</p>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-[#1d1d1f] mb-1.5">Select Doctor</label>
+                    <select
+                      value={selectedDoctorId}
+                      onChange={(e) => setSelectedDoctorId(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm bg-white focus:outline-none focus:border-[#0066cc]"
+                    >
+                      {doctors.map((d) => (
+                        <option key={d.doctorId} value={d.doctorId}>
+                          {d.fullName} ({d.specialty}) — Current: {d.cabinStatus === 'IN_CABIN' ? 'In Cabin' : d.cabinStatus === 'STEPPED_OUT' ? 'Stepped Out' : 'Out'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {currentDoctor && (
+                    <div className="p-4 rounded-2xl bg-[#f5f5f7] border border-[#e5e5ea] space-y-3">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={currentDoctor.avatarUrl || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=256&q=80'}
+                          alt={currentDoctor.fullName}
+                          className="w-12 h-12 rounded-full object-cover border border-[#e5e5ea]"
+                        />
+                        <div>
+                          <h4 className="font-bold text-sm text-[#1d1d1f]">{currentDoctor.fullName}</h4>
+                          <p className="text-xs text-[#86868b]">{currentDoctor.specialty} • Consultation Fee: ₹{currentDoctor.consultationFee}</p>
+                          <div className="mt-1">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                              currentDoctor.cabinStatus === 'IN_CABIN'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : currentDoctor.cabinStatus === 'STEPPED_OUT'
+                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                : 'bg-rose-50 text-rose-700 border border-rose-200'
+                            }`}>
+                              <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                              {currentDoctor.cabinStatus === 'IN_CABIN' ? 'In Cabin (Ready for Next Patient)' : currentDoctor.cabinStatus === 'STEPPED_OUT' ? 'Stepped Out on Break' : 'Out of Clinic'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-[#e5e5ea] grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          disabled={updatingCabin}
+                          onClick={() => handleUpdateDoctorCabin('IN_CABIN')}
+                          className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            currentDoctor.cabinStatus === 'IN_CABIN'
+                              ? 'bg-emerald-600 text-white shadow-xs'
+                              : 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50'
+                          }`}
+                        >
+                          In Cabin
+                        </button>
+                        <button
+                          type="button"
+                          disabled={updatingCabin}
+                          onClick={() => handleUpdateDoctorCabin('STEPPED_OUT', 15)}
+                          className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            currentDoctor.cabinStatus === 'STEPPED_OUT'
+                              ? 'bg-amber-500 text-white shadow-xs'
+                              : 'bg-white text-amber-700 border border-amber-200 hover:bg-amber-50'
+                          }`}
+                        >
+                          Step Out (15m)
+                        </button>
+                        <button
+                          type="button"
+                          disabled={updatingCabin}
+                          onClick={() => handleUpdateDoctorCabin('NOT_IN_CABIN')}
+                          className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            currentDoctor.cabinStatus === 'NOT_IN_CABIN'
+                              ? 'bg-rose-600 text-white shadow-xs'
+                              : 'bg-white text-rose-700 border border-rose-200 hover:bg-rose-50'
+                          }`}
+                        >
+                          Off Duty
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            <p className="text-xs text-[#86868b]">Keep your receptionist terminal secure with a strong password.</p>
+          </div>
+        )}
 
-            <form onSubmit={handleChangePassword} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Current Password</label>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Enter current password"
-                  required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
-                />
+        {/* TAB 5: DESK NOTIFICATIONS & SECURITY */}
+        {activeTab === 'notifications' && (
+          <div className="space-y-4">
+            {/* Live Notifications Box */}
+            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-[#f0f0f0]">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-[#0066cc]" />
+                  <h3 className="font-semibold text-sm text-[#1d1d1f]">Front Desk Alerts</h3>
+                  {unreadNotifCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold">
+                      {unreadNotifCount} new
+                    </span>
+                  )}
+                </div>
+                {notifications.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleMarkAllNotifsRead}
+                    className="text-xs text-[#0066cc] font-medium hover:underline cursor-pointer"
+                  >
+                    Mark all read
+                  </button>
+                )}
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-[#1d1d1f] mb-1">New Password</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password (min 6 chars)"
-                  required
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
-                />
+              {notifications.length === 0 ? (
+                <p className="text-xs text-[#86868b] py-6 text-center">No alerts logged for this desk yet.</p>
+              ) : (
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      onClick={() => !notif.isRead && handleMarkNotifRead(notif.id)}
+                      className={`p-3 rounded-2xl border transition-all text-xs cursor-pointer ${
+                        notif.isRead
+                          ? 'bg-[#f5f5f7] border-[#e5e5ea] opacity-80'
+                          : 'bg-blue-50/60 border-blue-200 shadow-2xs'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-[#1d1d1f]">{notif.title}</span>
+                        <span className="text-[10px] text-[#86868b]">
+                          {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <p className="text-[#48484a] mt-1">{notif.message}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Change Desk Password Card */}
+            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-3">
+              <div className="flex items-center gap-2 pb-2 border-b border-[#f0f0f0]">
+                <Lock className="w-4 h-4 text-[#0066cc]" />
+                <h3 className="font-semibold text-sm text-[#1d1d1f]">Update Desk Password</h3>
               </div>
+              <p className="text-xs text-[#86868b]">Keep your receptionist terminal secure with a strong password.</p>
+
+              <form onSubmit={handleChangePassword} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Current Password</label>
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Enter current password"
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">New Password</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password (min 6 chars)"
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={changingPassword}
+                  className="w-full py-2.5 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-xs font-medium transition-colors shadow-xs cursor-pointer"
+                >
+                  {changingPassword ? 'Updating...' : 'Save New Password'}
+                </button>
+              </form>
+            </div>
+
+            {/* Workspace & Sign Out Card */}
+            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-3">
+              <h3 className="font-semibold text-xs text-[#86868b] uppercase tracking-wider">Workspace & Account</h3>
+
+              {onOpenRoleSwitcher && (
+                <button
+                  type="button"
+                  onClick={onOpenRoleSwitcher}
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[#1d1d1f] text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-purple-600" />
+                    <span>Switch Platform Workspace</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#86868b]" />
+                </button>
+              )}
 
               <button
-                type="submit"
-                disabled={changingPassword}
-                className="w-full py-3 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-xs font-medium transition-colors shadow-xs"
+                type="button"
+                onClick={logout}
+                className="w-full py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
               >
-                {changingPassword ? 'Updating...' : 'Save New Password'}
+                <div className="flex items-center gap-2">
+                  <LogOut className="w-4 h-4 text-rose-600" />
+                  <span>Sign Out of Desk Account</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-rose-400" />
               </button>
-            </form>
+            </div>
           </div>
         )}
       </main>

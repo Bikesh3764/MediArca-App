@@ -26,9 +26,9 @@ import { DoctorAffiliationsScreen } from './screens/doctor/DoctorAffiliationsScr
 import { DoctorProfileScreen } from './screens/doctor/DoctorProfileScreen';
 
 // Other Platform Workspaces
-import { ClinicDashboardScreen } from './screens/clinic/ClinicDashboardScreen';
-import { ReceptionistDashboardScreen } from './screens/receptionist/ReceptionistDashboardScreen';
-import { AdminDashboardScreen } from './screens/admin/AdminDashboardScreen';
+import { ClinicDashboardScreen, ClinicTab } from './screens/clinic/ClinicDashboardScreen';
+import { ReceptionistDashboardScreen, ReceptionistTab } from './screens/receptionist/ReceptionistDashboardScreen';
+import { AdminDashboardScreen, AdminTab } from './screens/admin/AdminDashboardScreen';
 
 import {
   Search,
@@ -42,6 +42,12 @@ import {
   Building2,
   Sparkles,
   RefreshCw,
+  TrendingUp,
+  Users,
+  CheckCircle2,
+  Bell,
+  Mail,
+  Shield,
 } from 'lucide-react';
 
 type PatientTab = 'explore' | 'queue' | 'checkin' | 'history' | 'profile';
@@ -221,6 +227,9 @@ const MainApp: React.FC = () => {
   // Tab states
   const [patientTab, setPatientTab] = useState<PatientTab>('explore');
   const [doctorTab, setDoctorTab] = useState<DoctorTab>('console');
+  const [clinicTab, setClinicTab] = useState<ClinicTab>('kpi');
+  const [receptionistTab, setReceptionistTab] = useState<ReceptionistTab>('walkin');
+  const [adminTab, setAdminTab] = useState<AdminTab>('kpi');
 
   // Active items
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorProfile | null>(null);
@@ -255,6 +264,12 @@ const MainApp: React.FC = () => {
     } else if (role === 'PATIENT') {
       setPatientTab('explore');
       setSelectedDoctor(null);
+    } else if (role === 'CLINIC') {
+      setClinicTab('kpi');
+    } else if (role === 'RECEPTIONIST') {
+      setReceptionistTab('walkin');
+    } else if (role === 'ADMIN') {
+      setAdminTab('kpi');
     }
   };
 
@@ -313,8 +328,109 @@ const MainApp: React.FC = () => {
   if (user?.role === 'CLINIC') {
     return (
       <div className="min-h-screen bg-[#ebebee] flex justify-center">
-        <div className="w-full max-w-4xl min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] flex flex-col relative overflow-x-hidden">
-          <ClinicDashboardScreen onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)} />
+        <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
+          {/* Top Apple Header for Clinic */}
+          <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-[#e5e5ea] px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BrandLogo variant="full" size="sm" />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setRoleSwitcherOpen(true)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-teal-50 border border-teal-200/60 active:scale-95 transition-all text-xs font-semibold text-teal-700 cursor-pointer shadow-2xs hover:bg-teal-100/70"
+                title="Switch Workspace Portal"
+              >
+                <Building2 className="w-3.5 h-3.5 text-teal-600" />
+                <span>Clinic</span>
+                <Sparkles className="w-3 h-3 text-teal-400" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setClinicTab('profile')}
+                className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
+              >
+                <div className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                  {user.fullName ? user.fullName[0].toUpperCase() : 'C'}
+                </div>
+                <span className="truncate max-w-[65px] sm:max-w-[85px]">
+                  {user.fullName.split(' ')[0]}
+                </span>
+              </button>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="flex-1 w-full pb-20">
+            <ClinicDashboardScreen
+              onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)}
+              activeTab={clinicTab}
+              onTabChange={(tab) => setClinicTab(tab)}
+            />
+          </main>
+
+          {/* Fixed Bottom Tab Navigation for Clinic */}
+          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-[#e5e5ea] safe-area-bottom">
+            <div className="max-w-md mx-auto flex items-center justify-around px-2 py-1.5">
+              <button
+                type="button"
+                onClick={() => setClinicTab('kpi')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  clinicTab === 'kpi' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <TrendingUp className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">KPIs</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setClinicTab('doctors')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  clinicTab === 'doctors' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Stethoscope className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Doctors</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setClinicTab('receptionists')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  clinicTab === 'receptionists' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Users className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Desk</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setClinicTab('standee')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  clinicTab === 'standee' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <QrCode className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Standee</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setClinicTab('profile')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  clinicTab === 'profile' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Building2 className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Profile</span>
+              </button>
+            </div>
+          </nav>
+
           <RoleSwitcherModal
             isOpen={roleSwitcherOpen}
             onClose={() => setRoleSwitcherOpen(false)}
@@ -333,8 +449,109 @@ const MainApp: React.FC = () => {
   if (user?.role === 'RECEPTIONIST') {
     return (
       <div className="min-h-screen bg-[#ebebee] flex justify-center">
-        <div className="w-full max-w-4xl min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] flex flex-col relative overflow-x-hidden">
-          <ReceptionistDashboardScreen onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)} />
+        <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
+          {/* Top Apple Header for Receptionist */}
+          <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-[#e5e5ea] px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BrandLogo variant="full" size="sm" />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setRoleSwitcherOpen(true)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/60 active:scale-95 transition-all text-xs font-semibold text-[#0066cc] cursor-pointer shadow-2xs hover:bg-blue-100/70"
+                title="Switch Workspace Portal"
+              >
+                <Users className="w-3.5 h-3.5 text-[#0066cc]" />
+                <span>Desk</span>
+                <Sparkles className="w-3 h-3 text-blue-400" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setReceptionistTab('notifications')}
+                className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
+              >
+                <div className="w-5 h-5 rounded-full bg-[#0066cc] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                  {user.fullName ? user.fullName[0].toUpperCase() : 'R'}
+                </div>
+                <span className="truncate max-w-[65px] sm:max-w-[85px]">
+                  {user.fullName.split(' ')[0]}
+                </span>
+              </button>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="flex-1 w-full pb-20">
+            <ReceptionistDashboardScreen
+              onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)}
+              activeTab={receptionistTab}
+              onTabChange={(tab) => setReceptionistTab(tab)}
+            />
+          </main>
+
+          {/* Fixed Bottom Tab Navigation for Receptionist */}
+          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-[#e5e5ea] safe-area-bottom">
+            <div className="max-w-md mx-auto flex items-center justify-around px-2 py-1.5">
+              <button
+                type="button"
+                onClick={() => setReceptionistTab('walkin')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  receptionistTab === 'walkin' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Ticket className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Token</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setReceptionistTab('queue')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  receptionistTab === 'queue' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Clock className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Queue</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setReceptionistTab('pending')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  receptionistTab === 'pending' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <CheckCircle2 className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Approvals</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setReceptionistTab('cabin')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  receptionistTab === 'cabin' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Stethoscope className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Cabin</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setReceptionistTab('notifications')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  receptionistTab === 'notifications' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Bell className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Alerts</span>
+              </button>
+            </div>
+          </nav>
+
           <RoleSwitcherModal
             isOpen={roleSwitcherOpen}
             onClose={() => setRoleSwitcherOpen(false)}
@@ -353,8 +570,109 @@ const MainApp: React.FC = () => {
   if (user?.role === 'ADMIN') {
     return (
       <div className="min-h-screen bg-[#ebebee] flex justify-center">
-        <div className="w-full max-w-4xl min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] flex flex-col relative overflow-x-hidden">
-          <AdminDashboardScreen onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)} />
+        <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
+          {/* Top Apple Header for Admin */}
+          <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-[#e5e5ea] px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BrandLogo variant="full" size="sm" />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setRoleSwitcherOpen(true)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 border border-rose-200/60 active:scale-95 transition-all text-xs font-semibold text-rose-700 cursor-pointer shadow-2xs hover:bg-rose-100/70"
+                title="Switch Workspace Portal"
+              >
+                <Shield className="w-3.5 h-3.5 text-rose-600" />
+                <span>Admin</span>
+                <Sparkles className="w-3 h-3 text-rose-400" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAdminTab('messages')}
+                className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
+              >
+                <div className="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                  {user.fullName ? user.fullName[0].toUpperCase() : 'A'}
+                </div>
+                <span className="truncate max-w-[65px] sm:max-w-[85px]">
+                  {user.fullName.split(' ')[0]}
+                </span>
+              </button>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="flex-1 w-full pb-20">
+            <AdminDashboardScreen
+              onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)}
+              activeTab={adminTab}
+              onTabChange={(tab) => setAdminTab(tab)}
+            />
+          </main>
+
+          {/* Fixed Bottom Tab Navigation for Admin */}
+          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-[#e5e5ea] safe-area-bottom">
+            <div className="max-w-md mx-auto flex items-center justify-around px-2 py-1.5">
+              <button
+                type="button"
+                onClick={() => setAdminTab('kpi')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  adminTab === 'kpi' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <TrendingUp className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">KPIs</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAdminTab('doctors')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  adminTab === 'doctors' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Stethoscope className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Doctors</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAdminTab('clinics')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  adminTab === 'clinics' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Building2 className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Clinics</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAdminTab('appointments')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  adminTab === 'appointments' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Calendar className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Audit</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAdminTab('messages')}
+                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
+                  adminTab === 'messages' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
+                }`}
+              >
+                <Mail className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-semibold tracking-tight">Inbox</span>
+              </button>
+            </div>
+          </nav>
+
           <RoleSwitcherModal
             isOpen={roleSwitcherOpen}
             onClose={() => setRoleSwitcherOpen(false)}
