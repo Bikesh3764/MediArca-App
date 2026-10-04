@@ -34,6 +34,17 @@ interface ManageScheduleScreenProps {
   onNavigateToAffiliations?: () => void;
 }
 
+const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_INDEX_MAP: Record<string, number> = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
+};
+
 export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
   onBack,
   initialClinicId,
@@ -47,6 +58,15 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  const [workingDays, setWorkingDays] = useState<string[]>([
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+  ]);
 
   const [slots, setSlots] = useState<DoctorSlot[]>([
     {
@@ -74,6 +94,19 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
       } else if (user?.doctorProfile) {
         setSlots(parseDoctorSlots(user.doctorProfile));
       }
+
+      if (clinic.workingDays && Array.isArray(clinic.workingDays) && clinic.workingDays.length > 0) {
+        setWorkingDays(clinic.workingDays);
+      } else if (clinic.daysOfWeek && Array.isArray(clinic.daysOfWeek) && clinic.daysOfWeek.length > 0) {
+        const mapped = clinic.daysOfWeek.map((idx: number) => {
+          const found = Object.entries(DAY_INDEX_MAP).find(([, val]) => val === idx);
+          return found ? found[0] : 'Mon';
+        });
+        setWorkingDays(mapped);
+      } else {
+        setWorkingDays(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']);
+      }
+
       setConsultationFee(clinic.consultationFee ?? user?.doctorProfile?.consultationFee ?? 500);
       setError(null);
       setSuccessMsg(null);
@@ -194,6 +227,29 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
     setSlots((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleToggleDay = (day: string) => {
+    setWorkingDays((prev) => {
+      if (prev.includes(day)) {
+        if (prev.length <= 1) {
+          setError('You must select at least one practicing day for this clinic.');
+          return prev;
+        }
+        setError(null);
+        return prev.filter((d) => d !== day);
+      } else {
+        setError(null);
+        return DAYS_OF_WEEK.filter((d) => prev.includes(d) || d === day);
+      }
+    });
+  };
+
+  const handleSelectPresetDays = (preset: 'all' | 'weekdays' | 'mon-sat') => {
+    setError(null);
+    if (preset === 'all') setWorkingDays([...DAYS_OF_WEEK]);
+    else if (preset === 'weekdays') setWorkingDays(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
+    else if (preset === 'mon-sat') setWorkingDays(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']);
+  };
+
   const totalMaxDailyPatients = slots.reduce((sum, s) => sum + (Number(s.maxPatients) || 0), 0);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -206,6 +262,11 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
 
     if (isNaN(Number(consultationFee)) || Number(consultationFee) < 0) {
       setError('Please enter a valid consultation fee in ₹ INR (must be 0 or greater).');
+      return;
+    }
+
+    if (workingDays.length === 0) {
+      setError('Please select at least one practicing day of the week.');
       return;
     }
 
@@ -234,8 +295,11 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
       const payload = {
         clinicId: selectedClinic ? selectedClinic.clinicId : undefined,
         consultationFee: Number(consultationFee),
+        workingDays,
+        daysOfWeek: workingDays.map((d) => DAY_INDEX_MAP[d] ?? 1),
         slots: slots.map((s) => ({
           ...s,
+          days: workingDays,
           maxPatients: Number(s.maxPatients),
           avgConsultationMinutes: Number(s.avgConsultationMinutes),
         })),
@@ -254,7 +318,13 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
           setClinics((prev) =>
             prev.map((c) =>
               c.clinicId === selectedClinic.clinicId
-                ? { ...c, slots, consultationFee: Number(consultationFee) }
+                ? {
+                    ...c,
+                    slots,
+                    consultationFee: Number(consultationFee),
+                    workingDays,
+                    daysOfWeek: workingDays.map((d) => DAY_INDEX_MAP[d] ?? 1),
+                  }
                 : c
             )
           );
@@ -419,6 +489,72 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
                 <span className="text-xs font-bold text-[#0066cc] flex items-center gap-1 mt-0.5">
                   <Timer className="w-3.5 h-3.5" />
                   <span>Doctor Paced</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Practicing Days of the Week Card */}
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#e5e5ea] shadow-xs space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#f5f5f7]">
+                <div>
+                  <h3 className="text-sm font-bold text-[#1d1d1f] flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4 text-[#0066cc]" />
+                    <span>Practicing Days of the Week</span>
+                  </h3>
+                  <p className="text-[11px] text-[#86868b]">
+                    Select which days you attend patients at {selectedClinic ? selectedClinic.clinicName : 'this facility'}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPresetDays('all')}
+                    className="px-2.5 py-1 rounded-lg bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[10px] font-semibold text-[#1d1d1f] transition-colors cursor-pointer"
+                  >
+                    Mon – Sun
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPresetDays('mon-sat')}
+                    className="px-2.5 py-1 rounded-lg bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[10px] font-semibold text-[#1d1d1f] transition-colors cursor-pointer"
+                  >
+                    Mon – Sat
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPresetDays('weekdays')}
+                    className="px-2.5 py-1 rounded-lg bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[10px] font-semibold text-[#1d1d1f] transition-colors cursor-pointer"
+                  >
+                    Mon – Fri
+                  </button>
+                </div>
+              </div>
+
+              {/* Day Toggle Buttons */}
+              <div className="grid grid-cols-7 gap-1.5 sm:gap-2 pt-1">
+                {DAYS_OF_WEEK.map((day) => {
+                  const isSelected = workingDays.includes(day);
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => handleToggleDay(day)}
+                      className={`py-2 rounded-xl text-xs font-bold transition-all text-center select-none active:scale-95 cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#0066cc] text-white shadow-xs'
+                          : 'bg-[#f5f5f7] hover:bg-[#e5e5ea] text-[#86868b] border border-[#e5e5ea]'
+                      }`}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-[#86868b] pt-1">
+                <span>
+                  Active: <strong className="text-[#0066cc]">{workingDays.length} day{workingDays.length > 1 ? 's' : ''} / week</strong> ({workingDays.join(', ')})
                 </span>
               </div>
             </div>

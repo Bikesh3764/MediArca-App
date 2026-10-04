@@ -293,7 +293,7 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
                             clinicName: activeSchedule.clinicName,
                             slot,
                             date: selectedDate,
-                            consultationFee: activeSchedule.consultationFee,
+                            consultationFee: activeSchedule.consultationFee ?? doctor.consultationFee ?? 500,
                           })
                         }
                       >

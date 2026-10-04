@@ -70,8 +70,17 @@ const DoctorDeskHome: React.FC<DoctorDeskHomeProps> = ({ onSelectAppointment }) 
     try {
       const today = new Date().toISOString().split('T')[0];
       const res = await api.getDoctorQueue(today);
-      if (res.success && Array.isArray(res.data)) {
-        setQueue(res.data);
+      if (res.success && res.data) {
+        if (Array.isArray(res.data)) {
+          setQueue(res.data);
+        } else if (Array.isArray((res.data as any).allAppointments)) {
+          setQueue((res.data as any).allAppointments);
+        } else if (Array.isArray((res.data as any).waitingQueue)) {
+          const w = (res.data as any).waitingQueue || [];
+          const a = (res.data as any).activeInConsultation;
+          const c = (res.data as any).completedQueue || [];
+          setQueue([...(a ? [a] : []), ...w, ...c]);
+        }
       }
     } catch (e) {
       console.error(e);

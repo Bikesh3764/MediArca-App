@@ -72,8 +72,17 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
         api.getDoctorAffiliations(),
       ]);
 
-      if (queueRes.success && Array.isArray(queueRes.data)) {
-        setQueue(queueRes.data);
+      if (queueRes.success && queueRes.data) {
+        if (Array.isArray(queueRes.data)) {
+          setQueue(queueRes.data);
+        } else if (Array.isArray((queueRes.data as any).allAppointments)) {
+          setQueue((queueRes.data as any).allAppointments);
+        } else if (Array.isArray((queueRes.data as any).waitingQueue)) {
+          const w = (queueRes.data as any).waitingQueue || [];
+          const a = (queueRes.data as any).activeInConsultation;
+          const c = (queueRes.data as any).completedQueue || [];
+          setQueue([...(a ? [a] : []), ...w, ...c]);
+        }
       }
       if (affRes.success && affRes.data) {
         setAffiliations(affRes.data);

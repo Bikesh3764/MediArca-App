@@ -77,6 +77,7 @@ export interface DoctorSlot {
   endTime: string;   // "11:00"
   maxPatients: number;
   avgConsultationMinutes?: number;
+  days?: string[];
 }
 
 export interface SlotStatusResult {
@@ -312,6 +313,8 @@ export interface DoctorAffiliationClinic {
   bookingCount?: number;
   revenue?: number;
   consultationFee?: number;
+  workingDays?: string[];
+  daysOfWeek?: number[];
   slots?: DoctorSlot[];
   status: string;
   requestedBy?: string;
@@ -323,6 +326,7 @@ export interface DoctorAffiliationsData {
   clinics: DoctorAffiliationClinic[];
   incomingRequests?: DoctorAffiliationClinic[];
   outgoingRequests?: DoctorAffiliationClinic[];
+  rejectedRequests?: DoctorAffiliationClinic[];
   receptionists: Array<{
     affiliationId: string;
     receptionistId: string;

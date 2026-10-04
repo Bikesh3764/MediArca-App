@@ -20,6 +20,7 @@ import {
   X,
   Clock,
   Clock3,
+  Calendar,
   MapPin,
   Phone,
   Search,
@@ -210,14 +211,43 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
     }
   };
 
-  const clinics = data?.clinics || [];
+  const rawClinics = data?.clinics || [];
   const incomingRequests = data?.incomingRequests || [];
-  const outgoingRequests = data?.outgoingRequests || [];
+  const rawOutgoingRequests = data?.outgoingRequests || [];
   const receptionists = data?.receptionists || [];
 
+  // Filter approved active clinics
+  const approvedClinics = useMemo(() => {
+    return rawClinics.filter((c) => c.status === 'ACCEPTED' || c.status === 'APPROVED' || !c.status);
+  }, [rawClinics]);
+
+  // Filter pending outgoing requests
+  const pendingClinics = useMemo(() => {
+    return rawOutgoingRequests.filter((c) => c.status === 'PENDING' || !c.status);
+  }, [rawOutgoingRequests]);
+
+  // Consolidate rejected affiliations
+  const rejectedClinics = useMemo(() => {
+    const map = new Map<string, DoctorAffiliationClinic>();
+    if (data?.rejectedRequests && Array.isArray(data.rejectedRequests)) {
+      data.rejectedRequests.forEach((c) => map.set(c.clinicId, c));
+    }
+    rawClinics.forEach((c) => {
+      if (c.status === 'REJECTED' || c.status === 'DECLINED') {
+        map.set(c.clinicId, c);
+      }
+    });
+    rawOutgoingRequests.forEach((c) => {
+      if (c.status === 'REJECTED' || c.status === 'DECLINED') {
+        map.set(c.clinicId, c);
+      }
+    });
+    return Array.from(map.values());
+  }, [data, rawClinics, rawOutgoingRequests]);
+
   const totalRevenue = useMemo(() => {
-    return clinics.reduce((sum, c) => sum + (c.revenue || 0), 0);
-  }, [clinics]);
+    return approvedClinics.reduce((sum, c) => sum + (c.revenue || 0), 0);
+  }, [approvedClinics]);
 
   // Filter public clinics for search
   const filteredPublicClinics = useMemo(() => {
@@ -233,14 +263,18 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
   }, [publicClinics, clinicSearchQuery]);
 
   // Sets for quick status lookup
-  const affiliatedClinicIds = useMemo(() => new Set(clinics.map((c) => c.clinicId)), [clinics]);
+  const affiliatedClinicIds = useMemo(() => new Set(approvedClinics.map((c) => c.clinicId)), [approvedClinics]);
   const outgoingClinicIds = useMemo(
-    () => new Set(outgoingRequests.map((c) => c.clinicId)),
-    [outgoingRequests]
+    () => new Set(pendingClinics.map((c) => c.clinicId)),
+    [pendingClinics]
   );
   const incomingClinicIds = useMemo(
     () => new Set(incomingRequests.map((c) => c.clinicId)),
     [incomingRequests]
+  );
+  const rejectedClinicIds = useMemo(
+    () => new Set(rejectedClinics.map((c) => c.clinicId)),
+    [rejectedClinics]
   );
 
   return (
@@ -307,7 +341,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
               <span>Clinics</span>
             </div>
             <div className="text-xl font-bold text-[#1d1d1f] mt-1 tracking-tight">
-              {clinics.length}
+              {approvedClinics.length}
             </div>
             <div className="text-[10px] text-[#86868b] mt-0.5">Active facilities</div>
           </div>
@@ -402,19 +436,19 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
         )}
 
         {/* Pending Outgoing Clinic Approvals */}
-        {outgoingRequests.length > 0 && (
+        {pendingClinics.length > 0 && (
           <div className="bg-white rounded-2xl border border-amber-200 p-4 shadow-xs space-y-3">
             <div className="flex items-center gap-2">
               <Clock3 className="w-4 h-4 text-amber-600" />
               <h3 className="text-xs font-bold text-amber-900 uppercase tracking-wider">
-                Pending Clinic Approvals ({outgoingRequests.length})
+                Pending Clinic Approvals ({pendingClinics.length})
               </h3>
             </div>
 
             <div className="space-y-2">
-              {outgoingRequests.map((req) => (
+              {pendingClinics.map((req) => (
                 <div
-                  key={req.affiliationId}
+                  key={req.affiliationId || req.clinicId}
                   className="p-3 rounded-xl border border-amber-200/80 bg-amber-50/50 flex items-center justify-between text-xs"
                 >
                   <div>
@@ -430,6 +464,62 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
           </div>
         )}
 
+        {/* Rejected / Declined Affiliations */}
+        {rejectedClinics.length > 0 && (
+          <div className="bg-white rounded-2xl border border-rose-200 p-4 shadow-xs space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+                <X className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-rose-900 uppercase tracking-wider">
+                  Declined / Rejected Affiliations ({rejectedClinics.length})
+                </h3>
+                <p className="text-[11px] text-[#86868b]">
+                  Facilities that declined or ended your practice affiliation
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              {rejectedClinics.map((req) => (
+                <div
+                  key={req.affiliationId || req.clinicId}
+                  className="p-3.5 rounded-xl border border-rose-200/80 bg-rose-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-bold text-[#1d1d1f] truncate">{req.clinicName}</h4>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">
+                        Declined
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#86868b] mt-0.5 truncate">
+                      {req.address}{req.city ? `, ${req.city}` : ''}
+                    </p>
+                    {req.phone && (
+                      <p className="text-[10px] text-[#86868b]">Phone: {req.phone}</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <AppleButton
+                      size="sm"
+                      variant="primary"
+                      disabled={affiliatingId === req.clinicId}
+                      onClick={() => handleAffiliateClinic(req.clinicId)}
+                      className="text-xs py-1.5 px-3 flex items-center gap-1 bg-[#0066cc]"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${affiliatingId === req.clinicId ? 'animate-spin' : ''}`} />
+                      <span>Re-apply</span>
+                    </AppleButton>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* SECTION 1: AFFILIATED CLINICS */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -437,7 +527,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
               <Building2 className="w-4 h-4 text-[#0066cc]" />
               <h2 className="font-bold text-sm text-[#1d1d1f]">Affiliated Clinics & Hospitals</h2>
               <span className="text-xs font-semibold px-2 py-0.2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f]">
-                {clinics.length}
+                {approvedClinics.length}
               </span>
             </div>
 
@@ -456,7 +546,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
             <div className="p-8 text-center text-xs text-[#86868b] bg-white rounded-2xl border border-[#e5e5ea]">
               Loading affiliated clinics...
             </div>
-          ) : clinics.length === 0 ? (
+          ) : approvedClinics.length === 0 ? (
             <div className="bg-white rounded-2xl p-6 text-center border border-dashed border-[#e5e5ea] space-y-3">
               <div className="w-12 h-12 rounded-2xl bg-[#0066cc]/8 text-[#0066cc] flex items-center justify-center mx-auto">
                 <Building2 className="w-6 h-6" />
@@ -479,7 +569,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
             </div>
           ) : (
             <div className="space-y-3">
-              {clinics.map((clinic) => {
+              {approvedClinics.map((clinic) => {
                 const shiftCount = clinic.slots?.length || 0;
                 const shiftsSummary =
                   clinic.slots && clinic.slots.length > 0
@@ -545,15 +635,28 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                       </div>
                     </div>
 
-                    {/* Shifts status bar */}
-                    <div className="flex items-center justify-between text-xs px-1 text-[#86868b]">
-                      <span className="flex items-center gap-1.5 font-medium">
-                        <Clock className="w-3.5 h-3.5 text-[#0066cc]" />
-                        <span>Practice Shifts:</span>
-                      </span>
-                      <span className="font-semibold text-[#1d1d1f] truncate max-w-[200px]">
-                        {shiftsSummary}
-                      </span>
+                    {/* Schedule and Working Days status bar */}
+                    <div className="space-y-1.5 text-xs px-1 text-[#86868b]">
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <Calendar className="w-3.5 h-3.5 text-[#0066cc]" />
+                          <span>Working Days:</span>
+                        </span>
+                        <span className="font-semibold text-[#1d1d1f] truncate max-w-[200px]">
+                          {clinic.workingDays && clinic.workingDays.length > 0
+                            ? clinic.workingDays.join(', ')
+                            : 'Mon – Sat'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <Clock className="w-3.5 h-3.5 text-[#0066cc]" />
+                          <span>Practice Shifts:</span>
+                        </span>
+                        <span className="font-semibold text-[#1d1d1f] truncate max-w-[200px]">
+                          {shiftsSummary}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Action buttons */}
@@ -734,6 +837,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                       const isAlreadyAffiliated = affiliatedClinicIds.has(c.id);
                       const isPendingOutgoing = outgoingClinicIds.has(c.id);
                       const isIncoming = incomingClinicIds.has(c.id);
+                      const isRejected = rejectedClinicIds.has(c.id);
 
                       return (
                         <div
@@ -781,6 +885,17 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                                 className="text-xs py-1 px-3"
                               >
                                 Accept
+                              </AppleButton>
+                            ) : isRejected ? (
+                              <AppleButton
+                                size="sm"
+                                variant="secondary"
+                                disabled={affiliatingId === c.id}
+                                onClick={() => handleAffiliateClinic(c.id)}
+                                className="text-xs py-1.5 px-3 flex items-center gap-1 text-rose-700 border-rose-200 hover:bg-rose-50"
+                              >
+                                <RefreshCw className={`w-3 h-3 ${affiliatingId === c.id ? 'animate-spin' : ''}`} />
+                                <span>Re-apply</span>
                               </AppleButton>
                             ) : (
                               <AppleButton
