@@ -36,7 +36,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onOpenDoctorConsole,
   onOpenRoleSwitcher,
 }) => {
-  const { user, logout, refreshUser } = useAuth();
+  const { user, login, logout, refreshUser } = useAuth();
+  const [demoLoading, setDemoLoading] = useState(false);
 
   // Personal Profile Fields
   const [dateOfBirth, setDateOfBirth] = useState('');
@@ -266,26 +267,35 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
             {/* Switch Workspace 1-Tap Trigger */}
             {onOpenRoleSwitcher && (
-              <AppleCard
-                interactive
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={onOpenRoleSwitcher}
-                className="flex items-center justify-between border-[#e5e5ea]"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpenRoleSwitcher(); }}
+                className="w-full p-4 rounded-2xl bg-white border border-[#e5e5ea] hover:border-[#0066cc]/40 active:scale-[0.98] transition-all flex items-center justify-between text-left shadow-xs cursor-pointer group"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5" />
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-11 h-11 rounded-2xl bg-[#0066cc]/10 text-[#0066cc] border border-[#0066cc]/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <Sparkles className="w-5 h-5 text-[#0066cc]" />
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-[#1d1d1f]">
-                      Switch Workspace Portal
-                    </h4>
-                    <p className="text-xs text-[#86868b]">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-[15px] font-bold text-[#1d1d1f] tracking-tight group-hover:text-[#0066cc] transition-colors">
+                        Switch Workspace
+                      </h4>
+                      <span className="text-[10px] font-semibold text-[#0066cc] bg-[#0066cc]/10 px-2 py-0.5 rounded-full border border-[#0066cc]/20">
+                        4 Roles
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#86868b] mt-0.5 truncate">
                       Patient • Doctor • Clinic Partner • Receptionist
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-[#86868b]" />
-              </AppleCard>
+                <div className="w-7 h-7 rounded-full bg-[#f5f5f7] group-hover:bg-[#0066cc]/10 group-hover:text-[#0066cc] flex items-center justify-center text-[#86868b] shrink-0 transition-colors">
+                  <ChevronRight className="w-4 h-4" />
+                </div>
+              </div>
             )}
 
             {/* Company & Support Information */}
@@ -343,30 +353,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </button>
             </AppleCard>
 
-            {/* Workspace Switcher */}
-            {onOpenRoleSwitcher && (
-              <AppleCard
-                interactive
-                onClick={onOpenRoleSwitcher}
-                className="flex items-center justify-between border-[#e5e5ea] text-left cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-[#1d1d1f]">
-                      Switch Workspace Portal
-                    </h4>
-                    <p className="text-xs text-[#86868b]">
-                      Patient • Doctor • Clinic Partner • Receptionist
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-[#86868b]" />
-              </AppleCard>
-            )}
-
             {/* Sign Out */}
             <div className="pt-1">
               <AppleButton
@@ -401,26 +387,104 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               Sign In
             </AppleButton>
 
+            {/* 1-Click Instant Demo Access */}
+            <div className="pt-2 text-left">
+              <div className="flex items-center justify-between text-[11px] text-[#86868b] mb-2 px-0.5">
+                <span className="flex items-center gap-1.5 font-bold text-[#1d1d1f]">
+                  <Sparkles className="w-3.5 h-3.5 text-[#0066cc]" />
+                  Instant Demo Access
+                </span>
+                <span className="text-[10px] text-[#86868b]">1-Tap Login</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  disabled={demoLoading}
+                  onClick={async () => {
+                    setDemoLoading(true);
+                    await login('john.doe@gmail.com', 'patient123');
+                    setDemoLoading(false);
+                  }}
+                  className="p-3 rounded-2xl border border-[#e5e5ea] bg-white hover:bg-[#f5f5f7] active:scale-[0.98] transition-all text-left cursor-pointer group shadow-2xs disabled:opacity-60"
+                >
+                  <div className="text-xs font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                    Demo Patient
+                  </div>
+                  <div className="text-[10px] text-[#86868b] truncate mt-0.5">john.doe@gmail.com</div>
+                </button>
+                <button
+                  type="button"
+                  disabled={demoLoading}
+                  onClick={async () => {
+                    setDemoLoading(true);
+                    await login('dr.sarah@mediarca.com', 'doctor123');
+                    setDemoLoading(false);
+                  }}
+                  className="p-3 rounded-2xl border border-[#e5e5ea] bg-white hover:bg-[#f5f5f7] active:scale-[0.98] transition-all text-left cursor-pointer group shadow-2xs disabled:opacity-60"
+                >
+                  <div className="text-xs font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                    Demo Doctor
+                  </div>
+                  <div className="text-[10px] text-[#86868b] truncate mt-0.5">dr.sarah@mediarca.com</div>
+                </button>
+                <button
+                  type="button"
+                  disabled={demoLoading}
+                  onClick={async () => {
+                    setDemoLoading(true);
+                    await login('clinic@mediarca.com', 'clinic123');
+                    setDemoLoading(false);
+                  }}
+                  className="p-3 rounded-2xl border border-[#e5e5ea] bg-white hover:bg-[#f5f5f7] active:scale-[0.98] transition-all text-left cursor-pointer group shadow-2xs disabled:opacity-60"
+                >
+                  <div className="text-xs font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                    Demo Clinic
+                  </div>
+                  <div className="text-[10px] text-[#86868b] truncate mt-0.5">clinic@mediarca.com</div>
+                </button>
+                <button
+                  type="button"
+                  disabled={demoLoading}
+                  onClick={async () => {
+                    setDemoLoading(true);
+                    await login('receptionist@mediarca.com', 'receptionist123');
+                    setDemoLoading(false);
+                  }}
+                  className="p-3 rounded-2xl border border-[#e5e5ea] bg-white hover:bg-[#f5f5f7] active:scale-[0.98] transition-all text-left cursor-pointer group shadow-2xs disabled:opacity-60"
+                >
+                  <div className="text-xs font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                    Demo Receptionist
+                  </div>
+                  <div className="text-[10px] text-[#86868b] truncate mt-0.5">receptionist@mediarca.com</div>
+                </button>
+              </div>
+            </div>
+
             {onOpenRoleSwitcher && (
-              <AppleCard
-                interactive
-                onClick={onOpenRoleSwitcher}
-                className="flex items-center justify-between border-[#e5e5ea] text-left mt-2"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5" />
+              <AppleCard className="p-0 overflow-hidden border-[#e5e5ea] text-left mt-2 shadow-2xs">
+                <button
+                  type="button"
+                  onClick={onOpenRoleSwitcher}
+                  className="w-full p-4 flex items-center justify-between hover:bg-[#f5f5f7] active:bg-[#e5e5ea] transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[#1d1d1f]">Switch Workspace</span>
+                        <span className="text-[10px] font-semibold text-[#0066cc] bg-[#0066cc]/10 px-1.5 py-0.5 rounded-full">
+                          4 Roles
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#86868b] mt-0.5">
+                        Doctor Console, Clinic Operations, Reception Desk
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-[#1d1d1f]">
-                      Switch Workspace Portal
-                    </h4>
-                    <p className="text-xs text-[#86868b]">
-                      Patient • Doctor • Clinic Partner • Receptionist
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-[#86868b]" />
+                  <ChevronRight className="w-3.5 h-3.5 text-[#86868b]" />
+                </button>
               </AppleCard>
             )}
           </div>

@@ -82,7 +82,7 @@ export const CompanyInfoModal: React.FC<CompanyInfoModalProps> = ({
   const faqs = [
     {
       q: 'How does MediArca eliminate clinic waiting room queues?',
-      a: 'MediArca synchronizes patient queues in real-time. Patients receive an estimated consultation slot based on historical practitioner pace. When you arrive, scan the front-desk QR standee to confirm your presence without standing in line.',
+      a: 'MediArca synchronizes patient queues in real-time. Patients receive an estimated consultation slot based on historical practitioner pace. When you arrive, scan the clinic QR code to confirm your presence without standing in line.',
     },
     {
       q: 'Can I book walk-in appointments if I do not have a smartphone?',

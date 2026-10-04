@@ -194,7 +194,7 @@ const DoctorDeskHome: React.FC<DoctorDeskHomeProps> = ({ onSelectAppointment }) 
 };
 
 const MainApp: React.FC = () => {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
 
   // Role Gate & Navigation State
   const [activeRole, setActiveRole] = useState<AppRole | null>(null);
@@ -232,22 +232,7 @@ const MainApp: React.FC = () => {
     date: '',
   });
 
-  // On initial launch: retrieve saved role or present "Who are you?" gateway
-  useEffect(() => {
-    const initRole = async () => {
-      const stored = await getStoredSelectedRole();
-      if (stored) {
-        setActiveRole(stored);
-      } else if (user?.role && ['PATIENT', 'DOCTOR', 'CLINIC', 'RECEPTIONIST'].includes(user.role)) {
-        const uRole = user.role as AppRole;
-        setActiveRole(uRole);
-        await saveSelectedRole(uRole);
-      }
-      setRoleLoaded(true);
-    };
-    initRole();
-  }, [user]);
-
+  // Role switching helper
   const handleRoleSelect = async (role: AppRole) => {
     setActiveRole(role);
     await saveSelectedRole(role);
@@ -266,6 +251,32 @@ const MainApp: React.FC = () => {
       setReceptionistTab('walkin');
     }
   };
+
+  // On initial launch: retrieve saved role or present "Who are you?" gateway
+  useEffect(() => {
+    const initRole = async () => {
+      const stored = await getStoredSelectedRole();
+      if (user?.role && ['PATIENT', 'DOCTOR', 'CLINIC', 'RECEPTIONIST'].includes(user.role)) {
+        const uRole = user.role as AppRole;
+        setActiveRole(uRole);
+        await saveSelectedRole(uRole);
+      } else if (stored) {
+        setActiveRole(stored);
+      }
+      setRoleLoaded(true);
+    };
+    initRole();
+  }, []);
+
+  // Whenever user state changes (e.g. login / demo login), synchronize active workspace
+  useEffect(() => {
+    if (roleLoaded && user?.role && ['PATIENT', 'DOCTOR', 'CLINIC', 'RECEPTIONIST'].includes(user.role)) {
+      const uRole = user.role as AppRole;
+      if (activeRole !== uRole) {
+        handleRoleSelect(uRole);
+      }
+    }
+  }, [user, roleLoaded]);
 
   const handleQuickBook = (doctor: DoctorProfile) => {
     if (!user) {
@@ -347,6 +358,10 @@ const MainApp: React.FC = () => {
             currentRole={activeRole}
             isSwitching={!!activeRole && roleGatewayOpen}
             onCancel={activeRole ? () => setRoleGatewayOpen(false) : undefined}
+            onDemoLogin={async (email, pass, role) => {
+              await login(email, pass);
+              handleRoleSelect(role);
+            }}
           />
         </div>
       </div>
@@ -443,7 +458,7 @@ const MainApp: React.FC = () => {
                 }`}
               >
                 <QrCode className="w-5 h-5 mb-0.5" />
-                <span className="text-[10px] font-semibold tracking-tight">Standee</span>
+                <span className="text-[10px] font-semibold tracking-tight">Clinic QR</span>
               </button>
 
               <button

@@ -333,22 +333,25 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
           {onOpenRoleSwitcher && (
             <div
               onClick={onOpenRoleSwitcher}
-              className="bg-white p-3.5 rounded-2xl border border-[#e5e5ea] flex items-center justify-between cursor-pointer active:scale-98 transition-all"
+              className="bg-white p-4 rounded-2xl border border-[#e5e5ea] flex items-center justify-between cursor-pointer active:scale-98 transition-all shadow-2xs hover:bg-[#f5f5f7]"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-[#1d1d1f]">
-                    Switch Workspace Portal
-                  </h4>
-                  <p className="text-xs text-[#86868b]">
-                    Patient • Doctor • Clinic Partner • Receptionist
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-[#1d1d1f]">Switch Workspace</span>
+                    <span className="text-[10px] font-semibold text-[#0066cc] bg-[#0066cc]/10 px-1.5 py-0.5 rounded-full">
+                      4 Roles
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#86868b] mt-0.5">
+                    Patient App, Clinic Operations, Reception Desk
                   </p>
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-[#86868b]" />
+              <ChevronRight className="w-3.5 h-3.5 text-[#86868b]" />
             </div>
           )}
 

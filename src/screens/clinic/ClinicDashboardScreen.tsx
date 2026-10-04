@@ -384,7 +384,7 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
                 : 'text-[#86868b] hover:text-[#1d1d1f]'
             }`}
           >
-            Standee
+            Clinic QR
           </button>
           <button
             type="button"

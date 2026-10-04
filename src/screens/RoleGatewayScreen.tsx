@@ -51,7 +51,7 @@ export const APP_ROLES: RoleOption[] = [
     id: 'CLINIC',
     title: 'Clinic Partner',
     badge: 'Operations Desk',
-    subtitle: 'Doctor roster, reception desks, standee QR',
+    subtitle: 'Doctor roster, reception desks, clinic QR code',
     icon: Building2,
     accentColor: '#0d9488',
     badgeBg: 'bg-teal-50 text-teal-700 border-teal-200/60',
@@ -99,6 +99,7 @@ interface RoleGatewayScreenProps {
   onSelectRole: (role: AppRole) => void;
   onCancel?: () => void;
   isSwitching?: boolean;
+  onDemoLogin?: (email: string, pass: string, role: AppRole) => Promise<void>;
 }
 
 export const RoleGatewayScreen: React.FC<RoleGatewayScreenProps> = ({
@@ -106,6 +107,7 @@ export const RoleGatewayScreen: React.FC<RoleGatewayScreenProps> = ({
   onSelectRole,
   onCancel,
   isSwitching = false,
+  onDemoLogin,
 }) => {
   const handleSelect = async (role: AppRole) => {
     await saveSelectedRole(role);
@@ -193,6 +195,61 @@ export const RoleGatewayScreen: React.FC<RoleGatewayScreenProps> = ({
             );
           })}
         </div>
+
+        {/* 1-Click Instant Demo Logins */}
+        {onDemoLogin && (
+          <div className="mt-5 pt-4 border-t border-[#e5e5ea]">
+            <div className="flex items-center justify-between text-[11px] text-[#86868b] mb-2 px-1">
+              <span className="flex items-center gap-1.5 font-bold text-[#1d1d1f]">
+                <Sparkles className="w-3.5 h-3.5 text-[#0066cc]" />
+                Instant Demo Access
+              </span>
+              <span className="text-[10px] text-[#86868b]">1-Tap Login</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => onDemoLogin('john.doe@gmail.com', 'patient123', 'PATIENT')}
+                className="p-3 rounded-2xl border border-[#e5e5ea] bg-white hover:bg-[#f5f5f7] active:scale-[0.98] transition-all text-left cursor-pointer group shadow-2xs"
+              >
+                <div className="text-xs font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                  Demo Patient
+                </div>
+                <div className="text-[10px] text-[#86868b] truncate mt-0.5">john.doe@gmail.com</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => onDemoLogin('dr.sarah@mediarca.com', 'doctor123', 'DOCTOR')}
+                className="p-3 rounded-2xl border border-[#e5e5ea] bg-white hover:bg-[#f5f5f7] active:scale-[0.98] transition-all text-left cursor-pointer group shadow-2xs"
+              >
+                <div className="text-xs font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                  Demo Doctor
+                </div>
+                <div className="text-[10px] text-[#86868b] truncate mt-0.5">dr.sarah@mediarca.com</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => onDemoLogin('clinic@mediarca.com', 'clinic123', 'CLINIC')}
+                className="p-3 rounded-2xl border border-[#e5e5ea] bg-white hover:bg-[#f5f5f7] active:scale-[0.98] transition-all text-left cursor-pointer group shadow-2xs"
+              >
+                <div className="text-xs font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                  Demo Clinic
+                </div>
+                <div className="text-[10px] text-[#86868b] truncate mt-0.5">clinic@mediarca.com</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => onDemoLogin('receptionist@mediarca.com', 'receptionist123', 'RECEPTIONIST')}
+                className="p-3 rounded-2xl border border-[#e5e5ea] bg-white hover:bg-[#f5f5f7] active:scale-[0.98] transition-all text-left cursor-pointer group shadow-2xs"
+              >
+                <div className="text-xs font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                  Demo Receptionist
+                </div>
+                <div className="text-[10px] text-[#86868b] truncate mt-0.5">receptionist@mediarca.com</div>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Clean Apple HIG Footer */}

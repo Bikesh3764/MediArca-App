@@ -20,7 +20,7 @@ export const RoleSwitcherModal: React.FC<RoleSwitcherModalProps> = ({
   currentRole,
   onSelectRole,
 }) => {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
 
   if (!isOpen) return null;
 
@@ -114,7 +114,72 @@ export const RoleSwitcherModal: React.FC<RoleSwitcherModalProps> = ({
           })}
         </div>
 
-        <p className="text-[11px] text-center text-[#86868b] mt-4">
+        {/* Instant Demo Accounts Quick Switch */}
+        <div className="mt-4 pt-3.5 border-t border-[#f0f0f2]">
+          <div className="flex items-center justify-between text-[11px] text-[#86868b] mb-2 px-0.5">
+            <span className="flex items-center gap-1.5 font-bold text-[#1d1d1f]">
+              <Sparkles className="w-3.5 h-3.5 text-[#0066cc]" />
+              Instant Demo Logins
+            </span>
+            <span className="text-[10px] text-[#86868b]">1-Tap Switch</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={async () => {
+                await login('john.doe@gmail.com', 'patient123');
+                handleSwitch('PATIENT');
+              }}
+              className="p-2.5 rounded-xl border border-[#e5e5ea] bg-[#f5f5f7] hover:bg-[#ebebee] active:scale-[0.98] transition-all text-left cursor-pointer group"
+            >
+              <div className="text-[11px] font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                Demo Patient
+              </div>
+              <div className="text-[10px] text-[#86868b] truncate">john.doe@gmail.com</div>
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                await login('dr.sarah@mediarca.com', 'doctor123');
+                handleSwitch('DOCTOR');
+              }}
+              className="p-2.5 rounded-xl border border-[#e5e5ea] bg-[#f5f5f7] hover:bg-[#ebebee] active:scale-[0.98] transition-all text-left cursor-pointer group"
+            >
+              <div className="text-[11px] font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                Demo Doctor
+              </div>
+              <div className="text-[10px] text-[#86868b] truncate">dr.sarah@mediarca.com</div>
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                await login('clinic@mediarca.com', 'clinic123');
+                handleSwitch('CLINIC');
+              }}
+              className="p-2.5 rounded-xl border border-[#e5e5ea] bg-[#f5f5f7] hover:bg-[#ebebee] active:scale-[0.98] transition-all text-left cursor-pointer group"
+            >
+              <div className="text-[11px] font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                Demo Clinic
+              </div>
+              <div className="text-[10px] text-[#86868b] truncate">clinic@mediarca.com</div>
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                await login('receptionist@mediarca.com', 'receptionist123');
+                handleSwitch('RECEPTIONIST');
+              }}
+              className="p-2.5 rounded-xl border border-[#e5e5ea] bg-[#f5f5f7] hover:bg-[#ebebee] active:scale-[0.98] transition-all text-left cursor-pointer group"
+            >
+              <div className="text-[11px] font-bold text-[#1d1d1f] group-hover:text-[#0066cc] truncate">
+                Demo Receptionist
+              </div>
+              <div className="text-[10px] text-[#86868b] truncate">receptionist@mediarca.com</div>
+            </button>
+          </div>
+        </div>
+
+        <p className="text-[11px] text-center text-[#86868b] mt-3">
           Your selected workspace is remembered across app launches.
         </p>
       </div>

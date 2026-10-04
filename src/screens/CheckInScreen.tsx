@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { CameraQrScannerModal } from '../components/common/CameraQrScannerModal';
 import { AppleButton } from '../components/ui/AppleButton';
 import { AppleCard } from '../components/ui/AppleCard';
-import { AppleInput } from '../components/ui/AppleInput';
 import {
   QrCode,
   MapPin,
@@ -12,6 +11,7 @@ import {
   AlertCircle,
   Clock,
   Sparkles,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface CheckInScreenProps {
@@ -23,8 +23,6 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [scannerOpen, setScannerOpen] = useState(false);
-  const [manualCode, setManualCode] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{
     type: 'success' | 'error';
     text: string;
@@ -55,7 +53,6 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
 
   const handleProcessCheckIn = async (code: string, appointmentId?: string) => {
     setStatusMessage(null);
-    setSubmitting(true);
     const targetAppointmentId = appointmentId || appointments[0]?.id;
 
     try {
@@ -65,12 +62,11 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
           type: 'success',
           text: 'Check-in confirmed! Doctor cabin notified of your arrival.',
         });
-        setManualCode('');
         fetchActiveAppointments();
       } else {
         setStatusMessage({
           type: 'error',
-          text: res.message || 'Check-in failed. Please re-check the clinic standee code.',
+          text: res.message || 'Check-in failed. Please try scanning the clinic QR code again.',
         });
       }
     } catch (err: any) {
@@ -78,8 +74,6 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
         type: 'error',
         text: err.message || 'Error executing check-in.',
       });
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -111,60 +105,60 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
           </div>
         )}
 
-        {/* Scan Standee Hero Card */}
-        <AppleCard className="text-center p-5 sm:p-6 space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center mx-auto">
-            <QrCode className="w-7 h-7" />
+        {/* Scan QR Code Hero Card */}
+        <AppleCard className="text-center p-6 sm:p-7 space-y-4 border-[#e5e5ea] shadow-xs">
+          <div className="w-16 h-16 rounded-3xl bg-[#0066cc]/10 border border-[#0066cc]/20 text-[#0066cc] flex items-center justify-center mx-auto shadow-inner">
+            <QrCode className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-[#1d1d1f]">
-              Scan Reception QR
+            <h3 className="text-lg font-bold text-[#1d1d1f] tracking-tight">
+              Scan QR Code
             </h3>
-            <p className="text-xs text-[#86868b] mt-1 max-w-xs mx-auto">
-              Scan the desk QR standee to confirm your arrival.
+            <p className="text-xs text-[#86868b] mt-1 max-w-xs mx-auto leading-relaxed">
+              Scan the clinic QR code to confirm your arrival.
             </p>
           </div>
 
           <AppleButton
             variant="primary"
             size="lg"
-            className="w-full"
+            className="w-full shadow-sm"
             icon={<QrCode className="w-4 h-4" />}
             onClick={() => setScannerOpen(true)}
           >
-            Scan Standee QR
+            Scan QR Code
           </AppleButton>
         </AppleCard>
 
-        {/* Manual Code Input Card */}
-        <AppleCard className="space-y-3">
-          <h4 className="text-xs font-semibold text-[#86868b] uppercase tracking-wider">
-            Or Enter Clinic Code
-          </h4>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (manualCode.trim()) handleProcessCheckIn(manualCode.trim());
-            }}
-            className="space-y-3"
-          >
-            <AppleInput
-              placeholder="e.g. CLINIC01"
-              value={manualCode}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setManualCode(e.target.value)}
-            />
-            <AppleButton
-              variant="secondary"
-              size="md"
-              className="w-full"
-              type="submit"
-              loading={submitting}
-              disabled={!manualCode.trim()}
-            >
-              Verify Code
-            </AppleButton>
-          </form>
-        </AppleCard>
+        {/* How It Works Guidance Card */}
+        {(!user || appointments.length === 0) && (
+          <AppleCard className="p-4 space-y-3 bg-[#f5f5f7]/70 border-[#e5e5ea]">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#1d1d1f]">
+              <ShieldCheck className="w-4 h-4 text-[#0066cc]" />
+              <span>How Arrival Check-In Works</span>
+            </div>
+            <div className="space-y-2 text-xs text-[#86868b]">
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] text-[11px] font-bold flex items-center justify-center shrink-0">
+                  1
+                </span>
+                <span className="leading-snug">Arrive at your appointment clinic.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] text-[11px] font-bold flex items-center justify-center shrink-0">
+                  2
+                </span>
+                <span className="leading-snug">Tap <strong>Scan QR Code</strong> and point your camera at the clinic QR code.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] text-[11px] font-bold flex items-center justify-center shrink-0">
+                  3
+                </span>
+                <span className="leading-snug">Your live queue token status updates to <strong>Present</strong> and the doctor cabin is notified.</span>
+              </div>
+            </div>
+          </AppleCard>
+        )}
 
         {/* Pending Appointments for Check-in */}
         {user && appointments.length > 0 && (

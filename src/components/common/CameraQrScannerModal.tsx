@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import jsQR from 'jsqr';
-import { X, Camera, Keyboard, AlertCircle } from 'lucide-react';
+import { X, AlertCircle } from 'lucide-react';
 import { AppleButton } from '../ui/AppleButton';
-import { AppleInput } from '../ui/AppleInput';
 
 interface CameraQrScannerModalProps {
   isOpen: boolean;
@@ -16,11 +15,9 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
   isOpen,
   onClose,
   onScanSuccess,
-  title = 'Scan Clinic Standee',
-  subtitle = 'Point camera at the QR standee in the clinic lobby',
+  title = 'Scan QR Code',
+  subtitle = 'Point camera at the clinic QR code to confirm arrival',
 }) => {
-  const [activeTab, setActiveTab] = useState<'camera' | 'manual'>('camera');
-  const [manualCode, setManualCode] = useState('');
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
 
@@ -32,21 +29,16 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
   useEffect(() => {
     if (!isOpen) {
       stopCamera();
-      setManualCode('');
       setCameraError(null);
       return;
     }
 
-    if (activeTab === 'camera') {
-      startCamera();
-    } else {
-      stopCamera();
-    }
+    startCamera();
 
     return () => {
       stopCamera();
     };
-  }, [isOpen, activeTab]);
+  }, [isOpen]);
 
   const startCamera = async () => {
     setCameraError(null);
@@ -54,7 +46,7 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Camera access is not supported on this device');
+        throw new Error('Camera access is not supported on this browser/device');
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -71,7 +63,6 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
       }
     } catch (err: any) {
       setCameraError(err.message || 'Unable to access camera. Please allow camera permissions.');
-      setActiveTab('manual');
     }
   };
 
@@ -107,18 +98,12 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
       if (code && code.data) {
         stopCamera();
         onScanSuccess(code.data.trim());
+        onClose();
         return;
       }
     }
 
     animFrameId.current = requestAnimationFrame(scanFrame);
-  };
-
-  const handleManualSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualCode.trim()) return;
-    stopCamera();
-    onScanSuccess(manualCode.trim());
   };
 
   if (!isOpen) return null;
@@ -140,82 +125,44 @@ export const CameraQrScannerModal: React.FC<CameraQrScannerModalProps> = ({
           </button>
         </div>
 
-        {/* Tab switcher: Camera vs Manual Code */}
-        <div className="flex p-1 bg-[#f5f5f7] mx-4 mt-3 rounded-xl gap-1">
-          <button
-            onClick={() => setActiveTab('camera')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer active:scale-95 ${
-              activeTab === 'camera'
-                ? 'bg-white text-[#1d1d1f]'
-                : 'text-[#86868b]'
-            }`}
-          >
-            <Camera className="w-3.5 h-3.5" /> Camera
-          </button>
-          <button
-            onClick={() => setActiveTab('manual')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer active:scale-95 ${
-              activeTab === 'manual'
-                ? 'bg-white text-[#1d1d1f]'
-                : 'text-[#86868b]'
-            }`}
-          >
-            <Keyboard className="w-3.5 h-3.5" /> Enter Code
-          </button>
-        </div>
-
-        {/* Body */}
+        {/* Camera Viewfinder */}
         <div className="p-4">
-          {activeTab === 'camera' ? (
-            <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center">
-              <video
-                ref={videoRef}
-                className="w-full h-full object-cover"
-                autoPlay
-                muted
-                playsInline
-              />
-              <canvas ref={canvasRef} className="hidden" />
+          <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center">
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              autoPlay
+              muted
+              playsInline
+            />
+            <canvas ref={canvasRef} className="hidden" />
 
-              {/* Viewfinder crosshairs */}
-              <div className="absolute inset-8 border border-white/60 rounded-xl pointer-events-none flex items-center justify-center">
-                <div className="w-full h-0.5 bg-[#0066cc] animate-pulse" />
-              </div>
-
-              {cameraError && (
-                <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-4 text-center">
-                  <AlertCircle className="w-8 h-8 text-amber-400 mb-2" />
-                  <p className="text-xs text-white mb-3">{cameraError}</p>
-                  <AppleButton
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setActiveTab('manual')}
-                  >
-                    Enter Code Instead
-                  </AppleButton>
-                </div>
-              )}
+            {/* Viewfinder crosshairs */}
+            <div className="absolute inset-8 border-2 border-white/70 rounded-2xl pointer-events-none flex items-center justify-center shadow-lg">
+              <div className="w-full h-0.5 bg-[#0066cc] animate-pulse" />
             </div>
-          ) : (
-            <form onSubmit={handleManualSubmit} className="space-y-4 py-2">
-              <AppleInput
-                label="Clinic Check-In Code"
-                placeholder="e.g. CLN-8821 or 6-digit code"
-                value={manualCode}
-                onChange={(e) => setManualCode(e.target.value)}
-                autoFocus
-              />
-              <AppleButton
-                variant="primary"
-                size="md"
-                className="w-full"
-                type="submit"
-                disabled={!manualCode.trim()}
-              >
-                Submit Check-In
-              </AppleButton>
-            </form>
-          )}
+
+            {/* Hint overlay */}
+            <div className="absolute bottom-3 inset-x-3 text-center pointer-events-none">
+              <span className="text-[11px] font-medium text-white/90 bg-black/50 backdrop-blur-xs px-3 py-1 rounded-full border border-white/20">
+                Align QR Code inside frame
+              </span>
+            </div>
+
+            {cameraError && (
+              <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-5 text-center">
+                <AlertCircle className="w-8 h-8 text-amber-400 mb-2" />
+                <p className="text-xs text-white mb-3 leading-relaxed">{cameraError}</p>
+                <AppleButton
+                  size="sm"
+                  variant="primary"
+                  onClick={startCamera}
+                >
+                  Retry Camera
+                </AppleButton>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
