@@ -3,6 +3,8 @@ import { api, DoctorProfile, ClinicProfile, getFileUrl } from '../services/api';
 import { AppleCard } from '../components/ui/AppleCard';
 import { AppleButton } from '../components/ui/AppleButton';
 import { DoctorPresenceBadge } from '../components/ui/DoctorPresenceBadge';
+import clinicLobbyBg from '../assets/clinic-lobby-bg.jpg';
+import doctorHeroAlt from '../assets/doctor-hero-alt.jpg';
 import {
   Search,
   MapPin,
@@ -349,64 +351,72 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       key={doc.id}
                       interactive
                       onClick={() => onSelectDoctor(doc)}
-                      className="space-y-3 group"
+                      className="p-3 sm:p-3.5 group flex gap-3.5 items-stretch"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3 min-w-0">
-                          {/* Doctor Avatar with fixed dimensions */}
-                          <div className="w-[52px] h-[52px] min-w-[52px] min-h-[52px] max-w-[52px] max-h-[52px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
-                            {avatar ? (
-                              <img
-                                src={getFileUrl(avatar)}
-                                alt={docName}
-                                className="w-full h-full object-cover rounded-full"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            ) : (
-                              <User className="w-6 h-6 text-[#86868b]" />
-                            )}
-                          </div>
-
-                          <div className="min-w-0">
-                            <h4 className="text-[15px] font-bold text-[#1d1d1f] leading-snug truncate">
-                              {docName}
-                            </h4>
-                            <p className="text-xs font-semibold text-[#0066cc]">
-                              {doc.specialty}
-                            </p>
-                            <p className="text-[11px] text-[#86868b] mt-0.5 truncate">
-                              {doc.qualifications} • {doc.experienceYears} yrs exp
-                            </p>
-                          </div>
-                        </div>
-
-                        <DoctorPresenceBadge
-                          status={doc.cabinStatus}
-                          steppedOutUntil={doc.steppedOutUntil}
-                          size="sm"
+                      {/* Big Doctor Photo on Left (Flipkart Style) */}
+                      <div className="relative w-24 sm:w-28 h-28 sm:h-32 min-w-[96px] sm:min-w-[112px] rounded-2xl overflow-hidden bg-[#f0f0f2] border border-[#e5e5ea] shrink-0 self-center sm:self-auto flex items-center justify-center">
+                        {avatar ? (
+                          <img
+                            src={getFileUrl(avatar)}
+                            alt={docName}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              const fallback = e.currentTarget.parentElement?.querySelector('.doc-fallback-img');
+                              if (fallback) (fallback as HTMLElement).style.display = 'block';
+                            }}
+                          />
+                        ) : null}
+                        <img
+                          src={doctorHeroAlt}
+                          alt={docName}
+                          className={`doc-fallback-img w-full h-full object-cover ${avatar ? 'hidden' : 'block'}`}
                         />
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-[#f0f0f2]">
+                      {/* Content on Right */}
+                      <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                         <div>
-                          <span className="text-base font-bold text-[#1d1d1f]">
-                            ₹{doc.consultationFee || 500}
-                          </span>
-                          <span className="text-[11px] text-[#86868b] ml-1">Fee</span>
+                          <div className="flex items-start justify-between gap-1.5">
+                            <h4 className="text-[15px] sm:text-base font-bold text-[#1d1d1f] leading-snug truncate">
+                              {docName}
+                            </h4>
+                            <DoctorPresenceBadge
+                              status={doc.cabinStatus}
+                              steppedOutUntil={doc.steppedOutUntil}
+                              size="sm"
+                            />
+                          </div>
+
+                          <p className="text-xs font-semibold text-[#0066cc] mt-0.5 truncate">
+                            {doc.specialty}
+                          </p>
+
+                          <p className="text-[11px] text-[#86868b] mt-0.5 truncate">
+                            {doc.qualifications} • {doc.experienceYears} yrs exp
+                          </p>
                         </div>
 
-                        <AppleButton
-                          variant="primary"
-                          size="sm"
-                          onClick={(e: React.MouseEvent) => {
-                            e.stopPropagation();
-                            onQuickBook(doc);
-                          }}
-                        >
-                          Book Visit
-                        </AppleButton>
+                        {/* Bottom Fee & Book Row */}
+                        <div className="flex items-center justify-between pt-2 mt-2 border-t border-[#f0f0f2]">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-base font-bold text-[#1d1d1f]">
+                              ₹{doc.consultationFee || 500}
+                            </span>
+                            <span className="text-[10px] text-[#86868b]">fee</span>
+                          </div>
+
+                          <AppleButton
+                            variant="primary"
+                            size="sm"
+                            onClick={(e: React.MouseEvent) => {
+                              e.stopPropagation();
+                              onQuickBook(doc);
+                            }}
+                          >
+                            Book Visit
+                          </AppleButton>
+                        </div>
                       </div>
                     </AppleCard>
                   );
@@ -435,47 +445,53 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       key={clinic.id}
                       interactive
                       onClick={() => setSelectedClinic(clinic)}
-                      className="space-y-3 group"
+                      className="p-3 sm:p-3.5 group flex gap-3.5 items-stretch"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3 min-w-0">
-                          {/* Clinic Icon Badge */}
-                          <div className="w-12 h-12 min-w-[48px] min-h-[48px] max-w-[48px] max-h-[48px] rounded-2xl bg-[#0066cc]/10 border border-[#0066cc]/20 flex items-center justify-center shrink-0">
-                            <Building2 className="w-6 h-6 text-[#0066cc]" />
-                          </div>
-
-                          <div className="min-w-0">
-                            <h3 className="text-[15px] font-bold text-[#1d1d1f] leading-snug tracking-tight truncate group-hover:text-[#0066cc] transition-colors">
-                              {name}
-                            </h3>
-                            <p className="text-xs text-[#48484a] flex items-center gap-1.5 mt-0.5 truncate">
-                              <MapPin className="w-3.5 h-3.5 text-[#0066cc] shrink-0" />
-                              <span className="truncate">
-                                {clinic.address}, {clinic.city}
-                              </span>
-                            </p>
-                            {clinic.phone && (
-                              <p className="text-[11px] text-[#86868b] flex items-center gap-1 mt-1">
-                                <Phone className="w-3 h-3 text-[#0066cc]" />
-                                <span>{clinic.phone}</span>
-                              </p>
-                            )}
-                          </div>
+                      {/* Big Clinic Photo on Left (Flipkart Style) */}
+                      <div className="relative w-24 sm:w-28 h-24 sm:h-28 min-w-[96px] sm:min-w-[112px] rounded-2xl overflow-hidden bg-[#f0f0f2] border border-[#e5e5ea] shrink-0 self-center sm:self-auto flex items-center justify-center">
+                        <img
+                          src={clinicLobbyBg}
+                          alt={name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute top-1.5 left-1.5 p-1 rounded-lg bg-black/40 backdrop-blur-md text-white">
+                          <Building2 className="w-3 h-3" />
                         </div>
-
-                        {/* Doctors Count Pill */}
-                        <span className="text-[11px] font-semibold text-[#1d1d1f] bg-[#f5f5f7] px-2.5 py-1 rounded-full border border-[#e5e5ea] shrink-0 whitespace-nowrap">
-                          {docCount === 1 ? '1 Doctor' : `${docCount} Doctors`}
-                        </span>
                       </div>
 
-                      {/* Footer Action */}
-                      <div className="flex items-center justify-between pt-2.5 border-t border-[#f0f0f2]">
-                        <span className="text-xs font-semibold text-[#0066cc] flex items-center gap-1">
-                          View Doctors
-                        </span>
-                        <div className="p-1 rounded-full bg-[#f5f5f7] group-hover:bg-[#0066cc] group-hover:text-white transition-colors">
-                          <ChevronRight className="w-4 h-4" />
+                      {/* Content on Right */}
+                      <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                        <div>
+                          <div className="flex items-start justify-between gap-2">
+                            <h3 className="text-[15px] sm:text-base font-bold text-[#1d1d1f] leading-snug tracking-tight truncate group-hover:text-[#0066cc] transition-colors">
+                              {name}
+                            </h3>
+                            <span className="text-[10px] font-semibold text-[#1d1d1f] bg-[#f5f5f7] px-2 py-0.5 rounded-full border border-[#e5e5ea] shrink-0 whitespace-nowrap">
+                              {docCount === 1 ? '1 Doctor' : `${docCount} Doctors`}
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-[#48484a] flex items-center gap-1.5 mt-1 truncate">
+                            <MapPin className="w-3.5 h-3.5 text-[#0066cc] shrink-0" />
+                            <span className="truncate">{clinic.address}, {clinic.city}</span>
+                          </p>
+
+                          {clinic.phone && (
+                            <p className="text-[11px] text-[#86868b] flex items-center gap-1 mt-1 truncate">
+                              <Phone className="w-3 h-3 text-[#0066cc] shrink-0" />
+                              <span className="truncate">{clinic.phone}</span>
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Footer Action */}
+                        <div className="flex items-center justify-between pt-2 mt-2 border-t border-[#f0f0f2]">
+                          <span className="text-xs font-semibold text-[#0066cc]">
+                            View Doctors
+                          </span>
+                          <div className="p-1 rounded-full bg-[#f5f5f7] group-hover:bg-[#0066cc] group-hover:text-white transition-colors">
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </div>
                         </div>
                       </div>
                     </AppleCard>
@@ -509,85 +525,77 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                     key={doctor.id}
                     interactive
                     onClick={() => onSelectDoctor(doctor)}
-                    className="space-y-3 group"
+                    className="p-3 sm:p-3.5 group flex gap-3.5 items-stretch"
                   >
-                    {/* Doctor Avatar & Identity */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-start gap-3 min-w-0">
-                        {/* Doctor Avatar */}
-                        <div className="w-[52px] h-[52px] min-w-[52px] min-h-[52px] max-w-[52px] max-h-[52px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
-                          {avatar ? (
-                            <img
-                              src={getFileUrl(avatar)}
-                              alt={docName}
-                              className="w-full h-full object-cover rounded-full"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          ) : (
-                            <User className="w-6 h-6 text-[#86868b]" />
-                          )}
-                        </div>
-
-                        <div className="min-w-0">
-                          <h3 className="text-base font-bold text-[#1d1d1f] leading-snug truncate">
-                            {docName}
-                          </h3>
-                          <p className="text-xs font-semibold text-[#0066cc]">
-                            {doctor.specialty}
-                          </p>
-                          <p className="text-[11px] text-[#86868b] mt-0.5 truncate">
-                            {doctor.qualifications} • {doctor.experienceYears} yrs exp
-                          </p>
-                        </div>
-                      </div>
-
-                      <DoctorPresenceBadge
-                        status={doctor.cabinStatus}
-                        steppedOutUntil={doctor.steppedOutUntil}
-                        size="sm"
+                    {/* Big Doctor Photo on Left (Flipkart Style) */}
+                    <div className="relative w-24 sm:w-28 h-28 sm:h-32 min-w-[96px] sm:min-w-[112px] rounded-2xl overflow-hidden bg-[#f0f0f2] border border-[#e5e5ea] shrink-0 self-center sm:self-auto flex items-center justify-center">
+                      {avatar ? (
+                        <img
+                          src={getFileUrl(avatar)}
+                          alt={docName}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const fallback = e.currentTarget.parentElement?.querySelector('.doc-main-fallback-img');
+                            if (fallback) (fallback as HTMLElement).style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      <img
+                        src={doctorHeroAlt}
+                        alt={docName}
+                        className={`doc-main-fallback-img w-full h-full object-cover ${avatar ? 'hidden' : 'block'}`}
                       />
                     </div>
 
-                    {/* Clinic & Timing Info */}
-                    <div className="flex items-center justify-between text-xs text-[#48484a] pt-1.5 border-t border-[#f0f0f2]">
-                      <div className="flex items-center gap-1.5 truncate max-w-[65%]">
-                        <MapPin className="w-3.5 h-3.5 text-[#0066cc] shrink-0" />
-                        <span className="truncate">
-                          {primaryClinic} {city ? `• ${city}` : ''}
-                        </span>
+                    {/* Content on Right */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                      <div>
+                        <div className="flex items-start justify-between gap-1.5">
+                          <h3 className="text-[15px] sm:text-base font-bold text-[#1d1d1f] leading-snug truncate">
+                            {docName}
+                          </h3>
+                          <DoctorPresenceBadge
+                            status={doctor.cabinStatus}
+                            steppedOutUntil={doctor.steppedOutUntil}
+                            size="sm"
+                          />
+                        </div>
+
+                        <p className="text-xs font-semibold text-[#0066cc] mt-0.5 truncate">
+                          {doctor.specialty}
+                        </p>
+
+                        <p className="text-[11px] text-[#86868b] mt-0.5 truncate">
+                          {doctor.qualifications} • {doctor.experienceYears} yrs exp
+                        </p>
+
+                        <p className="text-[11px] text-[#48484a] flex items-center gap-1 mt-1 truncate">
+                          <MapPin className="w-3 h-3 text-[#0066cc] shrink-0" />
+                          <span className="truncate">{primaryClinic} {city ? `• ${city}` : ''}</span>
+                        </p>
                       </div>
 
-                      <div className="text-right shrink-0">
-                        <span className="font-bold text-[#1d1d1f]">
-                          ₹{doctor.consultationFee || 500}
-                        </span>
-                        <span className="text-[10px] text-[#86868b] ml-1">Fee</span>
+                      {/* Bottom Price & Book Row */}
+                      <div className="flex items-center justify-between pt-2 mt-2 border-t border-[#f0f0f2]">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-base font-bold text-[#1d1d1f]">
+                            ₹{doctor.consultationFee || 500}
+                          </span>
+                          <span className="text-[10px] text-[#86868b]">fee</span>
+                        </div>
+
+                        <AppleButton
+                          variant="primary"
+                          size="sm"
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            onQuickBook(doctor);
+                          }}
+                        >
+                          Book Visit
+                        </AppleButton>
                       </div>
-                    </div>
-
-                    {/* Action Row */}
-                    <div className="flex items-center gap-2 pt-1">
-                      <AppleButton
-                        variant="primary"
-                        size="sm"
-                        className="flex-1"
-                        onClick={(e: React.MouseEvent) => {
-                          e.stopPropagation();
-                          onQuickBook(doctor);
-                        }}
-                      >
-                        Book Visit
-                      </AppleButton>
-
-                      <button
-                        type="button"
-                        onClick={() => onSelectDoctor(doctor)}
-                        className="p-2 rounded-full bg-[#f5f5f7] text-[#1d1d1f] active:scale-95 active:bg-[#e5e5ea] hover:bg-[#e5e5ea] transition-all cursor-pointer"
-                      >
-                        <ChevronRight className="w-4 h-4 text-[#86868b]" />
-                      </button>
                     </div>
                   </AppleCard>
                 );
