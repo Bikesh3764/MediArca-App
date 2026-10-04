@@ -113,84 +113,7 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
   const [newPassword, setNewPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
 
-  // Demo Fallback Data
-  const getDemoReceptionistData = useCallback((): ReceptionistDashboardData => {
-    return {
-      receptionist: {
-        id: 'rec_clara_1',
-        fullName: 'Clara Oswald (Front Desk)',
-        email: 'receptionist@mediarca.com',
-        phone: '+91 98765 43219',
-        clinicId: 'clinic_demo_1',
-      },
-      clinic: {
-        id: 'clinic_demo_1',
-        clinicName: 'Metropolis Polyclinic & Diagnostic',
-        address: 'Floor 3, 100 Hill Road, Bandra West',
-        city: 'Mumbai',
-        state: 'Maharashtra',
-        checkinCode: 'METRO01',
-      },
-      doctors: [
-        {
-          affiliationId: 'aff_sarah_1',
-          doctorId: 'doc_sarah_01',
-          fullName: 'Dr. Sarah Jenkins',
-          email: 'dr.sarah@mediarca.com',
-          phone: '+91 98200 12345',
-          avatarUrl: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=256&q=80',
-          specialty: 'Cardiology',
-          consultationFee: 800,
-          todayTotalBookings: 18,
-          todayWaitingPatients: 5,
-          joinedAt: '2026-01-15',
-          cabinStatus: 'IN_CABIN',
-          slots: [
-            {
-              id: 'slot_sarah_1',
-              name: 'Morning Shift (09:00 AM – 11:00 AM)',
-              startTime: '09:00',
-              endTime: '11:00',
-              maxPatients: 50,
-              avgConsultationMinutes: 2.4,
-            },
-            {
-              id: 'slot_sarah_2',
-              name: 'Evening Shift (05:00 PM – 08:00 PM)',
-              startTime: '17:00',
-              endTime: '20:00',
-              maxPatients: 60,
-              avgConsultationMinutes: 3.0,
-            },
-          ],
-        },
-        {
-          affiliationId: 'aff_arjun_1',
-          doctorId: 'doc_arjun_02',
-          fullName: 'Dr. Arjun Patel',
-          email: 'dr.arjun@mediarca.com',
-          phone: '+91 98450 11223',
-          avatarUrl: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=256&q=80',
-          specialty: 'Dermatology',
-          consultationFee: 650,
-          todayTotalBookings: 12,
-          todayWaitingPatients: 3,
-          joinedAt: '2026-02-01',
-          cabinStatus: 'IN_CABIN',
-          slots: [
-            {
-              id: 'slot_arjun_1',
-              name: 'Morning Clinic (10:00 AM – 01:00 PM)',
-              startTime: '10:00',
-              endTime: '13:00',
-              maxPatients: 45,
-              avgConsultationMinutes: 4.0,
-            },
-          ],
-        },
-      ],
-    };
-  }, []);
+  
 
   const loadReceptionistData = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -203,19 +126,15 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
           setSelectedDoctorId(res.data.doctors[0].doctorId);
         }
       } else {
-        const demo = getDemoReceptionistData();
-        setData(demo);
-        setSelectedDoctorId(demo.doctors[0].doctorId);
+        setData(null);
       }
     } catch {
-      const demo = getDemoReceptionistData();
-      setData(demo);
-      setSelectedDoctorId(demo.doctors[0].doctorId);
+      setData(null);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [getDemoReceptionistData]);
+  }, []);
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -225,29 +144,8 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
         setNotifications(notifs);
         setUnreadNotifCount(res.data.unreadCount ?? notifs.filter((n: any) => !n.isRead).length);
       } else {
-        setNotifications([
-          {
-            id: 'notif_01',
-            userId: 'usr_rec_1',
-            title: 'New Online Token Booked',
-            message: 'Aarav Sharma booked Shift 1 with Dr. Sarah Jenkins (Token #04).',
-            type: 'APPOINTMENT',
-            isRead: false,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          {
-            id: 'notif_02',
-            userId: 'usr_rec_1',
-            title: 'Patient Fast Check-In',
-            message: 'Riya Gupta checked in via QR Standee METRO01 (Token #02).',
-            type: 'QUEUE',
-            isRead: true,
-            createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-            updatedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-          },
-        ]);
-        setUnreadNotifCount(1);
+        setNotifications([]);
+        setUnreadNotifCount(0);
       }
     } catch {
       // ignore
@@ -286,45 +184,7 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
       if (res.success && res.data?.appointments) {
         setQueueItems(res.data.appointments);
       } else {
-        // Fallback demo queue
-        setQueueItems([
-          {
-            id: 'q_item_1',
-            queueNumber: 1,
-            patientName: 'Aarav Sharma',
-            patientPhone: '+91 98765 43210',
-            gender: 'Male',
-            checkingWindow: 'Morning Shift (09:00 AM – 11:00 AM)',
-            estimatedTime: '09:05 AM',
-            status: 'WAITING',
-            isCheckedIn: true,
-            createdAt: '2026-10-04',
-          },
-          {
-            id: 'q_item_2',
-            queueNumber: 2,
-            patientName: 'Priya Mehra',
-            patientPhone: '+91 98200 66778',
-            gender: 'Female',
-            checkingWindow: 'Morning Shift (09:00 AM – 11:00 AM)',
-            estimatedTime: '09:20 AM',
-            status: 'IN_CONSULTATION',
-            isCheckedIn: true,
-            createdAt: '2026-10-04',
-          },
-          {
-            id: 'q_item_3',
-            queueNumber: 3,
-            patientName: 'Vikram Seth',
-            patientPhone: '+91 98110 55443',
-            gender: 'Male',
-            checkingWindow: 'Morning Shift (09:00 AM – 11:00 AM)',
-            estimatedTime: '09:35 AM',
-            status: 'WAITING',
-            isCheckedIn: false,
-            createdAt: '2026-10-04',
-          },
-        ]);
+        setQueueItems([]);
       }
     } catch {
       setQueueItems([]);

@@ -149,7 +149,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
             className="space-y-3"
           >
             <AppleInput
-              placeholder="e.g. METRO01"
+              placeholder="e.g. CLINIC01"
               value={manualCode}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setManualCode(e.target.value)}
             />

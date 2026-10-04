@@ -531,7 +531,7 @@ export interface User {
   email: string;
   fullName: string;
   phone?: string;
-  role: 'PATIENT' | 'DOCTOR' | 'CLINIC' | 'RECEPTIONIST' | 'ADMIN';
+  role: 'PATIENT' | 'DOCTOR' | 'CLINIC' | 'RECEPTIONIST';
   avatarUrl?: string;
   isEmailVerified?: boolean;
   mustChangePassword?: boolean;
@@ -874,208 +874,7 @@ export const evaluateSlotStatus = (
   };
 };
 
-export const DEMO_DOCTORS: Doctor[] = [
-  {
-    id: 'doc_sarah_01',
-    userId: 'usr_sarah_02',
-    specialty: 'Cardiology',
-    qualifications: 'MD',
-    experienceYears: 14,
-    consultationFee: 800,
-    bio: 'Specialist in preventive cardiology, hypertension, coronary artery disease, and heart failure management with over 14 years of clinical experience.',
-    clinicAddress: 'City Heart & Vascular Institute, Suite 402, Bandra West, Mumbai, MH',
-    isVerified: true,
-    checkingStartTime: '09:00',
-    checkingEndTime: '20:00',
-    avgConsultationMinutes: 2.7,
-    maxDailyPatients: 110,
-    rating: 4.9,
-    totalReviews: 128,
-    cabinStatus: 'IN_CABIN',
-    slots: [
-      {
-        id: 'slot_sarah_1',
-        name: 'Morning Shift (09:00 AM – 11:00 AM)',
-        startTime: '09:00',
-        endTime: '11:00',
-        maxPatients: 50,
-        avgConsultationMinutes: 2.4,
-      },
-      {
-        id: 'slot_sarah_2',
-        name: 'Evening Shift (05:00 PM – 08:00 PM)',
-        startTime: '17:00',
-        endTime: '20:00',
-        maxPatients: 60,
-        avgConsultationMinutes: 3.0,
-      },
-    ],
-    clinics: [
-      {
-        id: 'cd_sarah_1',
-        clinicId: 'clinic_demo_1',
-        clinic: {
-          id: 'clinic_demo_1',
-          clinicName: 'City Heart & Vascular Institute',
-          address: 'Suite 402, Hill Road, Bandra West',
-          city: 'Mumbai',
-          state: 'Maharashtra',
-          phone: '+91 98200 12345',
-          isVerified: true,
-        },
-      },
-      {
-        id: 'cd_sarah_2',
-        clinicId: 'clinic_demo_2',
-        clinic: {
-          id: 'clinic_demo_2',
-          clinicName: 'Mumbai Specialty Outpatient Clinic',
-          address: 'Floor 3, Linking Road, Khar West',
-          city: 'Mumbai',
-          state: 'Maharashtra',
-          phone: '+91 98200 54321',
-          isVerified: true,
-        },
-      },
-    ],
-    user: {
-      id: 'usr_sarah_02',
-      fullName: 'Dr. Sarah Jenkins',
-      email: 'dr.sarah@mediarca.com',
-      avatarUrl: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=256&q=80',
-      phone: '+91 9820012345',
-    },
-  },
-  {
-    id: 'doc_arjun_02',
-    userId: 'usr_arjun_03',
-    specialty: 'Dermatology',
-    qualifications: 'MD',
-    experienceYears: 10,
-    consultationFee: 650,
-    bio: 'Consultant dermatologist focusing on acne, eczema, psoriasis, skin cancer screening, and cosmetic laser treatments.',
-    clinicAddress: 'Apex Skin & Aesthetics Clinic, Floor 2, Indiranagar, Bengaluru, KA',
-    isVerified: true,
-    checkingStartTime: '10:00',
-    checkingEndTime: '18:30',
-    avgConsultationMinutes: 4.4,
-    maxDailyPatients: 75,
-    rating: 4.8,
-    totalReviews: 94,
-    cabinStatus: 'IN_CABIN',
-    slots: [
-      {
-        id: 'slot_arjun_1',
-        name: 'Morning Clinic (10:00 AM – 01:00 PM)',
-        startTime: '10:00',
-        endTime: '13:00',
-        maxPatients: 45,
-        avgConsultationMinutes: 4.0,
-      },
-      {
-        id: 'slot_arjun_2',
-        name: 'Afternoon Clinic (04:00 PM – 06:30 PM)',
-        startTime: '16:00',
-        endTime: '18:30',
-        maxPatients: 30,
-        avgConsultationMinutes: 5.0,
-      },
-    ],
-    clinics: [
-      {
-        id: 'cd_arjun_1',
-        clinicId: 'clinic_demo_3',
-        clinic: {
-          id: 'clinic_demo_3',
-          clinicName: 'Apex Skin & Aesthetics Clinic',
-          address: 'Floor 2, 100 Feet Road, Indiranagar',
-          city: 'Bengaluru',
-          state: 'Karnataka',
-          phone: '+91 98450 11223',
-          isVerified: true,
-        },
-      },
-    ],
-    user: {
-      id: 'usr_arjun_03',
-      fullName: 'Dr. Arjun Patel',
-      email: 'dr.arjun@mediarca.com',
-      avatarUrl: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=256&q=80',
-      phone: '+91 9845011223',
-    },
-  },
-  {
-    id: 'doc_elena_03',
-    userId: 'usr_elena_04',
-    specialty: 'Pediatrics',
-    qualifications: 'MD',
-    experienceYears: 12,
-    consultationFee: 700,
-    bio: 'Dedicated pediatrician providing comprehensive child wellness care, developmental tracking, vaccinations, and adolescent healthcare.',
-    clinicAddress: 'Little Steps Children Care, Building B, Vasant Vihar, New Delhi, DL',
-    isVerified: true,
-    checkingStartTime: '08:30',
-    checkingEndTime: '18:00',
-    avgConsultationMinutes: 4.5,
-    maxDailyPatients: 80,
-    rating: 5.0,
-    totalReviews: 150,
-    cabinStatus: 'IN_CABIN',
-    slots: [
-      {
-        id: 'slot_elena_1',
-        name: 'Morning Wellness (08:30 AM – 11:30 AM)',
-        startTime: '08:30',
-        endTime: '11:30',
-        maxPatients: 40,
-        avgConsultationMinutes: 4.5,
-      },
-      {
-        id: 'slot_elena_2',
-        name: 'Afternoon Consults (03:00 PM – 06:00 PM)',
-        startTime: '15:00',
-        endTime: '18:00',
-        maxPatients: 40,
-        avgConsultationMinutes: 4.5,
-      },
-    ],
-    clinics: [
-      {
-        id: 'cd_elena_1',
-        clinicId: 'clinic_demo_4',
-        clinic: {
-          id: 'clinic_demo_4',
-          clinicName: 'Little Steps Children Care',
-          address: 'Building B, Community Centre, Vasant Vihar',
-          city: 'New Delhi',
-          state: 'Delhi',
-          phone: '+91 98110 33445',
-          isVerified: true,
-        },
-      },
-      {
-        id: 'cd_elena_2',
-        clinicId: 'clinic_demo_5',
-        clinic: {
-          id: 'clinic_demo_5',
-          clinicName: 'Metro Pediatric Center',
-          address: 'Suite 104, Palam Marg, Vasant Vihar',
-          city: 'New Delhi',
-          state: 'Delhi',
-          phone: '+91 98110 55667',
-          isVerified: true,
-        },
-      },
-    ],
-    user: {
-      id: 'usr_elena_04',
-      fullName: 'Dr. Elena Rostova',
-      email: 'dr.elena@mediarca.com',
-      avatarUrl: 'https://images.unsplash.com/photo-1594824813576-0f723652f146?auto=format&fit=crop&w=256&q=80',
-      phone: '+91 9811033445',
-    },
-  },
-];
+
 
 // --------------------------------------------------------------------------
 // HTTP REQUEST HANDLER (Mobile Unified Response Wrapper)
@@ -1275,49 +1074,14 @@ export const api = {
 
     const qs = query.toString() ? `?${query.toString()}` : '';
     const res = await apiRequest<Doctor[]>(`/doctors${qs}`, { method: 'GET' });
-    if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+    if (res.success && Array.isArray(res.data)) {
       return res;
     }
-
-    // Graceful offline fallback
-    let list = [...DEMO_DOCTORS];
-    if (params?.specialty && params.specialty !== 'All') {
-      list = list.filter((d) => d.specialty.toLowerCase() === params.specialty?.toLowerCase());
-    }
-    if (params?.state && params.state !== 'All') {
-      const st = params.state.toLowerCase();
-      list = list.filter(
-        (d) =>
-          d.clinics?.some((c) => c.clinic.state?.toLowerCase() === st) ||
-          d.clinicAddress?.toLowerCase().includes(st)
-      );
-    }
-    if (params?.city && params.city !== 'All') {
-      const ct = params.city.toLowerCase();
-      list = list.filter(
-        (d) =>
-          d.clinics?.some((c) => c.clinic.city?.toLowerCase() === ct) ||
-          d.clinicAddress?.toLowerCase().includes(ct)
-      );
-    }
-    if (params?.search) {
-      const s = params.search.toLowerCase();
-      list = list.filter(
-        (d) =>
-          d.user.fullName.toLowerCase().includes(s) ||
-          d.specialty.toLowerCase().includes(s) ||
-          d.clinicAddress?.toLowerCase().includes(s)
-      );
-    }
-    return { success: true, data: list };
+    return { success: false, data: [], message: res.message || 'Failed to fetch doctors' };
   },
 
   async getDoctorById(id: string): Promise<ApiResponse<Doctor>> {
-    const res = await apiRequest<Doctor>(`/doctors/${id}`, { method: 'GET' });
-    if (res.success && res.data) return res;
-
-    const found = DEMO_DOCTORS.find((d) => d.id === id) || DEMO_DOCTORS[0];
-    return { success: true, data: found };
+    return apiRequest<Doctor>(`/doctors/${id}`, { method: 'GET' });
   },
 
   async getDoctorReviews(doctorId: string): Promise<ApiResponse<{
@@ -1401,8 +1165,12 @@ export const api = {
 
     if (res.success && res.data) return res;
 
-    // Offline calculate preview
-    const doctor = DEMO_DOCTORS.find((d) => d.id === docId) || DEMO_DOCTORS[0];
+    // Calculate preview dynamically from real doctor data
+    const docRes = await this.getDoctorById(docId);
+    if (!docRes.success || !docRes.data) {
+      return { success: false, message: docRes.message || 'Slot availability unavailable' };
+    }
+    const doctor = docRes.data;
     const matchedClinic = cId ? doctor.clinics?.find((c) => c.clinicId === cId) : doctor.clinics?.[0];
     const slots = matchedClinic?.slots && matchedClinic.slots.length > 0 ? matchedClinic.slots : parseDoctorSlots(doctor);
     const effectiveFee = matchedClinic?.consultationFee ?? doctor.consultationFee;
@@ -1419,6 +1187,10 @@ export const api = {
     }
     if (!chosen) {
       chosen = availableSlots.find((s) => !s.isPassed && !s.isFull) || availableSlots[0];
+    }
+
+    if (!chosen) {
+      return { success: false, message: 'No slots available for this doctor' };
     }
 
     const fallbackPreview: QueuePreview = {
@@ -1443,14 +1215,14 @@ export const api = {
       statusLabel: chosen.statusLabel,
       consultationFee: effectiveFee,
       clinicId: matchedClinic?.clinicId,
-      clinicName: matchedClinic?.clinic.clinicName,
+      clinicName: matchedClinic?.clinic?.clinicName,
       selectedClinic: matchedClinic
         ? {
             clinicId: matchedClinic.clinicId,
-            clinicName: matchedClinic.clinic.clinicName,
-            address: matchedClinic.clinic.address,
-            city: matchedClinic.clinic.city,
-            phone: matchedClinic.clinic.phone,
+            clinicName: matchedClinic.clinic?.clinicName || 'Clinic',
+            address: matchedClinic.clinic?.address || '',
+            city: matchedClinic.clinic?.city || '',
+            phone: matchedClinic.clinic?.phone,
             consultationFee: effectiveFee,
           }
         : null,
@@ -1458,10 +1230,10 @@ export const api = {
       clinicsCount: doctor.clinics?.length || 0,
       clinics: doctor.clinics?.map((c) => ({
         clinicId: c.clinicId,
-        clinicName: c.clinic.clinicName,
-        address: c.clinic.address,
-        city: c.clinic.city,
-        phone: c.clinic.phone,
+        clinicName: c.clinic?.clinicName || 'Clinic',
+        address: c.clinic?.address || '',
+        city: c.clinic?.city || '',
+        phone: c.clinic?.phone,
         consultationFee: c.consultationFee ?? doctor.consultationFee,
         slots: c.slots || parseDoctorSlots(doctor),
       })),
@@ -1640,59 +1412,7 @@ export const api = {
     return this.completeConsultation(body);
   },
 
-  // 5. Admin Platform Operations
-  async getAdminStats(): Promise<ApiResponse<{
-    totalPatients: number;
-    totalDoctors: number;
-    pendingDoctors: number;
-    totalClinics: number;
-    pendingClinics: number;
-    totalAppointments: number;
-    todayAppointments: number;
-  }>> {
-    return apiRequest('/admin/stats', { method: 'GET' });
-  },
-
-  async getAdminDoctors(): Promise<ApiResponse<Doctor[]>> {
-    return apiRequest('/admin/doctors', { method: 'GET' });
-  },
-
-  async verifyDoctor(
-    doctorId: string,
-    action: boolean | 'VERIFIED' | 'SUSPENDED' | 'REJECTED' | 'PENDING'
-  ): Promise<ApiResponse<Doctor>> {
-    const payload =
-      typeof action === 'boolean'
-        ? { doctorId, isVerified: action, status: action ? 'VERIFIED' : 'SUSPENDED' }
-        : { doctorId, isVerified: action === 'VERIFIED', status: action };
-    return apiRequest('/admin/verify-doctor', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  },
-
-  async getAdminClinics(): Promise<ApiResponse<any[]>> {
-    return apiRequest('/admin/clinics', { method: 'GET' });
-  },
-
-  async verifyClinic(
-    clinicId: string,
-    action: boolean | 'VERIFIED' | 'SUSPENDED' | 'REJECTED' | 'PENDING'
-  ): Promise<ApiResponse<any>> {
-    const payload =
-      typeof action === 'boolean'
-        ? { clinicId, isVerified: action, status: action ? 'VERIFIED' : 'SUSPENDED' }
-        : { clinicId, isVerified: action === 'VERIFIED', status: action };
-    return apiRequest('/admin/verify-clinic', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  },
-
-  async getAdminAppointments(): Promise<ApiResponse<any[]>> {
-    return apiRequest('/admin/appointments', { method: 'GET' });
-  },
-
+  // Contact & Support
   async submitContactMessage(data: {
     fullName: string;
     email: string;
@@ -1703,16 +1423,6 @@ export const api = {
     return apiRequest('/contact', {
       method: 'POST',
       body: JSON.stringify(data),
-    });
-  },
-
-  async getAdminContactMessages(): Promise<ApiResponse<ContactMessageItem[]>> {
-    return apiRequest('/admin/contact-messages', { method: 'GET' });
-  },
-
-  async markContactMessageRead(id: string): Promise<ApiResponse<ContactMessageItem>> {
-    return apiRequest(`/admin/contact-messages/${id}/read`, {
-      method: 'PATCH',
     });
   },
 
@@ -1784,68 +1494,14 @@ export const api = {
     if (params?.state && params.state !== 'All') query.append('state', params.state);
     const qs = query.toString() ? `?${query.toString()}` : '';
     const res = await apiRequest<ClinicProfile[]>(`/clinics/public${qs}`, { method: 'GET' });
-    if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+    if (res.success && Array.isArray(res.data)) {
       return res;
     }
-
-    // Fallback demo clinics
-    const clinicMap = new Map<string, ClinicProfile>();
-    DEMO_DOCTORS.forEach((doc) => {
-      doc.clinics?.forEach((cd) => {
-        const c = cd.clinic;
-        if (!clinicMap.has(c.id)) {
-          clinicMap.set(c.id, {
-            id: c.id,
-            clinicName: c.clinicName,
-            address: c.address,
-            city: c.city,
-            state: c.state || 'Maharashtra',
-            phone: c.phone,
-            isVerified: c.isVerified,
-            verificationStatus: 'VERIFIED',
-            _count: { doctors: 0 },
-            doctors: [],
-          });
-        }
-        const existing = clinicMap.get(c.id)!;
-        existing.doctors = existing.doctors || [];
-        existing.doctors.push({
-          id: cd.id,
-          clinicId: c.id,
-          doctorId: doc.id,
-          status: 'ACCEPTED',
-          consultationFee: cd.consultationFee ?? doc.consultationFee,
-          slots: cd.slots || doc.slots,
-          doctor: doc,
-        });
-        existing._count = { doctors: existing.doctors.length };
-      });
-    });
-
-    let list = Array.from(clinicMap.values());
-    if (params?.city && params.city !== 'All') {
-      list = list.filter((c) => c.city?.toLowerCase() === params.city?.toLowerCase());
-    }
-    if (params?.search) {
-      const q = params.search.toLowerCase();
-      list = list.filter(
-        (c) =>
-          c.clinicName.toLowerCase().includes(q) ||
-          c.address.toLowerCase().includes(q) ||
-          c.city?.toLowerCase().includes(q)
-      );
-    }
-    return { success: true, data: list };
+    return { success: false, data: [], message: res.message || 'Failed to fetch clinics' };
   },
 
   async getPublicClinicById(id: string): Promise<ApiResponse<ClinicProfile>> {
-    const res = await apiRequest<ClinicProfile>(`/clinics/public/${id}`, { method: 'GET' });
-    if (res.success && res.data) return res;
-
-    const clinicsRes = await this.getPublicClinics();
-    const found = clinicsRes.data?.find((c) => c.id === id);
-    if (found) return { success: true, data: found };
-    return { success: false, message: 'Clinic not found' };
+    return apiRequest<ClinicProfile>(`/clinics/public/${id}`, { method: 'GET' });
   },
 
   // 7. Receptionist Portal & Walk-in Desk

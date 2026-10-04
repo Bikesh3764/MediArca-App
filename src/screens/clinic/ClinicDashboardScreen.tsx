@@ -66,14 +66,14 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
 
   // Clinic Profile State
   const [clinicName, setClinicName] = useState(
-    user?.clinicProfile?.clinicName || user?.fullName || 'Metropolis Polyclinic & Diagnostic'
+    user?.clinicProfile?.clinicName || user?.fullName || ''
   );
-  const [clinicPhone, setClinicPhone] = useState(user?.clinicProfile?.phone || '+91 98200 55001');
+  const [clinicPhone, setClinicPhone] = useState(user?.clinicProfile?.phone || '');
   const [clinicAddress, setClinicAddress] = useState(
-    user?.clinicProfile?.address || 'Floor 3, 100 Hill Road, Bandra West'
+    user?.clinicProfile?.address || ''
   );
-  const [clinicCity, setClinicCity] = useState(user?.clinicProfile?.city || 'Mumbai');
-  const [clinicState, setClinicState] = useState(user?.clinicProfile?.state || 'Maharashtra');
+  const [clinicCity, setClinicCity] = useState(user?.clinicProfile?.city || '');
+  const [clinicState, setClinicState] = useState(user?.clinicProfile?.state || '');
   const [savingProfile, setSavingProfile] = useState(false);
 
   // Doctor Onboarding Modal
@@ -99,118 +99,7 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
   const [copiedCreds, setCopiedCreds] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
 
-  // Fallback demo clinic data for Metropolis Polyclinic & Diagnostic
-  const getDemoClinicData = useCallback((): ClinicDashboardData => {
-    return {
-      clinic: {
-        id: 'clinic_demo_1',
-        clinicName: user?.clinicProfile?.clinicName || user?.fullName || 'Metropolis Polyclinic & Diagnostic',
-        address: user?.clinicProfile?.address || 'Floor 3, 100 Hill Road, Bandra West',
-        city: user?.clinicProfile?.city || 'Mumbai',
-        state: user?.clinicProfile?.state || 'Maharashtra',
-        phone: user?.clinicProfile?.phone || '+91 98200 55001',
-        checkinCode: user?.clinicProfile?.checkinCode || 'METRO01',
-        isVerified: true,
-        verificationStatus: 'VERIFIED',
-        _count: { doctors: 2 },
-      },
-      doctors: [
-        {
-          affiliationId: 'aff_sarah_1',
-          doctorId: 'doc_sarah_01',
-          fullName: 'Dr. Sarah Jenkins',
-          email: 'dr.sarah@mediarca.com',
-          phone: '+91 98200 12345',
-          avatarUrl: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=256&q=80',
-          specialty: 'Cardiology',
-          qualifications: 'MD, DM',
-          experienceYears: 14,
-          consultationFee: 800,
-          bookingCount: 42,
-          completedCount: 38,
-          revenue: 33600,
-          status: 'ACCEPTED',
-          joinedAt: '2026-01-15',
-        },
-        {
-          affiliationId: 'aff_arjun_1',
-          doctorId: 'doc_arjun_02',
-          fullName: 'Dr. Arjun Patel',
-          email: 'dr.arjun@mediarca.com',
-          phone: '+91 98450 11223',
-          avatarUrl: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=256&q=80',
-          specialty: 'Dermatology',
-          qualifications: 'MD, DNB',
-          experienceYears: 10,
-          consultationFee: 650,
-          bookingCount: 29,
-          completedCount: 26,
-          revenue: 18850,
-          status: 'ACCEPTED',
-          joinedAt: '2026-02-01',
-        },
-      ],
-      receptionists: [
-        {
-          id: 'rec_clara_1',
-          userId: 'usr_receptionist_demo',
-          fullName: 'Clara Oswald (Front Desk 1)',
-          email: 'receptionist@mediarca.com',
-          phone: '+91 98765 43219',
-          doctorIds: ['doc_sarah_01', 'doc_arjun_02'],
-          doctors: [
-            { id: 'doc_sarah_01', fullName: 'Dr. Sarah Jenkins', specialty: 'Cardiology' },
-            { id: 'doc_arjun_02', fullName: 'Dr. Arjun Patel', specialty: 'Dermatology' },
-          ],
-          createdAt: '2026-01-18',
-        },
-      ],
-      totalDoctors: 2,
-      totalBookings: 71,
-      totalRevenue: 52450,
-      recentAppointments: [
-        {
-          id: 'appt_c_1',
-          patientName: 'Aarav Sharma',
-          patientPhone: '+91 98765 43210',
-          doctorName: 'Dr. Sarah Jenkins',
-          doctorId: 'doc_sarah_01',
-          date: '2026-10-04',
-          queueNumber: 1,
-          checkingWindow: 'Morning Shift (09:00 AM – 11:00 AM)',
-          estimatedTime: '09:05 AM',
-          status: 'WAITING',
-          fee: 800,
-        },
-        {
-          id: 'appt_c_2',
-          patientName: 'Pooja Verma',
-          patientPhone: '+91 98200 66778',
-          doctorName: 'Dr. Arjun Patel',
-          doctorId: 'doc_arjun_02',
-          date: '2026-10-04',
-          queueNumber: 2,
-          checkingWindow: 'Morning Clinic (10:00 AM – 01:00 PM)',
-          estimatedTime: '10:15 AM',
-          status: 'IN_CONSULTATION',
-          fee: 650,
-        },
-        {
-          id: 'appt_c_3',
-          patientName: 'Rohan Mehra',
-          patientPhone: '+91 98110 99887',
-          doctorName: 'Dr. Sarah Jenkins',
-          doctorId: 'doc_sarah_01',
-          date: '2026-10-04',
-          queueNumber: 3,
-          checkingWindow: 'Morning Shift (09:00 AM – 11:00 AM)',
-          estimatedTime: '09:30 AM',
-          status: 'COMPLETED',
-          fee: 800,
-        },
-      ],
-    };
-  }, [user]);
+  
 
   const loadClinicData = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true);
@@ -220,16 +109,15 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
       if (res.success && res.data) {
         setData(res.data);
       } else {
-        // Fallback demo data
-        setData(getDemoClinicData());
+        setData(null);
       }
     } catch {
-      setData(getDemoClinicData());
+      setData(null);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [getDemoClinicData]);
+  }, []);
 
   useEffect(() => {
     loadClinicData();
@@ -334,7 +222,7 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
   };
 
   const handleCopyCheckinCode = () => {
-    const code = data?.clinic?.checkinCode || 'METRO01';
+    const code = data?.clinic?.checkinCode || 'CLINIC01';
     navigator.clipboard?.writeText(code);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
@@ -375,7 +263,17 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
     );
   }
 
-  const clinic = data?.clinic || getDemoClinicData().clinic;
+  const clinic = data?.clinic || {
+    id: '',
+    clinicName: user?.clinicProfile?.clinicName || user?.fullName || 'My Clinic',
+    address: user?.clinicProfile?.address || '',
+    city: user?.clinicProfile?.city || '',
+    state: user?.clinicProfile?.state || '',
+    phone: user?.clinicProfile?.phone || '',
+    checkinCode: user?.clinicProfile?.checkinCode || '',
+    isVerified: Boolean(user?.clinicProfile?.isVerified),
+    verificationStatus: user?.clinicProfile?.verificationStatus || 'PENDING',
+  };
   const doctors = data?.doctors || [];
   const receptionists = data?.receptionists || [];
   const appointments = data?.recentAppointments || [];
@@ -551,7 +449,7 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
                 </div>
                 <div>
                   <div className="text-xs text-[#86868b]">Clinic Fast Check-In Code</div>
-                  <div className="text-base font-bold text-[#1d1d1f] tracking-wider">{clinic.checkinCode || 'METRO01'}</div>
+                  <div className="text-base font-bold text-[#1d1d1f] tracking-wider">{clinic.checkinCode || 'CLINIC01'}</div>
                 </div>
               </div>
               <button
@@ -808,7 +706,7 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
               </div>
 
               <div className="bg-[#f5f5f7] py-2 px-4 rounded-full inline-block text-xs font-mono font-bold text-[#1d1d1f]">
-                CODE: {clinic.checkinCode || 'METRO01'}
+                CODE: {clinic.checkinCode || 'CLINIC01'}
               </div>
 
               <p className="text-[11px] text-[#86868b]">
@@ -847,7 +745,7 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
                 <p className="text-xs text-[#86868b] mt-0.5">{clinicCity}, {clinicState}</p>
                 <div className="mt-1 flex items-center gap-2 text-[11px] text-[#0066cc]">
                   <QrCode className="w-3.5 h-3.5" />
-                  <span>Check-In Code: <strong>{clinic.checkinCode || 'METRO01'}</strong></span>
+                  <span>Check-In Code: <strong>{clinic.checkinCode || 'CLINIC01'}</strong></span>
                 </div>
               </div>
             </div>

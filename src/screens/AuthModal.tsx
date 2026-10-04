@@ -13,14 +13,9 @@ import {
   User as UserIcon,
   Phone,
   ArrowLeft,
-  Sparkles,
   Eye,
   EyeOff,
   Stethoscope,
-  Building,
-  Shield,
-  ChevronDown,
-  ChevronUp,
   AlertCircle,
 } from 'lucide-react';
 
@@ -31,36 +26,6 @@ export interface AuthModalProps {
   initialRole?: 'PATIENT' | 'DOCTOR';
   initialMode?: 'login' | 'signup';
 }
-
-const DEMO_STAFF_ACCOUNTS = [
-  {
-    role: 'CLINIC' as const,
-    title: 'Clinic Admin',
-    name: 'Metropolis Polyclinic',
-    email: 'clinic@mediarca.com',
-    password: 'clinic123',
-    icon: Building,
-    desc: 'Clinic Operations',
-  },
-  {
-    role: 'RECEPTIONIST' as const,
-    title: 'Receptionist',
-    name: 'Clara Oswald',
-    email: 'receptionist@mediarca.com',
-    password: 'receptionist123',
-    icon: UserIcon,
-    desc: 'Front Desk Walk-in',
-  },
-  {
-    role: 'ADMIN' as const,
-    title: 'Root Admin',
-    name: 'MediArca Administrator',
-    email: 'admin@mediarca.com',
-    password: 'admin123',
-    icon: Shield,
-    desc: 'System Terminal',
-  },
-];
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
@@ -86,10 +51,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [experienceYears, setExperienceYears] = useState('5');
 
   const [loading, setLoading] = useState(false);
-  const [quickLoggingEmail, setQuickLoggingEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [showStaffDemos, setShowStaffDemos] = useState(false);
 
   if (!isOpen) return null;
 
@@ -108,29 +71,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setMode('otp');
     } else {
       setError(res.message || 'Invalid email or password');
-    }
-  };
-
-  const handleQuickLogin = async (demoEmail: string, demoPass: string, role?: 'PATIENT' | 'DOCTOR') => {
-    setError(null);
-    if (role) setActiveRole(role);
-    setQuickLoggingEmail(demoEmail);
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    try {
-      const res = await login(demoEmail, demoPass);
-      if (res.success) {
-        onSuccess?.(res.user);
-        onClose();
-      } else if (res.requiresVerification) {
-        setMode('otp');
-      } else {
-        setError(res.message || 'Demo login failed');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Demo login failed');
-    } finally {
-      setQuickLoggingEmail(null);
     }
   };
 
@@ -226,50 +166,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleGoogleError = () => {
     if (!isAuthorizedGoogleOrigin) {
       setError(
-        `Google OAuth requires origin http://localhost:5173 (current: ${window.location.origin}). Run Vite on port 5173, or use 1-Click Demo Login below.`
+        'Google Sign-In is only supported on configured web domains. Please sign in using your email and password.'
       );
     } else {
       setError('Google Sign-In was cancelled or popup closed.');
     }
   };
 
-  const handleSimulatedGoogleLogin = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }));
-      const payload = btoa(
-        JSON.stringify({
-          email: activeRole === 'DOCTOR' ? 'dr.sarah@mediarca.com' : 'john.doe@gmail.com',
-          name: activeRole === 'DOCTOR' ? 'Dr. Sarah Jenkins' : 'John Doe',
-          picture:
-            activeRole === 'DOCTOR'
-              ? 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=256&q=80'
-              : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=256&q=80',
-        })
-      );
-      const simulatedToken = `${header}.${payload}.signature`;
-      const res = await loginWithGoogle(simulatedToken, activeRole);
-      if (res.success) {
-        onSuccess?.(res.user);
-        onClose();
-      } else {
-        // Fallback to verified seeded demo credentials so simulation always succeeds
-        const demoEmail = activeRole === 'DOCTOR' ? 'dr.sarah@mediarca.com' : 'john.doe@gmail.com';
-        const demoPass = activeRole === 'DOCTOR' ? 'doctor123' : 'patient123';
-        const fallbackRes = await login(demoEmail, demoPass);
-        if (fallbackRes.success) {
-          onSuccess?.(fallbackRes.user);
-          onClose();
-        } else {
-          setError(res.message || 'Simulated Google sign-in failed');
-        }
-      }
-    } catch (err: any) {
-      setError(err.message || 'Simulated Google sign-in failed');
-    } finally {
-      setLoading(false);
-    }
+  const handleGoogleUnavailable = () => {
+    setError('Google Sign-In is unavailable in this environment. Please sign in with your email and password below.');
   };
 
   return (
@@ -341,21 +246,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Error Notification */}
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex flex-col gap-2">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span className="leading-snug">{error}</span>
-            </div>
-            {error.toLowerCase().includes('google') && (
-              <button
-                type="button"
-                onClick={handleSimulatedGoogleLogin}
-                className="text-xs font-semibold text-[#0066cc] hover:underline self-start flex items-center gap-1.5 cursor-pointer bg-white px-2.5 py-1 rounded-lg border border-rose-200 active:scale-95"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#0066cc]" />
-                <span>Continue with Demo Google Account</span>
-              </button>
-            )}
+          <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span className="leading-snug">{error}</span>
           </div>
         )}
 
@@ -378,8 +271,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 ) : (
                   <button
                     type="button"
-                    onClick={handleSimulatedGoogleLogin}
-                    disabled={loading || Boolean(quickLoggingEmail)}
+                    onClick={handleGoogleUnavailable}
+                    disabled={loading}
                     className="w-full h-11 px-4 rounded-full border border-[#e5e5ea] bg-white hover:bg-[#fbfbfd] text-[#1d1d1f] text-xs font-semibold transition-all active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
                   >
                     <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
@@ -445,129 +338,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </AppleButton>
               </div>
             </form>
-
-            {/* Quick Demo Access */}
-            <div className="mt-4 pt-3.5 border-t border-[#f0f0f2]">
-              <div className="flex items-center justify-between text-[11px] text-[#86868b] mb-2 px-0.5">
-                <span className="font-semibold text-[#1d1d1f]">
-                  Demo Accounts
-                </span>
-                <span className="text-[10px] text-[#0066cc] bg-[#0066cc]/10 px-2 py-0.5 rounded-full font-semibold">
-                  1-Tap Access
-                </span>
-              </div>
-
-              {/* Primary Demo Buttons: Patient & Doctor */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('john.doe@gmail.com', 'patient123', 'PATIENT')}
-                  disabled={Boolean(quickLoggingEmail)}
-                  className={`py-2 px-3 rounded-xl border text-xs transition-all text-center cursor-pointer active:scale-95 ${
-                    activeRole === 'PATIENT'
-                      ? 'bg-[#0066cc]/10 text-[#0066cc] border-[#0066cc]/30 font-semibold'
-                      : 'bg-[#f5f5f7] hover:bg-[#ebebee] text-[#1d1d1f] border-[#e5e5ea] font-normal'
-                  }`}
-                >
-                  <div className="font-semibold flex items-center justify-center gap-1.5">
-                    <UserIcon className="w-3.5 h-3.5" />
-                    <span>Patient</span>
-                  </div>
-                  <div className="text-[10px] text-[#86868b] mt-0.5 truncate">
-                    {quickLoggingEmail === 'john.doe@gmail.com' ? 'Signing in...' : 'john.doe@gmail.com'}
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('dr.sarah@mediarca.com', 'doctor123', 'DOCTOR')}
-                  disabled={Boolean(quickLoggingEmail)}
-                  className={`py-2 px-3 rounded-xl border text-xs transition-all text-center cursor-pointer active:scale-95 ${
-                    activeRole === 'DOCTOR'
-                      ? 'bg-[#0066cc]/10 text-[#0066cc] border-[#0066cc]/30 font-semibold'
-                      : 'bg-[#f5f5f7] hover:bg-[#ebebee] text-[#1d1d1f] border-[#e5e5ea] font-normal'
-                  }`}
-                >
-                  <div className="font-semibold flex items-center justify-center gap-1.5">
-                    <Stethoscope className="w-3.5 h-3.5" />
-                    <span>Doctor</span>
-                  </div>
-                  <div className="text-[10px] text-[#86868b] mt-0.5 truncate">
-                    {quickLoggingEmail === 'dr.sarah@mediarca.com' ? 'Signing in...' : 'dr.sarah@mediarca.com'}
-                  </div>
-                </button>
-              </div>
-
-              {/* Staff Portals Quick Row */}
-              <div className="mt-2.5 flex items-center justify-center gap-2 text-[11px] text-[#86868b]">
-                <span>Staff:</span>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('receptionist@mediarca.com', 'receptionist123')}
-                  className="text-[#0066cc] hover:underline font-semibold cursor-pointer"
-                >
-                  Desk
-                </button>
-                <span>•</span>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('clinic@mediarca.com', 'clinic123')}
-                  className="text-[#0066cc] hover:underline font-semibold cursor-pointer"
-                >
-                  Clinic
-                </button>
-                <span>•</span>
-                <button
-                  type="button"
-                  onClick={() => handleQuickLogin('admin@mediarca.com', 'admin123')}
-                  className="text-[#0066cc] hover:underline font-semibold cursor-pointer"
-                >
-                  Admin
-                </button>
-              </div>
-
-              {/* Collapsible Staff Portals */}
-              <div className="mt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowStaffDemos(!showStaffDemos)}
-                  className="w-full py-1 px-1 flex items-center justify-between text-[11px] text-[#86868b] hover:text-[#1d1d1f] transition-colors cursor-pointer"
-                >
-                  <span>More staff credentials</span>
-                  {showStaffDemos ? (
-                    <ChevronUp className="w-3.5 h-3.5" />
-                  ) : (
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  )}
-                </button>
-
-                {showStaffDemos && (
-                  <div className="grid grid-cols-3 gap-1.5 mt-1.5 animate-fade-in">
-                    {DEMO_STAFF_ACCOUNTS.map((staff) => {
-                      const IconComp = staff.icon;
-                      const isLogging = quickLoggingEmail === staff.email;
-                      return (
-                        <button
-                          key={staff.email}
-                          type="button"
-                          onClick={() => handleQuickLogin(staff.email, staff.password)}
-                          disabled={Boolean(quickLoggingEmail)}
-                          className="p-2 rounded-xl border border-[#e5e5ea] bg-[#fafafc] hover:bg-[#f5f5f7] active:scale-95 text-center transition-all cursor-pointer"
-                        >
-                          <IconComp className="w-3.5 h-3.5 mx-auto text-[#0066cc] mb-1" />
-                          <div className="text-[11px] font-semibold text-[#1d1d1f] truncate">
-                            {staff.title}
-                          </div>
-                          <div className="text-[9px] text-[#86868b] truncate">
-                            {isLogging ? 'Signing in...' : staff.desc}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
 
             {/* Toggle to Signup */}
             <div className="text-center pt-1">
@@ -713,7 +483,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               ) : (
                 <button
                   type="button"
-                  onClick={handleSimulatedGoogleLogin}
+                  onClick={handleGoogleUnavailable}
                   disabled={loading}
                   className="w-full h-11 px-4 rounded-full border border-[#e5e5ea] bg-white hover:bg-[#fbfbfd] text-[#1d1d1f] text-xs font-semibold transition-all active:scale-95 flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
                 >

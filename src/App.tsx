@@ -7,6 +7,12 @@ import { BrandLogo } from './components/ui/BrandLogo';
 import { AppleCard } from './components/ui/AppleCard';
 import { AppleButton } from './components/ui/AppleButton';
 import { RoleSwitcherModal } from './components/RoleSwitcherModal';
+import {
+  AppRole,
+  RoleGatewayScreen,
+  getStoredSelectedRole,
+  saveSelectedRole,
+} from './screens/RoleGatewayScreen';
 
 // Patient Portal Screens
 import { ExploreScreen } from './screens/ExploreScreen';
@@ -25,10 +31,9 @@ import { ConsultationDeskScreen } from './screens/doctor/ConsultationDeskScreen'
 import { DoctorAffiliationsScreen } from './screens/doctor/DoctorAffiliationsScreen';
 import { DoctorProfileScreen } from './screens/doctor/DoctorProfileScreen';
 
-// Other Platform Workspaces
+// Clinic & Receptionist Workspaces
 import { ClinicDashboardScreen, ClinicTab } from './screens/clinic/ClinicDashboardScreen';
 import { ReceptionistDashboardScreen, ReceptionistTab } from './screens/receptionist/ReceptionistDashboardScreen';
-import { AdminDashboardScreen, AdminTab } from './screens/admin/AdminDashboardScreen';
 
 import {
   Search,
@@ -40,40 +45,15 @@ import {
   Clock,
   FileText,
   Building2,
-  Sparkles,
   RefreshCw,
   TrendingUp,
   Users,
   CheckCircle2,
   Bell,
-  Mail,
-  Shield,
 } from 'lucide-react';
 
 type PatientTab = 'explore' | 'queue' | 'checkin' | 'history' | 'profile';
 type DoctorTab = 'console' | 'schedule' | 'desk' | 'affiliations' | 'profile';
-
-const DEMO_CONSULTATION_APPT: Appointment = {
-  id: 'appt_demo_01',
-  patientId: 'usr_pat_01',
-  patientName: 'Aarav Sharma',
-  patientAge: 32,
-  patientGender: 'Male',
-  patientPhone: '+91 98765 43210',
-  doctorId: 'doc_sarah_01',
-  doctorName: 'Dr. Sarah Jenkins',
-  clinicId: 'cln_01',
-  appointmentDate: new Date().toISOString().split('T')[0],
-  date: new Date().toISOString().split('T')[0],
-  queueNumber: 4,
-  checkingWindow: 'Morning Clinic (09:00 AM – 11:30 AM)',
-  estimatedTime: '09:45 AM',
-  status: 'IN_CONSULTATION',
-  reasonForVisit: 'Persistent dry cough and mild chest tightness',
-  fee: 800,
-  isCheckedIn: true,
-  createdAt: new Date().toISOString(),
-};
 
 interface DoctorDeskHomeProps {
   onSelectAppointment: (appointment: Appointment) => void;
@@ -126,66 +106,77 @@ const DoctorDeskHome: React.FC<DoctorDeskHomeProps> = ({ onSelectAppointment }) 
         </button>
       </div>
 
-      <div className="p-4 space-y-4 max-w-md mx-auto w-full">
-        {inCabin && (
-          <AppleCard className="bg-emerald-50/60 border-emerald-200/80 space-y-3">
+      <div className="p-4 space-y-4">
+        {/* Active Cabin Consultation */}
+        {inCabin ? (
+          <AppleCard className="space-y-3 border-emerald-300/80 bg-gradient-to-br from-emerald-50/50 to-white">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+              <span className="text-[11px] font-bold tracking-wider uppercase text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
                 Currently In Cabin
               </span>
-              <span className="text-sm font-black text-emerald-700">
-                #{String(inCabin.queueNumber).padStart(2, '0')}
+              <span className="text-xs font-semibold text-[#86868b]">
+                Token #{String(inCabin.queueNumber).padStart(2, '0')}
               </span>
             </div>
+
             <div>
-              <h3 className="text-base font-bold text-[#1d1d1f]">{inCabin.patientName}</h3>
+              <h3 className="text-base font-bold text-[#1d1d1f]">
+                {inCabin.patientName}
+              </h3>
               <p className="text-xs text-[#86868b]">
                 {inCabin.patientAge ? `${inCabin.patientAge} yrs • ` : ''}
                 {inCabin.patientGender || 'Patient'}
                 {inCabin.reasonForVisit ? ` • ${inCabin.reasonForVisit}` : ''}
               </p>
             </div>
+
             <AppleButton
-              variant="success"
+              variant="primary"
               size="md"
-              className="w-full"
+              className="w-full text-xs"
               onClick={() => onSelectAppointment(inCabin)}
             >
-              Resume Consultation & Prescription
+              Open Digital Rx & Observations
             </AppleButton>
           </AppleCard>
+        ) : (
+          <div className="p-4 bg-white rounded-2xl border border-[#e5e5ea] text-center text-xs text-[#86868b]">
+            No patient currently inside the cabin. Call next patient from the waiting queue.
+          </div>
         )}
 
-        {/* Waiting Patients List */}
-        <div className="space-y-2.5">
-          <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider block px-1">
-            Waiting Patients ({waitingPatients.length})
-          </span>
+        {/* Waiting Queue List */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-bold text-[#86868b] uppercase tracking-wider">
+              Waiting Patients ({waitingPatients.length})
+            </span>
+          </div>
+
           {loading ? (
-            <div className="p-8 text-center text-xs text-[#86868b]">Loading appointments...</div>
+            <div className="p-6 text-center text-xs text-[#86868b]">Loading queue...</div>
           ) : waitingPatients.length === 0 ? (
-            <div className="p-8 bg-white rounded-2xl border border-[#e5e5ea] text-center text-xs text-[#86868b]">
-              No patients waiting in queue right now.
+            <div className="p-6 bg-white rounded-2xl border border-[#e5e5ea] text-center text-xs text-[#86868b]">
+              Queue is clear. No waiting patients.
             </div>
           ) : (
             waitingPatients.map((patient) => (
               <div
                 key={patient.id}
-                className="bg-white p-3.5 rounded-2xl border border-[#e5e5ea] flex items-center justify-between gap-3"
+                className="bg-white p-3.5 rounded-2xl border border-[#e5e5ea] flex items-center justify-between"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-base font-black text-[#0066cc] w-7 shrink-0">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-black text-[#0066cc]">
                     #{String(patient.queueNumber).padStart(2, '0')}
                   </span>
-                  <div className="min-w-0">
-                    <h4 className="text-xs font-bold text-[#1d1d1f] truncate">
-                      {patient.patientName}
-                    </h4>
-                    <p className="text-[11px] text-[#86868b] truncate">
-                      {patient.reasonForVisit || 'General Consultation'}
+                  <div>
+                    <h4 className="text-xs font-bold text-[#1d1d1f]">{patient.patientName}</h4>
+                    <p className="text-[11px] text-[#86868b]">
+                      {patient.checkingWindow || 'Today'}
                     </p>
                   </div>
                 </div>
+
                 <AppleButton
                   size="sm"
                   variant="primary"
@@ -197,25 +188,6 @@ const DoctorDeskHome: React.FC<DoctorDeskHomeProps> = ({ onSelectAppointment }) 
             ))
           )}
         </div>
-
-        {/* Demo Consultation Desk Launcher */}
-        <AppleCard className="space-y-2.5 bg-gradient-to-br from-blue-50/60 to-indigo-50/60 border-blue-200/70 p-4">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#0066cc]" />
-            <h4 className="text-xs font-bold text-[#1d1d1f]">Interactive Demo Desk</h4>
-          </div>
-          <p className="text-[11px] text-[#48484a] leading-relaxed">
-            Open active clinical desk for Aarav Sharma to test digital vitals logging (BP, Pulse, SpO2, Temp), clinical observations, and multi-medication Rx builder.
-          </p>
-          <AppleButton
-            variant="secondary"
-            size="sm"
-            className="w-full text-xs"
-            onClick={() => onSelectAppointment(DEMO_CONSULTATION_APPT)}
-          >
-            Open Demo Patient Desk
-          </AppleButton>
-        </AppleCard>
       </div>
     </div>
   );
@@ -224,19 +196,22 @@ const DoctorDeskHome: React.FC<DoctorDeskHomeProps> = ({ onSelectAppointment }) 
 const MainApp: React.FC = () => {
   const { user } = useAuth();
 
-  // Tab states
+  // Role Gate & Navigation State
+  const [activeRole, setActiveRole] = useState<AppRole | null>(null);
+  const [roleLoaded, setRoleLoaded] = useState<boolean>(false);
+  const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
+
+  // Tab states for each portal
   const [patientTab, setPatientTab] = useState<PatientTab>('explore');
   const [doctorTab, setDoctorTab] = useState<DoctorTab>('console');
   const [clinicTab, setClinicTab] = useState<ClinicTab>('kpi');
   const [receptionistTab, setReceptionistTab] = useState<ReceptionistTab>('walkin');
-  const [adminTab, setAdminTab] = useState<AdminTab>('kpi');
 
   // Active items
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorProfile | null>(null);
   const [consultationAppt, setConsultationAppt] = useState<Appointment | null>(null);
 
-  // Modals
-  const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
+  // Auth Modal
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   // Booking Modal State
@@ -256,8 +231,27 @@ const MainApp: React.FC = () => {
     date: '',
   });
 
-  const handleRoleSelect = (role: 'PATIENT' | 'DOCTOR' | 'CLINIC' | 'RECEPTIONIST' | 'ADMIN') => {
+  // On initial launch: retrieve saved role or present "Who are you?" gateway
+  useEffect(() => {
+    const initRole = async () => {
+      const stored = await getStoredSelectedRole();
+      if (stored) {
+        setActiveRole(stored);
+      } else if (user?.role && ['PATIENT', 'DOCTOR', 'CLINIC', 'RECEPTIONIST'].includes(user.role)) {
+        const uRole = user.role as AppRole;
+        setActiveRole(uRole);
+        await saveSelectedRole(uRole);
+      }
+      setRoleLoaded(true);
+    };
+    initRole();
+  }, [user]);
+
+  const handleRoleSelect = async (role: AppRole) => {
+    setActiveRole(role);
+    await saveSelectedRole(role);
     setRoleSwitcherOpen(false);
+
     if (role === 'DOCTOR') {
       setDoctorTab('console');
       setConsultationAppt(null);
@@ -268,8 +262,6 @@ const MainApp: React.FC = () => {
       setClinicTab('kpi');
     } else if (role === 'RECEPTIONIST') {
       setReceptionistTab('walkin');
-    } else if (role === 'ADMIN') {
-      setAdminTab('kpi');
     }
   };
 
@@ -324,41 +316,64 @@ const MainApp: React.FC = () => {
     setPatientTab('queue');
   };
 
+  // Splash loading while reading preferences
+  if (!roleLoaded) {
+    return (
+      <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center p-4">
+        <div className="w-8 h-8 border-2 border-[#0066cc] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Gateway: If no role selected yet, display "Who are you?" Apple HIG selection
+  if (!activeRole) {
+    return (
+      <div className="min-h-screen bg-[#ebebee] flex justify-center">
+        <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
+          <RoleGatewayScreen
+            onSelectRole={handleRoleSelect}
+            currentRole={null}
+            isSwitching={false}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // 1. CLINIC WORKSPACE
-  if (user?.role === 'CLINIC') {
+  if (activeRole === 'CLINIC') {
     return (
       <div className="min-h-screen bg-[#ebebee] flex justify-center">
         <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
-          {/* Top Apple Header for Clinic */}
+          {/* Top Apple Header for Clinic (clean, uncluttered - no role pill) */}
           <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-[#e5e5ea] px-4 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BrandLogo variant="full" size="sm" />
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setRoleSwitcherOpen(true)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-teal-50 border border-teal-200/60 active:scale-95 transition-all text-xs font-semibold text-teal-700 cursor-pointer shadow-2xs hover:bg-teal-100/70"
-                title="Switch Workspace Portal"
-              >
-                <Building2 className="w-3.5 h-3.5 text-teal-600" />
-                <span>Clinic</span>
-                <Sparkles className="w-3 h-3 text-teal-400" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setClinicTab('profile')}
-                className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
-              >
-                <div className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                  {user.fullName ? user.fullName[0].toUpperCase() : 'C'}
-                </div>
-                <span className="truncate max-w-[65px] sm:max-w-[85px]">
-                  {user.fullName.split(' ')[0]}
-                </span>
-              </button>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => setClinicTab('profile')}
+                  className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
+                >
+                  <div className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                    {user.fullName ? user.fullName[0].toUpperCase() : 'C'}
+                  </div>
+                  <span className="truncate max-w-[75px] sm:max-w-[95px]">
+                    {user.fullName.split(' ')[0]}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAuthModalOpen(true)}
+                  className="text-xs font-semibold text-white px-3.5 py-1.5 rounded-full bg-[#0066cc] active:scale-95 transition-all cursor-pointer"
+                >
+                  Sign In
+                </button>
+              )}
             </div>
           </header>
 
@@ -434,6 +449,7 @@ const MainApp: React.FC = () => {
           <RoleSwitcherModal
             isOpen={roleSwitcherOpen}
             onClose={() => setRoleSwitcherOpen(false)}
+            currentRole={activeRole}
             onSelectRole={handleRoleSelect}
           />
           <AuthModal
@@ -446,40 +462,39 @@ const MainApp: React.FC = () => {
   }
 
   // 2. RECEPTIONIST WORKSPACE
-  if (user?.role === 'RECEPTIONIST') {
+  if (activeRole === 'RECEPTIONIST') {
     return (
       <div className="min-h-screen bg-[#ebebee] flex justify-center">
         <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
-          {/* Top Apple Header for Receptionist */}
+          {/* Top Apple Header for Receptionist (clean, uncluttered - no role pill) */}
           <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-[#e5e5ea] px-4 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BrandLogo variant="full" size="sm" />
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setRoleSwitcherOpen(true)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/60 active:scale-95 transition-all text-xs font-semibold text-[#0066cc] cursor-pointer shadow-2xs hover:bg-blue-100/70"
-                title="Switch Workspace Portal"
-              >
-                <Users className="w-3.5 h-3.5 text-[#0066cc]" />
-                <span>Desk</span>
-                <Sparkles className="w-3 h-3 text-blue-400" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setReceptionistTab('notifications')}
-                className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
-              >
-                <div className="w-5 h-5 rounded-full bg-[#0066cc] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                  {user.fullName ? user.fullName[0].toUpperCase() : 'R'}
-                </div>
-                <span className="truncate max-w-[65px] sm:max-w-[85px]">
-                  {user.fullName.split(' ')[0]}
-                </span>
-              </button>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => setReceptionistTab('notifications')}
+                  className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
+                >
+                  <div className="w-5 h-5 rounded-full bg-[#0066cc] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                    {user.fullName ? user.fullName[0].toUpperCase() : 'R'}
+                  </div>
+                  <span className="truncate max-w-[75px] sm:max-w-[95px]">
+                    {user.fullName.split(' ')[0]}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAuthModalOpen(true)}
+                  className="text-xs font-semibold text-white px-3.5 py-1.5 rounded-full bg-[#0066cc] active:scale-95 transition-all cursor-pointer"
+                >
+                  Sign In
+                </button>
+              )}
             </div>
           </header>
 
@@ -555,6 +570,7 @@ const MainApp: React.FC = () => {
           <RoleSwitcherModal
             isOpen={roleSwitcherOpen}
             onClose={() => setRoleSwitcherOpen(false)}
+            currentRole={activeRole}
             onSelectRole={handleRoleSelect}
           />
           <AuthModal
@@ -566,162 +582,40 @@ const MainApp: React.FC = () => {
     );
   }
 
-  // 3. ADMIN WORKSPACE
-  if (user?.role === 'ADMIN') {
+  // 3. DOCTOR WORKSPACE
+  if (activeRole === 'DOCTOR') {
     return (
       <div className="min-h-screen bg-[#ebebee] flex justify-center">
         <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
-          {/* Top Apple Header for Admin */}
+          {/* Top Apple Header for Doctor (clean, uncluttered - no role pill) */}
           <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-[#e5e5ea] px-4 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <BrandLogo variant="full" size="sm" />
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setRoleSwitcherOpen(true)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 border border-rose-200/60 active:scale-95 transition-all text-xs font-semibold text-rose-700 cursor-pointer shadow-2xs hover:bg-rose-100/70"
-                title="Switch Workspace Portal"
-              >
-                <Shield className="w-3.5 h-3.5 text-rose-600" />
-                <span>Admin</span>
-                <Sparkles className="w-3 h-3 text-rose-400" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAdminTab('messages')}
-                className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
-              >
-                <div className="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                  {user.fullName ? user.fullName[0].toUpperCase() : 'A'}
-                </div>
-                <span className="truncate max-w-[65px] sm:max-w-[85px]">
-                  {user.fullName.split(' ')[0]}
-                </span>
-              </button>
-            </div>
-          </header>
-
-          {/* Main Content */}
-          <main className="flex-1 w-full pb-20">
-            <AdminDashboardScreen
-              onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)}
-              activeTab={adminTab}
-              onTabChange={(tab) => setAdminTab(tab)}
-            />
-          </main>
-
-          {/* Fixed Bottom Tab Navigation for Admin */}
-          <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-t border-[#e5e5ea] safe-area-bottom">
-            <div className="max-w-md mx-auto flex items-center justify-around px-2 py-1.5">
-              <button
-                type="button"
-                onClick={() => setAdminTab('kpi')}
-                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
-                  adminTab === 'kpi' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
-                }`}
-              >
-                <TrendingUp className="w-5 h-5 mb-0.5" />
-                <span className="text-[10px] font-semibold tracking-tight">KPIs</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAdminTab('doctors')}
-                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
-                  adminTab === 'doctors' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
-                }`}
-              >
-                <Stethoscope className="w-5 h-5 mb-0.5" />
-                <span className="text-[10px] font-semibold tracking-tight">Doctors</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAdminTab('clinics')}
-                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
-                  adminTab === 'clinics' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
-                }`}
-              >
-                <Building2 className="w-5 h-5 mb-0.5" />
-                <span className="text-[10px] font-semibold tracking-tight">Clinics</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAdminTab('appointments')}
-                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
-                  adminTab === 'appointments' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
-                }`}
-              >
-                <Calendar className="w-5 h-5 mb-0.5" />
-                <span className="text-[10px] font-semibold tracking-tight">Audit</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAdminTab('messages')}
-                className={`flex flex-col items-center justify-center flex-1 py-1 transition-all select-none cursor-pointer active:scale-95 ${
-                  adminTab === 'messages' ? 'text-[#0066cc]' : 'text-[#86868b] hover:text-[#1d1d1f]'
-                }`}
-              >
-                <Mail className="w-5 h-5 mb-0.5" />
-                <span className="text-[10px] font-semibold tracking-tight">Inbox</span>
-              </button>
-            </div>
-          </nav>
-
-          <RoleSwitcherModal
-            isOpen={roleSwitcherOpen}
-            onClose={() => setRoleSwitcherOpen(false)}
-            onSelectRole={handleRoleSelect}
-          />
-          <AuthModal
-            isOpen={authModalOpen}
-            onClose={() => setAuthModalOpen(false)}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  // 4. DOCTOR WORKSPACE
-  if (user?.role === 'DOCTOR') {
-    return (
-      <div className="min-h-screen bg-[#ebebee] flex justify-center">
-        <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
-          {/* Top Apple Header for Doctor */}
-          <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-[#e5e5ea] px-4 py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <BrandLogo variant="full" size="sm" />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setRoleSwitcherOpen(true)}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200/60 active:scale-95 transition-all text-xs font-semibold text-indigo-700 cursor-pointer shadow-2xs hover:bg-indigo-100/70"
-                title="Switch Workspace Portal"
-              >
-                <Stethoscope className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Doctor</span>
-                <Sparkles className="w-3 h-3 text-indigo-400" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setDoctorTab('profile')}
-                className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
-              >
-                <div className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                  {user.fullName ? user.fullName[0].toUpperCase() : 'D'}
-                </div>
-                <span className="truncate max-w-[65px] sm:max-w-[85px]">
-                  {user.fullName.split(' ')[0]}
-                </span>
-              </button>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => setDoctorTab('profile')}
+                  className="flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer"
+                >
+                  <div className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                    {user.fullName ? user.fullName[0].toUpperCase() : 'D'}
+                  </div>
+                  <span className="truncate max-w-[75px] sm:max-w-[95px]">
+                    {user.fullName.split(' ')[0]}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAuthModalOpen(true)}
+                  className="text-xs font-semibold text-white px-3.5 py-1.5 rounded-full bg-[#0066cc] active:scale-95 transition-all cursor-pointer"
+                >
+                  Sign In
+                </button>
+              )}
             </div>
           </header>
 
@@ -855,35 +749,29 @@ const MainApp: React.FC = () => {
           <RoleSwitcherModal
             isOpen={roleSwitcherOpen}
             onClose={() => setRoleSwitcherOpen(false)}
+            currentRole={activeRole}
             onSelectRole={handleRoleSelect}
+          />
+          <AuthModal
+            isOpen={authModalOpen}
+            onClose={() => setAuthModalOpen(false)}
           />
         </div>
       </div>
     );
   }
 
-  // 5. PATIENT WORKSPACE (Default for Patients & Guests)
+  // 4. PATIENT WORKSPACE (Default for Patient role)
   return (
     <div className="min-h-screen bg-[#ebebee] flex justify-center">
-      {/* Mobile-contained layout */}
       <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
-        {/* Top Apple Header for Patient */}
+        {/* Top Apple Header for Patient (clean, uncluttered - no role pill) */}
         <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-[#e5e5ea] px-4 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BrandLogo variant="full" size="sm" />
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setRoleSwitcherOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer hover:bg-white shadow-2xs"
-              title="Switch Workspace Portal"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-              <span>Portal</span>
-            </button>
-
             {user ? (
               <button
                 type="button"
@@ -893,7 +781,7 @@ const MainApp: React.FC = () => {
                 <div className="w-5 h-5 rounded-full bg-[#0066cc] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
                   {user.fullName ? user.fullName[0].toUpperCase() : 'U'}
                 </div>
-                <span className="truncate max-w-[65px] sm:max-w-[90px]">
+                <span className="truncate max-w-[75px] sm:max-w-[95px]">
                   {user.fullName.split(' ')[0]}
                 </span>
               </button>
@@ -944,7 +832,7 @@ const MainApp: React.FC = () => {
                 <ProfileScreen
                   onOpenAuth={() => setAuthModalOpen(true)}
                   onOpenDoctorConsole={() => {
-                    setRoleSwitcherOpen(true);
+                    handleRoleSelect('DOCTOR');
                   }}
                   onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)}
                 />
@@ -1059,10 +947,8 @@ const MainApp: React.FC = () => {
           isOpen={authModalOpen}
           onClose={() => setAuthModalOpen(false)}
           onSuccess={(loggedUser) => {
-            if (loggedUser?.role === 'DOCTOR') {
-              setDoctorTab('console');
-            } else if (loggedUser?.role === 'PATIENT') {
-              setPatientTab('explore');
+            if (loggedUser?.role && ['PATIENT', 'DOCTOR', 'CLINIC', 'RECEPTIONIST'].includes(loggedUser.role)) {
+              handleRoleSelect(loggedUser.role as AppRole);
             }
           }}
         />
@@ -1071,6 +957,7 @@ const MainApp: React.FC = () => {
         <RoleSwitcherModal
           isOpen={roleSwitcherOpen}
           onClose={() => setRoleSwitcherOpen(false)}
+          currentRole={activeRole}
           onSelectRole={handleRoleSelect}
         />
       </div>

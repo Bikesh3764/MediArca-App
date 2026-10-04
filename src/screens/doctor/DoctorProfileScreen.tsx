@@ -344,7 +344,7 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
                     Switch Workspace Portal
                   </h4>
                   <p className="text-xs text-[#86868b]">
-                    Patient • Doctor • Clinic • Front Desk • Admin
+                    Patient • Doctor • Clinic Partner • Receptionist
                   </p>
                 </div>
               </div>

@@ -38,50 +38,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
   const [recEmail, setRecEmail] = useState('');
   const [addingRec, setAddingRec] = useState(false);
 
-  const getDemoAffiliations = useCallback((): DoctorAffiliationsData => {
-    return {
-      clinics: [
-        {
-          affiliationId: 'aff_c_1',
-          clinicId: 'clinic_demo_1',
-          clinicName: 'Metropolis Polyclinic & Diagnostic',
-          address: 'Floor 3, 100 Hill Road, Bandra West',
-          city: 'Mumbai',
-          state: 'Maharashtra',
-          phone: '+91 98200 55001',
-          consultationFee: 800,
-          status: 'ACCEPTED',
-          bookingCount: 42,
-          revenue: 33600,
-        },
-        {
-          affiliationId: 'aff_c_2',
-          clinicId: 'clinic_demo_2',
-          clinicName: 'Mumbai Specialty Outpatient Center',
-          address: 'Floor 3, Linking Road, Khar West',
-          city: 'Mumbai',
-          state: 'Maharashtra',
-          phone: '+91 98200 54321',
-          consultationFee: 750,
-          status: 'ACCEPTED',
-          bookingCount: 29,
-          revenue: 21750,
-        },
-      ],
-      receptionists: [
-        {
-          affiliationId: 'rec_aff_1',
-          receptionistId: 'rec_clara_1',
-          fullName: 'Clara Oswald (Front Desk 1)',
-          email: 'receptionist@mediarca.com',
-          phone: '+91 98765 43219',
-          clinicName: 'Metropolis Polyclinic',
-          status: 'ACCEPTED',
-          joinedAt: '2026-01-18',
-        },
-      ],
-    };
-  }, []);
+  
 
   const loadAffiliations = useCallback(async () => {
     setLoading(true);
@@ -91,14 +48,14 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
       if (res.success && res.data) {
         setData(res.data);
       } else {
-        setData(getDemoAffiliations());
+        setData({ clinics: [], receptionists: [] });
       }
     } catch {
-      setData(getDemoAffiliations());
+      setData({ clinics: [], receptionists: [] });
     } finally {
       setLoading(false);
     }
-  }, [getDemoAffiliations]);
+  }, []);
 
   useEffect(() => {
     loadAffiliations();
@@ -330,7 +287,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                   type="text"
                   value={clinicInput}
                   onChange={(e) => setClinicInput(e.target.value)}
-                  placeholder="e.g. clinic@mediarca.com or clinic_demo_1"
+                  placeholder="e.g. clinic email or Clinic ID"
                   required
                   className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
                 />
