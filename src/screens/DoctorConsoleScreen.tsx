@@ -155,46 +155,6 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
 
   return (
     <div className="flex flex-col min-h-full pb-safe">
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea] flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onBack}
-            className="p-1.5 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div>
-            <h2 className="text-base font-bold text-[#1d1d1f]">Doctor Console</h2>
-            <p className="text-[11px] text-[#86868b]">
-              Dr. {user?.fullName?.replace(/^Dr\.?\s+/i, '') || 'Practitioner'}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          {onOpenRoleSwitcher && (
-            <button
-              type="button"
-              onClick={onOpenRoleSwitcher}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-[#e5e5ea] text-xs font-semibold text-[#1d1d1f] active:scale-95 transition-all cursor-pointer shadow-2xs"
-            >
-              <Sparkles className="w-3 h-3 text-purple-600" />
-              <span>Switch</span>
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => fetchDoctorQueue(true)}
-            disabled={refreshing}
-            className="p-2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#0066cc] ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      </div>
-
       <div className="p-4 space-y-4 max-w-md mx-auto w-full">
         {/* Presence Controls Card */}
         <AppleCard className="space-y-3">
@@ -320,9 +280,20 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
         {/* Waiting List */}
         <div className="space-y-2.5">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider">
-              Waiting Queue ({waitingPatients.length})
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider">
+                Waiting Queue ({waitingPatients.length})
+              </span>
+              <button
+                type="button"
+                onClick={() => fetchDoctorQueue(true)}
+                disabled={refreshing}
+                className="p-1 rounded-full text-[#86868b] hover:text-[#0066cc] active:scale-95 transition-all cursor-pointer"
+                title="Refresh Queue"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-[#0066cc]' : ''}`} />
+              </button>
+            </div>
             {waitingPatients.length > 0 && (
               <AppleButton
                 size="sm"
