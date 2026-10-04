@@ -1014,7 +1014,21 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
             </form>
 
             {/* Account Sign Out Card */}
-            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs">
+            <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs space-y-2">
+              {onOpenRoleSwitcher && (
+                <button
+                  type="button"
+                  onClick={onOpenRoleSwitcher}
+                  className="w-full py-2.5 px-4 rounded-xl bg-white border border-[#e5e5ea] text-[#1d1d1f] text-xs font-semibold flex items-center justify-between hover:bg-[#f5f5f7] active:scale-[0.99] transition-all cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#0066cc]" />
+                    <span>Switch Platform Workspace</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-[#86868b]" />
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={logout}
