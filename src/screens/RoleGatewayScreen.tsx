@@ -113,7 +113,7 @@ export const RoleGatewayScreen: React.FC<RoleGatewayScreenProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] flex flex-col justify-between max-w-md mx-auto relative px-5 py-6 antialiased selection:bg-[#0066cc]/20">
+    <div className="min-h-screen bg-[#f5f5f7] flex flex-col justify-between max-w-md mx-auto relative px-5 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] antialiased selection:bg-[#0066cc]/20">
       {/* Top Bar with Brand Logo and optional Cancel button */}
       <div>
         <div className="flex items-center justify-between pt-2 pb-4">

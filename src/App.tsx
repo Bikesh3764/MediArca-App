@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { GOOGLE_CLIENT_ID } from './config/auth';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { DoctorProfile, DoctorSlot, Appointment, api } from './services/api';
+import { DoctorProfile, DoctorSlot, Appointment, api, parseDoctorSlots } from './services/api';
 import { BrandLogo } from './components/ui/BrandLogo';
 import { AppleCard } from './components/ui/AppleCard';
 import { AppleButton } from './components/ui/AppleButton';
@@ -199,6 +199,7 @@ const MainApp: React.FC = () => {
   // Role Gate & Navigation State
   const [activeRole, setActiveRole] = useState<AppRole | null>(null);
   const [roleLoaded, setRoleLoaded] = useState<boolean>(false);
+  const [roleGatewayOpen, setRoleGatewayOpen] = useState(false);
   const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
 
   // Tab states for each portal
@@ -250,6 +251,7 @@ const MainApp: React.FC = () => {
   const handleRoleSelect = async (role: AppRole) => {
     setActiveRole(role);
     await saveSelectedRole(role);
+    setRoleGatewayOpen(false);
     setRoleSwitcherOpen(false);
 
     if (role === 'DOCTOR') {
@@ -271,20 +273,30 @@ const MainApp: React.FC = () => {
       return;
     }
     const today = new Date().toISOString().split('T')[0];
-    const schedule = doctor.schedules?.[0];
-    const slot = schedule?.slots?.[0] || {
-      id: 'default_slot',
-      name: 'General Shift',
-      startTime: '09:00 AM',
-      endTime: '12:00 PM',
-      maxPatients: 30,
-    };
+    const firstClinicAffiliation = doctor.clinics?.[0];
+    const schedule = firstClinicAffiliation
+      ? {
+          clinicId: firstClinicAffiliation.clinicId,
+          clinicName: firstClinicAffiliation.clinic?.clinicName || 'Clinic',
+          slots: (firstClinicAffiliation.slots && firstClinicAffiliation.slots.length > 0)
+            ? firstClinicAffiliation.slots
+            : parseDoctorSlots(doctor),
+        }
+      : doctor.schedules?.[0] || {
+          clinicId: doctor.id || 'cabin',
+          clinicName: doctor.clinicAddress ? 'Clinical Cabin' : 'Outpatient Cabin',
+          slots: parseDoctorSlots(doctor),
+        };
+
+    const slot = (Array.isArray(schedule.slots) && schedule.slots.length > 0)
+      ? schedule.slots[0]
+      : parseDoctorSlots(doctor)[0];
 
     setBookingParams({
       isOpen: true,
       doctor,
-      clinicId: schedule?.clinicId || 'cln_01',
-      clinicName: schedule?.clinicName || 'MediArca Clinic',
+      clinicId: schedule.clinicId,
+      clinicName: schedule.clinicName,
       slot,
       date: today,
     });
@@ -325,15 +337,16 @@ const MainApp: React.FC = () => {
     );
   }
 
-  // Gateway: If no role selected yet, display "Who are you?" Apple HIG selection
-  if (!activeRole) {
+  // Gateway: If no role selected yet or user chose "Switch Role", display "Who are you?" Apple HIG selection
+  if (!activeRole || roleGatewayOpen) {
     return (
       <div className="min-h-screen bg-[#ebebee] flex justify-center">
         <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
           <RoleGatewayScreen
             onSelectRole={handleRoleSelect}
-            currentRole={null}
-            isSwitching={false}
+            currentRole={activeRole}
+            isSwitching={!!activeRole && roleGatewayOpen}
+            onCancel={activeRole ? () => setRoleGatewayOpen(false) : undefined}
           />
         </div>
       </div>
@@ -380,7 +393,7 @@ const MainApp: React.FC = () => {
           {/* Main Content */}
           <main className="flex-1 w-full pb-20">
             <ClinicDashboardScreen
-              onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)}
+              onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
               activeTab={clinicTab}
               onTabChange={(tab) => setClinicTab(tab)}
             />
@@ -501,7 +514,7 @@ const MainApp: React.FC = () => {
           {/* Main Content */}
           <main className="flex-1 w-full pb-20">
             <ReceptionistDashboardScreen
-              onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)}
+              onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
               activeTab={receptionistTab}
               onTabChange={(tab) => setReceptionistTab(tab)}
             />
@@ -629,7 +642,7 @@ const MainApp: React.FC = () => {
                   setDoctorTab('desk');
                 }}
                 onOpenSchedule={() => setDoctorTab('schedule')}
-                onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)}
+                onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
               />
             )}
             {doctorTab === 'schedule' && (
@@ -657,7 +670,7 @@ const MainApp: React.FC = () => {
             {doctorTab === 'profile' && (
               <DoctorProfileScreen
                 onBack={() => setDoctorTab('console')}
-                onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)}
+                onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
               />
             )}
           </main>
@@ -834,7 +847,7 @@ const MainApp: React.FC = () => {
                   onOpenDoctorConsole={() => {
                     handleRoleSelect('DOCTOR');
                   }}
-                  onOpenRoleSwitcher={() => setRoleSwitcherOpen(true)}
+                  onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
                 />
               )}
             </>

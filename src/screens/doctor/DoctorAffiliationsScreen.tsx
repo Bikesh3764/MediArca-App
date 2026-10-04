@@ -336,7 +336,7 @@ export const DoctorAffiliationsScreen: React.FC<DoctorAffiliationsScreenProps> =
                   type="email"
                   value={recEmail}
                   onChange={(e) => setRecEmail(e.target.value)}
-                  placeholder="e.g. receptionist@mediarca.com"
+                  placeholder="e.g. receptionist@example.com"
                   required
                   className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
                 />

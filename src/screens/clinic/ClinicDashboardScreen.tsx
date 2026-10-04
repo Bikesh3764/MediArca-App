@@ -884,7 +884,7 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
                   type="email"
                   value={doctorEmail}
                   onChange={(e) => setDoctorEmail(e.target.value)}
-                  placeholder="e.g. dr.sarah@mediarca.com"
+                  placeholder="e.g. doctor@example.com"
                   required
                   className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
                 />

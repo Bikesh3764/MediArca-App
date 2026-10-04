@@ -300,9 +300,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {/* Email Form */}
             <form onSubmit={handleLogin} className="space-y-3">
               <AppleInput
-                label={activeRole === 'DOCTOR' ? 'Doctor Email' : 'Patient Email'}
+                label="Email Address"
                 type="email"
-                placeholder={activeRole === 'DOCTOR' ? 'dr.sarah@mediarca.com' : 'john.doe@gmail.com'}
+                placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 icon={<Mail className="w-4 h-4" />}
@@ -378,7 +378,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <AppleInput
               label="Email Address"
               type="email"
-              placeholder={activeRole === 'DOCTOR' ? 'dr.name@mediarca.com' : 'name@example.com'}
+              placeholder="name@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               icon={<Mail className="w-4 h-4" />}

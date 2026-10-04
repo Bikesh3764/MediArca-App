@@ -343,6 +343,30 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               </button>
             </AppleCard>
 
+            {/* Workspace Switcher */}
+            {onOpenRoleSwitcher && (
+              <AppleCard
+                interactive
+                onClick={onOpenRoleSwitcher}
+                className="flex items-center justify-between border-[#e5e5ea] text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-[#1d1d1f]">
+                      Switch Workspace Portal
+                    </h4>
+                    <p className="text-xs text-[#86868b]">
+                      Patient • Doctor • Clinic Partner • Receptionist
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-[#86868b]" />
+              </AppleCard>
+            )}
+
             {/* Sign Out */}
             <div className="pt-1">
               <AppleButton

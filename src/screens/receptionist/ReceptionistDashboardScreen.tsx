@@ -68,7 +68,7 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
   const [unreadNotifCount, setUnreadNotifCount] = useState<number>(0);
 
   // Selected Doctor for Walk-in and Queue
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string>('doc_sarah_01');
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
   const [appointmentDate, setAppointmentDate] = useState<string>(getLocalDateString());
 
   // Walk-In Form State

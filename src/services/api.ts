@@ -125,6 +125,13 @@ export interface DoctorProfile {
   cabinStatusUpdatedAt?: string | null;
   schedules?: DoctorClinicSchedule[];
   slots?: DoctorSlot[];
+  clinics?: Array<{
+    id?: string;
+    clinicId: string;
+    clinic?: ClinicProfile;
+    consultationFee?: number;
+    slots?: DoctorSlot[];
+  }>;
   user?: {
     id?: string;
     fullName: string;
@@ -1078,6 +1085,20 @@ export const api = {
       return res;
     }
     return { success: false, data: [], message: res.message || 'Failed to fetch doctors' };
+  },
+
+  async getPublicDoctors(params?: {
+    search?: string;
+    specialty?: string;
+    minExp?: number;
+    maxFee?: number;
+    sortBy?: string;
+    clinicOnly?: boolean;
+    clinicId?: string;
+    state?: string;
+    city?: string;
+  }): Promise<ApiResponse<Doctor[]>> {
+    return this.getDoctors(params);
   },
 
   async getDoctorById(id: string): Promise<ApiResponse<Doctor>> {

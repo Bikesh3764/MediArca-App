@@ -550,7 +550,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                 </div>
               ) : (
                 filteredClinics.map((clinic) => {
-                  const name = clinic.clinicName || clinic.name || 'MediArca Clinic';
+                  const name = clinic.clinicName || clinic.name || 'Clinic';
                   const docCount =
                     clinic.doctors?.length || clinic._count?.doctors || 0;
 
@@ -631,8 +631,15 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
               doctors.map((doctor) => {
                 const docName = formatDoctorName(doctor.user?.fullName);
                 const avatar = doctor.user?.avatarUrl;
-                const primaryClinic = doctor.schedules?.[0]?.clinicName || 'MediArca Healthcare';
-                const city = doctor.schedules?.[0]?.clinicCity || '';
+                const primaryClinic =
+                  doctor.clinics?.[0]?.clinic?.clinicName ||
+                  doctor.schedules?.[0]?.clinicName ||
+                  doctor.clinicAddress ||
+                  'Clinical Practice';
+                const city =
+                  doctor.clinics?.[0]?.clinic?.city ||
+                  doctor.schedules?.[0]?.clinicCity ||
+                  '';
 
                 return (
                   <AppleCard

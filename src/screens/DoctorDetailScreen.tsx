@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { DoctorProfile, DoctorSlot, getFileUrl, calculateSlotMetrics } from '../services/api';
+import React, { useState, useMemo } from 'react';
+import {
+  DoctorProfile,
+  DoctorSlot,
+  getFileUrl,
+  calculateSlotMetrics,
+  parseDoctorSlots,
+} from '../services/api';
 import { AppleCard } from '../components/ui/AppleCard';
 import { AppleButton } from '../components/ui/AppleButton';
 import { DoctorPresenceBadge } from '../components/ui/DoctorPresenceBadge';
@@ -49,38 +55,35 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
 
   const [selectedDate, setSelectedDate] = useState(dates[0].dateString);
 
-  // Fallback schedules if empty
-  const schedules = doctor.schedules && doctor.schedules.length > 0
-    ? doctor.schedules
-    : [
-        {
-          clinicId: 'cln_default_01',
-          clinicName: 'MediArca Central Clinic',
-          clinicAddress: 'Medical Enclave, Main Road',
-          clinicCity: 'City Centre',
-          consultationFee: doctor.consultationFee || 500,
-          daysOfWeek: [1, 2, 3, 4, 5, 6],
-          slots: [
-            {
-              id: 'slot_morn_01',
-              name: 'Morning Shift',
-              startTime: '09:00 AM',
-              endTime: '12:00 PM',
-              maxPatients: 30,
-            },
-            {
-              id: 'slot_eve_02',
-              name: 'Evening Shift',
-              startTime: '05:00 PM',
-              endTime: '08:00 PM',
-              maxPatients: 30,
-            },
-          ],
-        },
-      ];
+  // Authentic clinic affiliations or clinical cabin (zero mock clinics)
+  const clinicsList = useMemo(() => {
+    if (doctor.clinics && doctor.clinics.length > 0) {
+      return doctor.clinics.map((cd) => ({
+        clinicId: cd.clinicId,
+        clinicName: cd.clinic?.clinicName || 'Clinic',
+        clinicAddress: cd.clinic?.address || doctor.clinicAddress || '',
+        clinicCity: cd.clinic?.city || '',
+        consultationFee: cd.consultationFee ?? doctor.consultationFee ?? 500,
+        slots: Array.isArray(cd.slots) && cd.slots.length > 0 ? cd.slots : parseDoctorSlots(doctor),
+      }));
+    }
+    if (doctor.schedules && doctor.schedules.length > 0) {
+      return doctor.schedules;
+    }
+    return [
+      {
+        clinicId: doctor.id || 'cabin',
+        clinicName: doctor.clinicAddress ? 'Clinical Cabin' : 'Outpatient Consultation',
+        clinicAddress: doctor.clinicAddress || 'Consultation Cabin',
+        clinicCity: '',
+        consultationFee: doctor.consultationFee || 500,
+        slots: parseDoctorSlots(doctor),
+      },
+    ];
+  }, [doctor]);
 
-  const [selectedClinicId, setSelectedClinicId] = useState(schedules[0].clinicId);
-  const activeSchedule = schedules.find((s: any) => s.clinicId === selectedClinicId) || schedules[0];
+  const [selectedClinicId, setSelectedClinicId] = useState(clinicsList[0]?.clinicId || '');
+  const activeSchedule = clinicsList.find((s: any) => s.clinicId === selectedClinicId) || clinicsList[0];
 
   return (
     <div className="flex flex-col min-h-full pb-safe">
@@ -172,13 +175,13 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
         </AppleCard>
 
         {/* Multi-Clinic Selector if practicing at multiple clinics */}
-        {schedules.length > 1 && (
+        {clinicsList.length > 1 && (
           <div>
             <span className="text-xs font-semibold text-[#86868b] block mb-2 px-1">
               Select Clinic
             </span>
             <div className="flex gap-2 overflow-x-auto py-1 no-scrollbar -mx-4 px-4">
-              {schedules.map((s: any) => (
+              {clinicsList.map((s: any) => (
                 <button
                   key={s.clinicId}
                   type="button"
@@ -237,7 +240,7 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
                   {activeSchedule.clinicName}
                 </h4>
                 <p className="text-xs text-[#86868b] mt-0.5">
-                  {activeSchedule.clinicAddress}, {activeSchedule.clinicCity}
+                  {[activeSchedule.clinicAddress, activeSchedule.clinicCity].filter(Boolean).join(', ') || 'Consultation Cabin'}
                 </p>
               </div>
             </div>
