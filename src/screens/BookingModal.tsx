@@ -66,7 +66,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           date,
         });
         if (res.success && res.data) {
-          setPreview(res.data);
+          setPreview(res.data as any);
         }
       } catch (err) {
         // preview non-blocking
@@ -99,7 +99,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       });
 
       if (res.success && res.data) {
-        onBookingSuccess(res.data.appointment || res.data);
+        onBookingSuccess((res.data as any).appointment || res.data);
         onClose();
       } else {
         setError(res.message || 'Failed to book appointment');

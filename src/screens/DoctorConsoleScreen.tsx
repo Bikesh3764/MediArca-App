@@ -15,13 +15,22 @@ import {
   RefreshCw,
   FileText,
   User,
+  Sparkles,
 } from 'lucide-react';
 
 interface DoctorConsoleScreenProps {
   onBack: () => void;
+  onOpenConsultation?: (appointment: Appointment) => void;
+  onOpenSchedule?: () => void;
+  onOpenRoleSwitcher?: () => void;
 }
 
-export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack }) => {
+export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
+  onBack,
+  onOpenConsultation,
+  onOpenSchedule,
+  onOpenRoleSwitcher,
+}) => {
   const { user } = useAuth();
   const [queue, setQueue] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,14 +123,26 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => fetchDoctorQueue(true)}
-          disabled={refreshing}
-          className="p-2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 text-[#0066cc] ${refreshing ? 'animate-spin' : ''}`} />
-        </button>
+        <div className="flex items-center gap-1.5">
+          {onOpenRoleSwitcher && (
+            <button
+              type="button"
+              onClick={onOpenRoleSwitcher}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white border border-[#e5e5ea] text-xs font-semibold text-[#1d1d1f] active:scale-95 transition-all cursor-pointer shadow-2xs"
+            >
+              <Sparkles className="w-3 h-3 text-purple-600" />
+              <span>Switch</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => fetchDoctorQueue(true)}
+            disabled={refreshing}
+            className="p-2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#0066cc] ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
       <div className="p-4 space-y-4 max-w-md mx-auto w-full">
@@ -199,15 +220,27 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
               />
             </div>
 
-            <AppleButton
-              variant="success"
-              size="md"
-              className="w-full"
-              icon={<Check className="w-4 h-4" />}
-              onClick={() => handleCompleteConsultation(inCabinPatient.id)}
-            >
-              Complete Visit
-            </AppleButton>
+            <div className="flex items-center gap-2 pt-1">
+              {onOpenConsultation && (
+                <AppleButton
+                  variant="secondary"
+                  size="md"
+                  className="flex-1 text-xs"
+                  onClick={() => onOpenConsultation(inCabinPatient)}
+                >
+                  Clinical Desk & Rx
+                </AppleButton>
+              )}
+              <AppleButton
+                variant="success"
+                size="md"
+                className="flex-1"
+                icon={<Check className="w-4 h-4" />}
+                onClick={() => handleCompleteConsultation(inCabinPatient.id)}
+              >
+                Complete Visit
+              </AppleButton>
+            </div>
           </AppleCard>
         )}
 
@@ -260,14 +293,26 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
                   </div>
                 </div>
 
-                <AppleButton
-                  size="sm"
-                  variant="ghost"
-                  loading={callingPatientId === patient.id}
-                  onClick={() => handleCallPatient(patient.id)}
-                >
-                  Call
-                </AppleButton>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {onOpenConsultation && (
+                    <AppleButton
+                      size="sm"
+                      variant="secondary"
+                      className="text-xs px-2.5"
+                      onClick={() => onOpenConsultation(patient)}
+                    >
+                      Desk
+                    </AppleButton>
+                  )}
+                  <AppleButton
+                    size="sm"
+                    variant="ghost"
+                    loading={callingPatientId === patient.id}
+                    onClick={() => handleCallPatient(patient.id)}
+                  >
+                    Call
+                  </AppleButton>
+                </div>
               </div>
             ))
           )}

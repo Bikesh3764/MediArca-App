@@ -121,7 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const res = await api.getMe();
       if (res.success && res.data) {
-        setUser(res.data.user || res.data);
+        setUser((res.data as any).user || res.data);
       } else {
         await removeAuthToken();
         setUser(null);
@@ -139,9 +139,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     const res = await api.login(email, password);
-    if (res.success && res.data?.token) {
-      await setAuthToken(res.data.token);
-      const loggedUser = res.data.user || res.data;
+    const token = res.token || (res.data as any)?.token;
+    if (res.success && token) {
+      await setAuthToken(token);
+      const loggedUser = (res.data as any)?.user || res.user || res.data;
       setUser(loggedUser);
       return { success: true, user: loggedUser };
     }
@@ -162,7 +163,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {
       success: false,
       message: res.message || 'Login failed',
-      requiresVerification: res.data?.requiresVerification || false,
+      requiresVerification: (res as any).requiresVerification || (res.data as any)?.requiresVerification || false,
     };
   };
 

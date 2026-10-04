@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { api, DoctorProfile, ClinicProfile, getFileUrl } from '../services/api';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { api, DoctorProfile, ClinicProfile, getFileUrl, ALL_SPECIALTIES } from '../services/api';
+import { INDIAN_STATES, getCitiesForState } from '../utils/indiaStates';
 import { AppleCard } from '../components/ui/AppleCard';
 import { AppleButton } from '../components/ui/AppleButton';
 import clinicLobbyBg from '../assets/clinic-lobby-bg.jpg';
@@ -16,19 +17,13 @@ import {
   ArrowLeft,
   QrCode,
   Sparkles,
+  SlidersHorizontal,
+  X,
+  IndianRupee,
+  Award,
 } from 'lucide-react';
 
-const SPECIALTIES = [
-  'All',
-  'General Physician',
-  'Cardiology',
-  'Pediatrics',
-  'Dermatology',
-  'Orthopedics',
-  'ENT',
-  'Neurology',
-  'Ophthalmology',
-];
+const SPECIALTIES = ['All', ...ALL_SPECIALTIES];
 
 interface ExploreScreenProps {
   onSelectDoctor: (doctor: DoctorProfile) => void;
@@ -51,14 +46,44 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('All');
+  const [selectedState, setSelectedState] = useState<string>('All');
+  const [selectedCity, setSelectedCity] = useState<string>('All');
+  const [maxFee, setMaxFee] = useState<number>(3000);
+  const [minExp, setMinExp] = useState<number>(0);
+  const [showFiltersModal, setShowFiltersModal] = useState<boolean>(false);
   const [selectedClinic, setSelectedClinic] = useState<ClinicProfile | null>(null);
 
+  const availableCities = useMemo(() => {
+    if (selectedState === 'All') return [];
+    return getCitiesForState(selectedState);
+  }, [selectedState]);
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (selectedState !== 'All') count++;
+    if (selectedCity !== 'All') count++;
+    if (maxFee < 3000) count++;
+    if (minExp > 0) count++;
+    return count;
+  }, [selectedState, selectedCity, maxFee, minExp]);
+
   // Fetch doctors
-  const fetchDoctors = async (query = '', specialty = 'All') => {
+  const fetchDoctors = useCallback(async (
+    query = searchQuery,
+    specialty = selectedSpecialty,
+    state = selectedState,
+    city = selectedCity,
+    fee = maxFee,
+    exp = minExp
+  ) => {
     try {
       const params: any = {};
       if (query.trim()) params.search = query.trim();
       if (specialty !== 'All') params.specialty = specialty;
+      if (state !== 'All') params.state = state;
+      if (city !== 'All') params.city = city;
+      if (fee < 3000) params.maxFee = fee;
+      if (exp > 0) params.minExp = exp;
 
       const res = await api.getDoctors(params);
       if (res.success && Array.isArray(res.data)) {
@@ -67,13 +92,19 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
     } catch (err) {
       console.error('Failed to fetch doctors:', err);
     }
-  };
+  }, [searchQuery, selectedSpecialty, selectedState, selectedCity, maxFee, minExp]);
 
   // Fetch public clinics
-  const fetchClinics = async (query = '') => {
+  const fetchClinics = useCallback(async (
+    query = searchQuery,
+    state = selectedState,
+    city = selectedCity
+  ) => {
     try {
       const params: any = {};
       if (query.trim()) params.search = query.trim();
+      if (state !== 'All') params.state = state;
+      if (city !== 'All') params.city = city;
 
       const res = await api.getPublicClinics(params);
       if (res.success && Array.isArray(res.data)) {
@@ -82,36 +113,33 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
     } catch (err) {
       console.error('Failed to fetch clinics:', err);
     }
-  };
+  }, [searchQuery, selectedState, selectedCity]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
-    await Promise.all([
-      fetchDoctors(searchQuery, selectedSpecialty),
-      fetchClinics(searchQuery),
-    ]);
+    await Promise.all([fetchDoctors(), fetchClinics()]);
     setLoading(false);
     setRefreshing(false);
-  };
+  }, [fetchDoctors, fetchClinics]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   useEffect(() => {
     if (activeSection === 'doctors') {
-      fetchDoctors(searchQuery, selectedSpecialty);
+      fetchDoctors();
     } else {
-      fetchClinics(searchQuery);
+      fetchClinics();
     }
-  }, [selectedSpecialty, activeSection]);
+  }, [selectedSpecialty, selectedState, selectedCity, maxFee, minExp, activeSection, fetchDoctors, fetchClinics]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (activeSection === 'doctors') {
-      fetchDoctors(searchQuery, selectedSpecialty);
+      fetchDoctors();
     } else {
-      fetchClinics(searchQuery);
+      fetchClinics();
     }
   };
 
@@ -195,37 +223,126 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
           </button>
         </div>
 
-        {/* Search Input */}
-        <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-          <Search className="absolute left-3.5 w-4 h-4 text-[#86868b] pointer-events-none" />
-          <input
-            type="text"
-            placeholder={
-              activeSection === 'clinics'
-                ? 'Search clinics or locations...'
-                : 'Search doctors or specialties...'
-            }
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white text-[#1d1d1f] text-sm rounded-full pl-10 pr-10 py-2 border border-[#d2d2d7] focus:border-[#0066cc] outline-none transition-all placeholder:text-[#86868b]"
-          />
-          {searchQuery && (
+        {/* Search Input & Filter Button */}
+        <div className="flex items-center gap-2">
+          <form onSubmit={handleSearchSubmit} className="relative flex-1 flex items-center">
+            <Search className="absolute left-3.5 w-4 h-4 text-[#86868b] pointer-events-none" />
+            <input
+              type="text"
+              placeholder={
+                activeSection === 'clinics'
+                  ? 'Search clinics or locations...'
+                  : 'Search doctors or specialties...'
+              }
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white text-[#1d1d1f] text-sm rounded-full pl-10 pr-10 py-2 border border-[#d2d2d7] focus:border-[#0066cc] outline-none transition-all placeholder:text-[#86868b]"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  if (activeSection === 'doctors') {
+                    fetchDoctors('', selectedSpecialty);
+                  } else {
+                    fetchClinics('');
+                  }
+                }}
+                className="absolute right-3 text-xs text-[#86868b] hover:text-[#1d1d1f] cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </form>
+
+          <button
+            type="button"
+            onClick={() => setShowFiltersModal(true)}
+            className={`relative p-2.5 rounded-full border transition-all cursor-pointer flex items-center justify-center shrink-0 active:scale-95 ${
+              activeFiltersCount > 0
+                ? 'bg-[#0066cc] border-[#0066cc] text-white'
+                : 'bg-white border-[#d2d2d7] text-[#1d1d1f] hover:bg-[#f5f5f7]'
+            }`}
+            title="Filter Options"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            {activeFiltersCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-[#ff3b30] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {activeFiltersCount}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Active Filter Badges */}
+        {activeFiltersCount > 0 && (
+          <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 no-scrollbar text-xs">
+            {selectedState !== 'All' && (
+              <span className="inline-flex items-center gap-1 bg-[#0066cc]/10 text-[#0066cc] font-medium px-2.5 py-1 rounded-full shrink-0 border border-[#0066cc]/20">
+                State: {selectedState}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedState('All');
+                    setSelectedCity('All');
+                  }}
+                  className="hover:text-[#004d99]"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {selectedCity !== 'All' && (
+              <span className="inline-flex items-center gap-1 bg-[#0066cc]/10 text-[#0066cc] font-medium px-2.5 py-1 rounded-full shrink-0 border border-[#0066cc]/20">
+                City: {selectedCity}
+                <button
+                  type="button"
+                  onClick={() => setSelectedCity('All')}
+                  className="hover:text-[#004d99]"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {maxFee < 3000 && (
+              <span className="inline-flex items-center gap-1 bg-[#0066cc]/10 text-[#0066cc] font-medium px-2.5 py-1 rounded-full shrink-0 border border-[#0066cc]/20">
+                Fee ≤ ₹{maxFee}
+                <button
+                  type="button"
+                  onClick={() => setMaxFee(3000)}
+                  className="hover:text-[#004d99]"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+            {minExp > 0 && (
+              <span className="inline-flex items-center gap-1 bg-[#0066cc]/10 text-[#0066cc] font-medium px-2.5 py-1 rounded-full shrink-0 border border-[#0066cc]/20">
+                Exp: {minExp}+ yrs
+                <button
+                  type="button"
+                  onClick={() => setMinExp(0)}
+                  className="hover:text-[#004d99]"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
             <button
               type="button"
               onClick={() => {
-                setSearchQuery('');
-                if (activeSection === 'doctors') {
-                  fetchDoctors('', selectedSpecialty);
-                } else {
-                  fetchClinics('');
-                }
+                setSelectedState('All');
+                setSelectedCity('All');
+                setMaxFee(3000);
+                setMinExp(0);
               }}
-              className="absolute right-3 text-xs text-[#86868b] hover:text-[#1d1d1f] cursor-pointer"
+              className="text-xs text-[#86868b] hover:text-[#1d1d1f] font-semibold underline shrink-0 px-1"
             >
-              Clear
+              Clear All
             </button>
-          )}
-        </form>
+          </div>
+        )}
 
         {/* Specialty Filter (Only visible in Doctors mode) */}
         {activeSection === 'doctors' && (
@@ -599,6 +716,153 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
           </div>
         )}
       </div>
+      {/* Filter Bottom Sheet Modal */}
+      {showFiltersModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-slideUp">
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-[#e5e5ea] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <SlidersHorizontal className="w-5 h-5 text-[#0066cc]" />
+                <h3 className="text-base font-bold text-[#1d1d1f]">Filter & Refine</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFiltersModal(false)}
+                className="p-1 rounded-full text-[#86868b] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-5 overflow-y-auto space-y-5">
+              {/* State Selection */}
+              <div>
+                <label className="block text-xs font-bold text-[#86868b] uppercase tracking-wider mb-2">
+                  State / Union Territory
+                </label>
+                <select
+                  value={selectedState}
+                  onChange={(e) => {
+                    setSelectedState(e.target.value);
+                    setSelectedCity('All');
+                  }}
+                  className="w-full bg-[#f5f5f7] text-[#1d1d1f] text-sm rounded-xl px-3.5 py-2.5 border border-[#e5e5ea] focus:border-[#0066cc] outline-none"
+                >
+                  <option value="All">All Indian States</option>
+                  {INDIAN_STATES.map((st) => (
+                    <option key={st} value={st}>{st}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* City Selection */}
+              <div>
+                <label className="block text-xs font-bold text-[#86868b] uppercase tracking-wider mb-2">
+                  City
+                </label>
+                <select
+                  value={selectedCity}
+                  disabled={selectedState === 'All'}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="w-full bg-[#f5f5f7] text-[#1d1d1f] text-sm rounded-xl px-3.5 py-2.5 border border-[#e5e5ea] focus:border-[#0066cc] outline-none disabled:opacity-50"
+                >
+                  <option value="All">
+                    {selectedState === 'All' ? 'Select state first' : 'All Cities in ' + selectedState}
+                  </option>
+                  {availableCities.map((ct) => (
+                    <option key={ct} value={ct}>{ct}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Max Consultation Fee Slider */}
+              {activeSection === 'doctors' && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-[#86868b] uppercase tracking-wider">
+                      Max Consultation Fee
+                    </label>
+                    <span className="text-sm font-bold text-[#0066cc]">
+                      {maxFee >= 3000 ? 'Any Fee' : `Up to ₹${maxFee}`}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="200"
+                    max="3000"
+                    step="100"
+                    value={maxFee}
+                    onChange={(e) => setMaxFee(Number(e.target.value))}
+                    className="w-full accent-[#0066cc]"
+                  />
+                  <div className="flex justify-between text-[11px] text-[#86868b] mt-1">
+                    <span>₹200</span>
+                    <span>₹1500</span>
+                    <span>₹3000+</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Minimum Experience */}
+              {activeSection === 'doctors' && (
+                <div>
+                  <label className="block text-xs font-bold text-[#86868b] uppercase tracking-wider mb-2">
+                    Minimum Experience
+                  </label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { label: 'Any', value: 0 },
+                      { label: '3+ yrs', value: 3 },
+                      { label: '5+ yrs', value: 5 },
+                      { label: '10+ yrs', value: 10 },
+                    ].map((exp) => (
+                      <button
+                        key={exp.value}
+                        type="button"
+                        onClick={() => setMinExp(exp.value)}
+                        className={`py-2 px-3 text-xs font-semibold rounded-xl border text-center transition-all cursor-pointer ${
+                          minExp === exp.value
+                            ? 'bg-[#0066cc] border-[#0066cc] text-white'
+                            : 'bg-[#f5f5f7] border-[#e5e5ea] text-[#1d1d1f] hover:bg-[#ebebed]'
+                        }`}
+                      >
+                        {exp.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Actions */}
+            <div className="p-4 border-t border-[#e5e5ea] bg-[#f9f9fb] flex items-center gap-3">
+              <AppleButton
+                variant="secondary"
+                size="md"
+                className="flex-1"
+                onClick={() => {
+                  setSelectedState('All');
+                  setSelectedCity('All');
+                  setMaxFee(3000);
+                  setMinExp(0);
+                }}
+              >
+                Reset All
+              </AppleButton>
+              <AppleButton
+                variant="primary"
+                size="md"
+                className="flex-1"
+                onClick={() => setShowFiltersModal(false)}
+              >
+                Apply Filters
+              </AppleButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
