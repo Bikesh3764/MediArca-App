@@ -353,12 +353,12 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       className="p-3 sm:p-3.5 group flex gap-3.5 items-stretch"
                     >
                       {/* Big Doctor Photo on Left (Flipkart Style) */}
-                      <div className="relative w-28 sm:w-32 h-24 sm:h-28 min-w-[112px] sm:min-w-[128px] rounded-2xl overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 self-center flex items-center justify-center p-1">
+                      <div className="relative w-28 sm:w-32 aspect-[4/3] min-w-[112px] sm:min-w-[128px] rounded-2xl overflow-hidden border border-[#e5e5ea] shrink-0 self-center bg-[#f0f0f2]">
                         {avatar ? (
                           <img
                             src={getFileUrl(avatar)}
                             alt={docName}
-                            className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                               const fallback = e.currentTarget.parentElement?.querySelector('.doc-fallback-img');
@@ -369,7 +369,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                         <img
                           src={doctorHeroAlt}
                           alt={docName}
-                          className={`doc-fallback-img w-full h-full object-contain rounded-xl ${avatar ? 'hidden' : 'block'}`}
+                          className={`doc-fallback-img w-full h-full object-cover ${avatar ? 'hidden' : 'block'}`}
                         />
                       </div>
 
@@ -445,11 +445,11 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       className="p-3 sm:p-3.5 group flex gap-3.5 items-stretch"
                     >
                       {/* Big Clinic Photo on Left (Flipkart Style) */}
-                      <div className="relative w-28 sm:w-32 h-24 sm:h-28 min-w-[112px] sm:min-w-[128px] rounded-2xl overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 self-center flex items-center justify-center p-1">
+                      <div className="relative w-28 sm:w-32 aspect-[4/3] min-w-[112px] sm:min-w-[128px] rounded-2xl overflow-hidden border border-[#e5e5ea] shrink-0 self-center bg-[#f0f0f2]">
                         <img
                           src={clinicLobbyBg}
                           alt={name}
-                          className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute top-2 left-2 p-1 rounded-lg bg-black/40 backdrop-blur-md text-white">
                           <Building2 className="w-3 h-3" />
@@ -525,12 +525,12 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                     className="p-3 sm:p-3.5 group flex gap-3.5 items-stretch"
                   >
                     {/* Big Doctor Photo on Left (Flipkart Style) */}
-                    <div className="relative w-28 sm:w-32 h-24 sm:h-28 min-w-[112px] sm:min-w-[128px] rounded-2xl overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 self-center flex items-center justify-center p-1">
+                    <div className="relative w-28 sm:w-32 aspect-[4/3] min-w-[112px] sm:min-w-[128px] rounded-2xl overflow-hidden border border-[#e5e5ea] shrink-0 self-center bg-[#f0f0f2]">
                       {avatar ? (
                         <img
                           src={getFileUrl(avatar)}
                           alt={docName}
-                          className="w-full h-full object-contain rounded-xl group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
                             const fallback = e.currentTarget.parentElement?.querySelector('.doc-main-fallback-img');
@@ -541,7 +541,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       <img
                         src={doctorHeroAlt}
                         alt={docName}
-                        className={`doc-main-fallback-img w-full h-full object-contain rounded-xl ${avatar ? 'hidden' : 'block'}`}
+                        className={`doc-main-fallback-img w-full h-full object-cover ${avatar ? 'hidden' : 'block'}`}
                       />
                     </div>
 
