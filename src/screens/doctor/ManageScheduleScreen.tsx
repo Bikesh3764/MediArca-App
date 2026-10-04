@@ -192,6 +192,10 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
   };
 
   const handleRemoveSlot = (index: number) => {
+    if (slots.length <= 1) {
+      setError('At least one consultation shift is required.');
+      return;
+    }
     setError(null);
     setSlots((prev) => prev.filter((_, i) => i !== index));
   };
@@ -211,6 +215,11 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
       return;
     }
 
+    if (slots.length === 0) {
+      setError('At least one consultation shift is required.');
+      return;
+    }
+
     // Validate slots if any exist
     for (let i = 0; i < slots.length; i++) {
       const s = slots[i];
@@ -218,11 +227,17 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
         setError(`Specify start and end time for ${s.name || `Shift ${i + 1}`}.`);
         return;
       }
-      if (!s.maxPatients || s.maxPatients < 1) {
+      const startMins = timeToMinutes(s.startTime);
+      const endMins = timeToMinutes(s.endTime);
+      if (endMins <= startMins) {
+        setError(`End time must be after start time for ${s.name || `Shift ${i + 1}`}.`);
+        return;
+      }
+      if (!s.maxPatients || Number(s.maxPatients) < 1) {
         setError(`Max capacity for ${s.name || `Shift ${i + 1}`} must be at least 1.`);
         return;
       }
-      if (!s.avgConsultationMinutes || s.avgConsultationMinutes < 1) {
+      if (!s.avgConsultationMinutes || Number(s.avgConsultationMinutes) < 1) {
         setError(`Average duration for ${s.name || `Shift ${i + 1}`} must be at least 1 minute.`);
         return;
       }
@@ -413,8 +428,13 @@ export const ManageScheduleScreen: React.FC<ManageScheduleScreenProps> = ({
                           <button
                             type="button"
                             onClick={() => handleRemoveSlot(idx)}
-                            className="text-rose-500 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
-                            title="Delete shift"
+                            disabled={slots.length <= 1}
+                            className={`p-1.5 rounded-lg transition-colors ${
+                              slots.length <= 1
+                                ? 'text-[#86868b]/40 cursor-not-allowed'
+                                : 'text-rose-500 hover:text-rose-700 hover:bg-rose-50 cursor-pointer'
+                            }`}
+                            title={slots.length <= 1 ? 'At least one shift is required' : 'Delete shift'}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

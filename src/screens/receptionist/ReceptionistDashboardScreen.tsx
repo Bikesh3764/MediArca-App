@@ -266,7 +266,7 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
     }
 
     const cleanPhone = sanitizeIndianPhone(patientPhone);
-    if (cleanPhone && !isValidIndianPhone(cleanPhone)) {
+    if (!cleanPhone || !isValidIndianPhone(cleanPhone)) {
       setError('Please enter a valid 10-digit Indian phone number.');
       return;
     }
@@ -279,7 +279,7 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
       const res = await api.bookWalkinAppointment({
         doctorId: selectedDoctorId,
         patientName: patientName.trim(),
-        patientPhone: cleanPhone || '9876543210',
+        patientPhone: cleanPhone,
         gender,
         patientAge: patientAge.trim() || undefined,
         appointmentDate,
@@ -682,12 +682,14 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Mobile Phone (10-Digit)</label>
+                  <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Mobile Phone (10-Digit) *</label>
                   <input
                     type="tel"
                     value={patientPhone}
                     onChange={(e) => setPatientPhone(e.target.value)}
                     placeholder="e.g. 9876543210"
+                    required
+                    maxLength={10}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
                   />
                 </div>

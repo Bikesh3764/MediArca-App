@@ -4,6 +4,7 @@ import {
   Appointment,
   DoctorAffiliationsData,
   DoctorAffiliationClinic,
+  getLocalDateString,
 } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { AppleCard } from '../components/ui/AppleCard';
@@ -66,7 +67,7 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
   const fetchDoctorQueue = async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateString();
       const [queueRes, affRes] = await Promise.all([
         api.getDoctorQueue(today),
         api.getDoctorAffiliations(),

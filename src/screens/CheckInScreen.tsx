@@ -183,7 +183,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
                     </span>
                   </div>
                   <p className="text-[11px] text-[#86868b] mt-0.5">
-                    {appt.clinic?.name} • {appt.date}
+                    {appt.clinic?.clinicName || appt.clinic?.name || 'Clinic'} • {appt.date}
                   </p>
                 </div>
 

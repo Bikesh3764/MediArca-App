@@ -5,6 +5,8 @@ import {
   getFileUrl,
   calculateSlotMetrics,
   parseDoctorSlots,
+  getLocalDateString,
+  format12Hour,
 } from '../services/api';
 import { AppleCard } from '../components/ui/AppleCard';
 import { AppleButton } from '../components/ui/AppleButton';
@@ -48,7 +50,7 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
     const d = new Date();
     d.setDate(d.getDate() + offset);
     return {
-      dateString: d.toISOString().split('T')[0],
+      dateString: getLocalDateString(d),
       dayName: offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short' }),
       formatted: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     };
@@ -276,7 +278,7 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
 
                     <div className="flex items-center justify-between pt-1 border-t border-[#f0f0f2]">
                       <div className="text-[11px] text-[#86868b] flex items-center gap-2">
-                        <span>{slot.startTime} – {slot.endTime}</span>
+                        <span>{format12Hour(slot.startTime)} – {format12Hour(slot.endTime)}</span>
                         <span>•</span>
                         <span>Max {slot.maxPatients || 30} cap</span>
                         <span>•</span>

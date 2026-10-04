@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { GOOGLE_CLIENT_ID } from './config/auth';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { DoctorProfile, DoctorSlot, Appointment, api, parseDoctorSlots } from './services/api';
+import { DoctorProfile, DoctorSlot, Appointment, api, parseDoctorSlots, getLocalDateString } from './services/api';
 import { BrandLogo } from './components/ui/BrandLogo';
 import { AppleCard } from './components/ui/AppleCard';
 import { AppleButton } from './components/ui/AppleButton';
@@ -68,7 +68,7 @@ const DoctorDeskHome: React.FC<DoctorDeskHomeProps> = ({ onSelectAppointment }) 
     if (!silent) setLoading(true);
     else setRefreshing(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateString();
       const res = await api.getDoctorQueue(today);
       if (res.success && res.data) {
         if (Array.isArray(res.data)) {
@@ -295,7 +295,7 @@ const MainApp: React.FC = () => {
       setAuthModalOpen(true);
       return;
     }
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     const firstClinicAffiliation = doctor.clinics?.[0];
     const effectiveFee = firstClinicAffiliation?.consultationFee ?? doctor.consultationFee ?? 500;
     const schedule = firstClinicAffiliation
