@@ -211,6 +211,7 @@ const MainApp: React.FC = () => {
   // Active items
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorProfile | null>(null);
   const [consultationAppt, setConsultationAppt] = useState<Appointment | null>(null);
+  const [selectedClinicForSchedule, setSelectedClinicForSchedule] = useState<string | null>(null);
 
   // Auth Modal
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -223,6 +224,7 @@ const MainApp: React.FC = () => {
     clinicName: string;
     slot: DoctorSlot | null;
     date: string;
+    consultationFee?: number;
   }>({
     isOpen: false,
     doctor: null,
@@ -230,6 +232,7 @@ const MainApp: React.FC = () => {
     clinicName: '',
     slot: null,
     date: '',
+    consultationFee: undefined,
   });
 
   // Role switching helper
@@ -285,6 +288,7 @@ const MainApp: React.FC = () => {
     }
     const today = new Date().toISOString().split('T')[0];
     const firstClinicAffiliation = doctor.clinics?.[0];
+    const effectiveFee = firstClinicAffiliation?.consultationFee ?? doctor.consultationFee ?? 500;
     const schedule = firstClinicAffiliation
       ? {
           clinicId: firstClinicAffiliation.clinicId,
@@ -310,6 +314,7 @@ const MainApp: React.FC = () => {
       clinicName: schedule.clinicName,
       slot,
       date: today,
+      consultationFee: effectiveFee,
     });
   };
 
@@ -319,6 +324,7 @@ const MainApp: React.FC = () => {
     clinicName: string;
     slot: DoctorSlot;
     date: string;
+    consultationFee?: number;
   }) => {
     if (!user) {
       setAuthModalOpen(true);
@@ -331,6 +337,7 @@ const MainApp: React.FC = () => {
       clinicName: params.clinicName,
       slot: params.slot,
       date: params.date,
+      consultationFee: params.consultationFee,
     });
   };
 
@@ -656,12 +663,20 @@ const MainApp: React.FC = () => {
                   setConsultationAppt(appt);
                   setDoctorTab('desk');
                 }}
-                onOpenSchedule={() => setDoctorTab('schedule')}
+                onOpenSchedule={(clinicId) => {
+                  if (clinicId) setSelectedClinicForSchedule(clinicId);
+                  setDoctorTab('schedule');
+                }}
+                onOpenAffiliations={() => setDoctorTab('affiliations')}
                 onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
               />
             )}
             {doctorTab === 'schedule' && (
-              <ManageScheduleScreen onBack={() => setDoctorTab('console')} />
+              <ManageScheduleScreen
+                onBack={() => setDoctorTab('console')}
+                initialClinicId={selectedClinicForSchedule || undefined}
+                onNavigateToAffiliations={() => setDoctorTab('affiliations')}
+              />
             )}
             {doctorTab === 'desk' && (
               consultationAppt ? (
@@ -680,12 +695,20 @@ const MainApp: React.FC = () => {
               )
             )}
             {doctorTab === 'affiliations' && (
-              <DoctorAffiliationsScreen onBack={() => setDoctorTab('console')} />
+              <DoctorAffiliationsScreen
+                onBack={() => setDoctorTab('console')}
+                onManageClinicSchedule={(clinicId) => {
+                  setSelectedClinicForSchedule(clinicId);
+                  setDoctorTab('schedule');
+                }}
+              />
             )}
             {doctorTab === 'profile' && (
               <DoctorProfileScreen
                 onBack={() => setDoctorTab('console')}
                 onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
+                onNavigateToAffiliations={() => setDoctorTab('affiliations')}
+                onNavigateToSchedule={() => setDoctorTab('schedule')}
               />
             )}
           </main>
@@ -966,6 +989,7 @@ const MainApp: React.FC = () => {
             clinicName={bookingParams.clinicName}
             slot={bookingParams.slot}
             date={bookingParams.date}
+            consultationFee={bookingParams.consultationFee}
             onBookingSuccess={handleBookingSuccess}
           />
         )}

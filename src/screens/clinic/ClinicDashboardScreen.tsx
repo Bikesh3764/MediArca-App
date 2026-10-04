@@ -169,6 +169,22 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
     }
   };
 
+  const handleRespondDoctorAffiliation = async (affiliationId: string, action: 'ACCEPT' | 'REJECT') => {
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      const res = await api.respondToDoctorAffiliation(affiliationId, action);
+      if (res.success) {
+        setSuccessMsg(res.message || `Doctor affiliation request ${action.toLowerCase()}ed successfully`);
+        loadClinicData(true);
+      } else {
+        setError(res.message || 'Failed to respond to doctor affiliation request');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to respond to doctor affiliation request');
+    }
+  };
+
   const handleProvisionReceptionist = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!recFullName.trim() || !recEmail.trim() || !recPassword.trim()) {
@@ -275,6 +291,8 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
     verificationStatus: user?.clinicProfile?.verificationStatus || 'PENDING',
   };
   const doctors = data?.doctors || [];
+  const incomingDoctorRequests = data?.incomingRequests || [];
+  const outgoingDoctorRequests = data?.outgoingRequests || [];
   const receptionists = data?.receptionists || [];
   const appointments = data?.recentAppointments || [];
 
@@ -551,6 +569,89 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
                 <span>Onboard Doctor</span>
               </button>
             </div>
+
+            {/* Incoming Doctor Affiliation Requests */}
+            {incomingDoctorRequests.length > 0 && (
+              <div className="bg-white rounded-2xl p-4 border border-[#0066cc]/30 shadow-xs space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center font-bold">
+                    <Stethoscope className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-[#1d1d1f] uppercase tracking-wider">
+                      Incoming Doctor Affiliation Requests ({incomingDoctorRequests.length})
+                    </h3>
+                    <p className="text-[11px] text-[#86868b]">
+                      Doctors requesting to practice at your clinic facility
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  {incomingDoctorRequests.map((doc) => (
+                    <div
+                      key={doc.affiliationId || doc.doctorId}
+                      className="p-3.5 rounded-xl border border-[#0066cc]/20 bg-[#f0f8ff]/50 space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h4 className="font-bold text-sm text-[#1d1d1f]">{doc.fullName}</h4>
+                          <p className="text-xs text-[#86868b]">{doc.specialty} • {doc.qualifications}</p>
+                          <p className="text-[11px] text-[#86868b] mt-0.5">{doc.email} {doc.phone ? `• ${doc.phone}` : ''}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-[#0066cc]/15">
+                        <button
+                          type="button"
+                          onClick={() => handleRespondDoctorAffiliation(doc.affiliationId, 'ACCEPT')}
+                          className="flex-1 py-1.5 rounded-full bg-[#0066cc] text-white text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition-all shadow-xs cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Accept Request</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRespondDoctorAffiliation(doc.affiliationId, 'REJECT')}
+                          className="flex-1 py-1.5 rounded-full bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          <span>Decline</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Outgoing Doctor Invitations */}
+            {outgoingDoctorRequests.length > 0 && (
+              <div className="bg-white rounded-2xl p-4 border border-amber-200 shadow-xs space-y-2">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-amber-600" />
+                  <h3 className="text-xs font-bold text-amber-900 uppercase tracking-wider">
+                    Pending Doctor Invitations ({outgoingDoctorRequests.length})
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {outgoingDoctorRequests.map((doc) => (
+                    <div
+                      key={doc.affiliationId || doc.doctorId}
+                      className="p-3 rounded-xl border border-amber-200/80 bg-amber-50/50 flex items-center justify-between text-xs"
+                    >
+                      <div>
+                        <h4 className="font-bold text-[#1d1d1f]">{doc.fullName}</h4>
+                        <p className="text-[11px] text-[#86868b]">{doc.email}</p>
+                      </div>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                        Awaiting Doctor
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {doctors.length === 0 ? (
               <div className="bg-white rounded-2xl p-8 text-center border border-[#e5e5ea]">

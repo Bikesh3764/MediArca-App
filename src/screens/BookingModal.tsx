@@ -22,6 +22,7 @@ interface BookingModalProps {
   clinicName: string;
   slot: DoctorSlot;
   date: string;
+  consultationFee?: number;
   onBookingSuccess: (appointment: any) => void;
 }
 
@@ -33,9 +34,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   clinicName,
   slot,
   date,
+  consultationFee,
   onBookingSuccess,
 }) => {
   const { user } = useAuth();
+
+  const effectiveFee =
+    consultationFee ??
+    doctor.clinics?.find((c) => c.clinicId === clinicId || (c as any).clinic?.id === clinicId)?.consultationFee ??
+    doctor.consultationFee ??
+    500;
 
   const [isForOther, setIsForOther] = useState(false);
   const [patientName, setPatientName] = useState(user?.fullName || '');
@@ -263,7 +271,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <ShieldCheck className="w-4 h-4 text-[#0066cc]" />
               <div>
                 <p className="text-xs font-semibold text-[#1d1d1f]">
-                  Fee: ₹{doctor.consultationFee || 500}
+                  Fee: ₹{effectiveFee}
                 </p>
                 <p className="text-[11px] text-[#86868b]">
                   Pay at clinic counter after visit

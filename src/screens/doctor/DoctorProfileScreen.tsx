@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { optimizeAvatarImage } from '../../utils/documentOptimizer';
 import { sanitizeIndianPhone, formatIndianPhone } from '../../utils/phoneUtils';
+import { AppleButton } from '../../components/ui/AppleButton';
 import {
   ChevronLeft,
   Camera,
@@ -14,38 +15,37 @@ import {
   AlertCircle,
   GraduationCap,
   Briefcase,
-  IndianRupee,
-  MapPin,
   Building2,
   Save,
-  Check,
   ShieldCheck,
-  LogOut,
-  Sparkles,
+  User as UserIcon,
   ChevronRight,
+  Clock,
 } from 'lucide-react';
 
 interface DoctorProfileScreenProps {
   onBack: () => void;
   onOpenRoleSwitcher?: () => void;
+  onNavigateToAffiliations?: () => void;
+  onNavigateToSchedule?: () => void;
 }
 
 export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
   onBack,
   onOpenRoleSwitcher,
+  onNavigateToAffiliations,
+  onNavigateToSchedule,
 }) => {
-  const { user, refreshUser, logout } = useAuth();
+  const { user, refreshUser } = useAuth();
 
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [phone, setPhone] = useState(user?.phone || '');
 
-  const initialSpec = user?.doctorProfile?.specialty || 'Cardiology';
+  const initialSpec = user?.doctorProfile?.specialty || 'General Medicine';
   const [specialty, setSpecialty] = useState(initialSpec);
-  const [qualifications, setQualifications] = useState(user?.doctorProfile?.qualifications || 'MD, DM');
-  const [experienceYears, setExperienceYears] = useState(user?.doctorProfile?.experienceYears || 14);
-  const [consultationFee, setConsultationFee] = useState(user?.doctorProfile?.consultationFee || 800);
+  const [qualifications, setQualifications] = useState(user?.doctorProfile?.qualifications || 'MBBS');
+  const [experienceYears, setExperienceYears] = useState(user?.doctorProfile?.experienceYears || 5);
   const [bio, setBio] = useState(user?.doctorProfile?.bio || '');
-  const [clinicAddress, setClinicAddress] = useState(user?.doctorProfile?.clinicAddress || '');
 
   const [saving, setSaving] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
@@ -59,12 +59,10 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
       setFullName(user.fullName || '');
       setPhone(user.phone || '');
       if (user.doctorProfile) {
-        setSpecialty(user.doctorProfile.specialty || 'Cardiology');
-        setQualifications(user.doctorProfile.qualifications || 'MD, DM');
-        setExperienceYears(user.doctorProfile.experienceYears || 14);
-        setConsultationFee(user.doctorProfile.consultationFee || 800);
+        setSpecialty(user.doctorProfile.specialty || 'General Medicine');
+        setQualifications(user.doctorProfile.qualifications || 'MBBS');
+        setExperienceYears(user.doctorProfile.experienceYears || 5);
         setBio(user.doctorProfile.bio || '');
-        setClinicAddress(user.doctorProfile.clinicAddress || '');
       }
     }
   }, [user]);
@@ -74,7 +72,7 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setError('Please upload a valid image (JPEG, PNG, WebP).');
+      setError('Please upload a valid image file (JPEG, PNG, WebP).');
       return;
     }
 
@@ -84,7 +82,7 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
       const optimized = await optimizeAvatarImage(file);
       const res = await api.uploadAvatar(optimized.file);
       if (res.success) {
-        setSuccessMsg('Profile photo updated successfully!');
+        setSuccessMsg('Profile headshot updated successfully!');
         await refreshUser();
       } else {
         setError(res.message || 'Failed to upload photo');
@@ -104,6 +102,11 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
     setSuccessMsg(null);
 
     const cleanPhone = sanitizeIndianPhone(phone);
+    if (cleanPhone.length > 0 && cleanPhone.length !== 10) {
+      setError('Please enter a valid 10-digit mobile number.');
+      setSaving(false);
+      return;
+    }
 
     try {
       const res = await api.updateDoctorProfile({
@@ -112,15 +115,13 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
         specialty,
         qualifications: qualifications.trim(),
         experienceYears: Number(experienceYears),
-        consultationFee: Number(consultationFee),
         bio: bio.trim() || undefined,
-        clinicAddress: clinicAddress.trim() || undefined,
       });
 
       if (res.success) {
-        setSuccessMsg('Doctor profile saved successfully!');
+        setSuccessMsg('Doctor professional credentials saved successfully!');
         await refreshUser();
-        setTimeout(() => setSuccessMsg(null), 3000);
+        setTimeout(() => setSuccessMsg(null), 3500);
       } else {
         setError(res.message || 'Failed to update doctor profile');
       }
@@ -131,49 +132,57 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
     }
   };
 
-  const isVerified = user?.doctorProfile?.verificationStatus === 'VERIFIED' || user?.doctorProfile?.isVerified;
+  const isVerified =
+    user?.doctorProfile?.verificationStatus === 'VERIFIED' || user?.doctorProfile?.isVerified;
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] pb-24 text-[#1d1d1f]">
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-3">
+      {/* Sticky Apple Top Header */}
+      <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1.5 text-xs font-medium text-[#86868b] hover:text-[#1d1d1f] transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#86868b] hover:text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
             <span>Console</span>
           </button>
-          <h1 className="font-semibold text-sm text-[#1d1d1f]">Doctor Professional Profile</h1>
-          <div className="w-16" />
+          <h1 className="font-bold text-sm text-[#1d1d1f]">Doctor Professional Profile</h1>
+          <div className="w-12" />
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 pt-5 space-y-4">
+      <main className="max-w-3xl mx-auto px-4 pt-4 space-y-4">
         {/* Banner Alerts */}
         {error && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2.5 animate-fadeIn shadow-2xs">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-            <span className="flex-1">{error}</span>
-            <button type="button" onClick={() => setError(null)}><span className="text-sm">×</span></button>
+            <span className="flex-1 font-medium">{error}</span>
+            <button type="button" onClick={() => setError(null)} className="p-1">
+              <span className="text-sm">×</span>
+            </button>
           </div>
         )}
 
         {successMsg && (
-          <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+          <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5 animate-fadeIn shadow-2xs">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-            <span className="flex-1">{successMsg}</span>
-            <button type="button" onClick={() => setSuccessMsg(null)}><span className="text-sm">×</span></button>
+            <span className="flex-1 font-medium">{successMsg}</span>
+            <button type="button" onClick={() => setSuccessMsg(null)} className="p-1">
+              <span className="text-sm">×</span>
+            </button>
           </div>
         )}
 
-        {/* Avatar & Verification Card */}
-        <div className="bg-white rounded-3xl p-5 border border-[#e5e5ea] shadow-xs flex items-center gap-4">
-          <div className="relative">
+        {/* Avatar & Professional Badge Card */}
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#e5e5ea] shadow-xs flex items-center gap-4">
+          <div className="relative shrink-0">
             <img
-              src={user?.avatarUrl || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=256&q=80'}
+              src={
+                user?.avatarUrl ||
+                'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=256&q=80'
+              }
               alt={fullName}
               className="w-16 h-16 rounded-full object-cover border-2 border-[#e5e5ea]"
             />
@@ -181,7 +190,7 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
               type="button"
               onClick={() => avatarInputRef.current?.click()}
               disabled={avatarLoading}
-              className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-[#0066cc] text-white flex items-center justify-center shadow-xs hover:bg-[#0071e3] transition-colors"
+              className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-[#0066cc] text-white flex items-center justify-center shadow-xs hover:bg-[#0071e3] transition-colors cursor-pointer"
               title="Change Photo"
             >
               <Camera className="w-3.5 h-3.5" />
@@ -196,7 +205,7 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2 className="font-bold text-base text-[#1d1d1f] truncate">{fullName}</h2>
               {isVerified ? (
                 <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 shrink-0">
@@ -209,43 +218,112 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
                 </span>
               )}
             </div>
-            <p className="text-xs text-[#86868b] mt-0.5">{specialty} • {formatDoctorDegrees(qualifications)}</p>
+            <p className="text-xs text-[#86868b] mt-0.5">
+              {specialty} • {formatDoctorDegrees(qualifications)}
+            </p>
             <p className="text-[11px] text-[#0066cc] mt-0.5">{user?.email}</p>
           </div>
         </div>
 
-        {/* Profile Form */}
-        <form onSubmit={handleSave} className="bg-white rounded-3xl p-6 border border-[#e5e5ea] shadow-xs space-y-4">
+        {/* Practicing Clinics, Shifts & Consultation Fees Card (Exact Parity with Web Platform) */}
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#e5e5ea] shadow-xs space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-[#0066cc]" />
+                <h3 className="text-sm font-bold text-[#1d1d1f] tracking-tight">
+                  Practicing Clinics, Shifts & Consultation Fees
+                </h3>
+              </div>
+              <p className="text-xs text-[#86868b] leading-relaxed">
+                Consultation fees, working hours (e.g. Shift 1: 09:00–13:00, Shift 2: 15:00–19:00), and patient quotas are configured per affiliated clinic facility, matching real-world clinical practice.
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-[#f5f5f7] flex flex-col sm:flex-row gap-2">
+            {onNavigateToAffiliations && (
+              <AppleButton
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={onNavigateToAffiliations}
+                className="flex-1 flex items-center justify-center gap-1.5 text-xs py-2 shadow-xs"
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span>Manage Clinic Affiliations</span>
+              </AppleButton>
+            )}
+
+            {onNavigateToSchedule && (
+              <AppleButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={onNavigateToSchedule}
+                className="flex-1 flex items-center justify-center gap-1.5 text-xs py-2 border-[#0066cc]/30 text-[#0066cc]"
+              >
+                <Clock className="w-3.5 h-3.5 text-[#0066cc]" />
+                <span>Configure Shifts & Fees</span>
+              </AppleButton>
+            )}
+          </div>
+        </div>
+
+        {/* Profile Form (Credentials & Professional Identity) */}
+        <form onSubmit={handleSave} className="bg-white rounded-2xl p-5 border border-[#e5e5ea] shadow-xs space-y-4">
+          <div className="border-b border-[#f5f5f7] pb-2">
+            <h3 className="font-bold text-sm text-[#1d1d1f]">Professional Identity & Credentials</h3>
+            <p className="text-[11px] text-[#86868b]">Displayed to patients across search and discovery</p>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Doctor Full Name</label>
+              <label className="block text-xs font-semibold text-[#1d1d1f] mb-1">
+                Full Name & Title *
+              </label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
+                placeholder="Dr. Full Name"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-xs bg-[#fafafc] focus:bg-white focus:outline-none focus:border-[#0066cc]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Contact Phone</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
-              />
+              <label className="block text-xs font-semibold text-[#1d1d1f] mb-1">
+                Contact Phone (India)
+              </label>
+              <div className="flex rounded-xl border border-[#e5e5ea] overflow-hidden bg-[#fafafc] focus-within:bg-white focus-within:border-[#0066cc]">
+                <span className="inline-flex items-center px-3 border-r border-[#e5e5ea] text-xs font-bold text-[#86868b] bg-[#f5f5f7]">
+                  +91
+                </span>
+                <input
+                  type="tel"
+                  maxLength={10}
+                  value={sanitizeIndianPhone(phone)}
+                  onChange={(e) => {
+                    const val = sanitizeIndianPhone(e.target.value);
+                    setPhone(val ? `+91 ${val}` : '');
+                  }}
+                  placeholder="98765 43210"
+                  className="w-full px-3 py-2 text-xs bg-transparent focus:outline-none"
+                />
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Primary Specialty (32 Specialties)</label>
+              <label className="block text-xs font-semibold text-[#1d1d1f] mb-1">
+                Medical Specialty *
+              </label>
               <select
                 value={specialty}
                 onChange={(e) => setSpecialty(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm bg-white focus:outline-none focus:border-[#0066cc]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-xs bg-[#fafafc] focus:bg-white focus:outline-none focus:border-[#0066cc]"
               >
                 {ALL_SPECIALTIES.map((spec) => (
                   <option key={spec} value={spec}>
@@ -256,114 +334,63 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Recognized Qualifications (Degrees)</label>
+              <label className="block text-xs font-semibold text-[#1d1d1f] mb-1">
+                Qualifications & Degrees *
+              </label>
               <input
                 type="text"
                 value={qualifications}
                 onChange={(e) => setQualifications(e.target.value)}
                 placeholder="e.g. MBBS, MD, DM"
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-xs bg-[#fafafc] focus:bg-white focus:outline-none focus:border-[#0066cc]"
               />
-              <p className="text-[10px] text-[#86868b] mt-1 font-mono">Recognized: {formatDoctorDegrees(qualifications)}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Years of Experience</label>
-              <input
-                type="number"
-                min="0"
-                value={experienceYears}
-                onChange={(e) => setExperienceYears(Number(e.target.value))}
-                required
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Consultation Fee (₹)</label>
-              <input
-                type="number"
-                min="0"
-                step="50"
-                value={consultationFee}
-                onChange={(e) => setConsultationFee(Number(e.target.value))}
-                required
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
-              />
+              <p className="text-[10px] text-[#86868b] mt-1 font-mono">
+                Preview: {formatDoctorDegrees(qualifications)}
+              </p>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Primary Clinic Address</label>
+            <label className="block text-xs font-semibold text-[#1d1d1f] mb-1">
+              Years of Clinical Experience
+            </label>
             <input
-              type="text"
-              value={clinicAddress}
-              onChange={(e) => setClinicAddress(e.target.value)}
-              placeholder="e.g. City Heart & Vascular Institute, Bandra West, Mumbai"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-sm focus:outline-none focus:border-[#0066cc]"
+              type="number"
+              min="0"
+              value={experienceYears}
+              onChange={(e) => setExperienceYears(Number(e.target.value))}
+              required
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-xs bg-[#fafafc] focus:bg-white focus:outline-none focus:border-[#0066cc]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#1d1d1f] mb-1">Doctor Biography & Experience Summary</label>
+            <label className="block text-xs font-semibold text-[#1d1d1f] mb-1">
+              Professional Bio & Clinical Philosophy
+            </label>
             <textarea
               rows={3}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
               placeholder="Share your clinical background, areas of expertise, and patient approach..."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[#e5e5ea] text-xs focus:outline-none focus:border-[#0066cc]"
+              className="w-full p-3 rounded-xl border border-[#e5e5ea] text-xs bg-[#fafafc] focus:bg-white focus:outline-none focus:border-[#0066cc] resize-none"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full py-3.5 rounded-full bg-[#0066cc] hover:bg-[#0071e3] text-white text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-2"
-          >
-            <Save className="w-4 h-4" />
-            <span>{saving ? 'Saving Profile...' : 'Save Profile Details'}</span>
-          </button>
-        </form>
-
-        {/* Workspace Switcher & Sign Out */}
-        <div className="space-y-3 pt-4">
-          {onOpenRoleSwitcher && (
-            <div
-              onClick={onOpenRoleSwitcher}
-              className="bg-white p-4 rounded-2xl border border-[#e5e5ea] flex items-center justify-between cursor-pointer active:scale-98 transition-all shadow-2xs hover:bg-[#f5f5f7]"
+          <div className="pt-2">
+            <AppleButton
+              type="submit"
+              variant="primary"
+              size="lg"
+              disabled={saving}
+              className="w-full flex items-center justify-center gap-2 shadow-xs"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-[#1d1d1f]">Switch Workspace</span>
-                    <span className="text-[10px] font-semibold text-[#0066cc] bg-[#0066cc]/10 px-1.5 py-0.5 rounded-full">
-                      4 Roles
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#86868b] mt-0.5">
-                    Patient App, Clinic Operations, Reception Desk
-                  </p>
-                </div>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-[#86868b]" />
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={logout}
-            className="w-full py-3 rounded-full bg-[#fee2e2] text-[#dc2626] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Sign Out</span>
-          </button>
-        </div>
+              <Save className="w-4 h-4" />
+              <span>{saving ? 'Saving Credentials...' : 'Save Doctor Profile'}</span>
+            </AppleButton>
+          </div>
+        </form>
       </main>
     </div>
   );

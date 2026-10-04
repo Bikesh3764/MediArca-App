@@ -31,6 +31,7 @@ interface DoctorDetailScreenProps {
     clinicName: string;
     slot: DoctorSlot;
     date: string;
+    consultationFee?: number;
   }) => void;
 }
 
@@ -157,7 +158,7 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
                 Consultation Fee
               </span>
               <p className="text-sm font-bold text-[#0066cc] mt-0.5">
-                ₹{doctor.consultationFee || 500}
+                ₹{activeSchedule.consultationFee ?? doctor.consultationFee ?? 500}
               </p>
             </div>
           </div>
@@ -292,6 +293,7 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
                             clinicName: activeSchedule.clinicName,
                             slot,
                             date: selectedDate,
+                            consultationFee: activeSchedule.consultationFee,
                           })
                         }
                       >

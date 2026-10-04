@@ -461,6 +461,10 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                 clinicDoctors.map((doc) => {
                   const avatar = doc.user?.avatarUrl;
                   const docName = formatDoctorName(doc.user?.fullName);
+                  const clinicAffiliation = doc.clinics?.find(
+                    (c: any) => c.clinicId === selectedClinic.id || c.clinic?.id === selectedClinic.id
+                  );
+                  const effectiveFee = clinicAffiliation?.consultationFee ?? doc.consultationFee ?? 500;
 
                   return (
                     <AppleCard
@@ -515,7 +519,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                         <div className="flex items-center justify-between pt-2 mt-2 border-t border-[#f0f0f2]">
                           <div className="flex items-baseline gap-1">
                             <span className="text-base font-bold text-[#1d1d1f]">
-                              ₹{doc.consultationFee || 500}
+                              ₹{effectiveFee}
                             </span>
                             <span className="text-[10px] text-[#86868b]">fee</span>
                           </div>

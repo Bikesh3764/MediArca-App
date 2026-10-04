@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { api, Appointment } from '../services/api';
+import {
+  api,
+  Appointment,
+  DoctorAffiliationsData,
+  DoctorAffiliationClinic,
+} from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { AppleCard } from '../components/ui/AppleCard';
 import { AppleButton } from '../components/ui/AppleButton';
-import { DoctorPresenceBadge } from '../components/ui/DoctorPresenceBadge';
+import { ClinicQrStandeeModal } from '../components/common/ClinicQrStandeeModal';
 import {
   Users,
   Bell,
@@ -16,12 +21,17 @@ import {
   FileText,
   User,
   Sparkles,
+  Building2,
+  QrCode,
+  Calendar,
+  AlertCircle,
 } from 'lucide-react';
 
 interface DoctorConsoleScreenProps {
   onBack: () => void;
   onOpenConsultation?: (appointment: Appointment) => void;
-  onOpenSchedule?: () => void;
+  onOpenSchedule?: (clinicId?: string) => void;
+  onOpenAffiliations?: () => void;
   onOpenRoleSwitcher?: () => void;
 }
 
@@ -29,26 +39,47 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
   onBack,
   onOpenConsultation,
   onOpenSchedule,
+  onOpenAffiliations,
   onOpenRoleSwitcher,
 }) => {
   const { user } = useAuth();
   const [queue, setQueue] = useState<Appointment[]>([]);
+  const [affiliations, setAffiliations] = useState<DoctorAffiliationsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentCabinStatus, setCurrentCabinStatus] = useState<'IN_CABIN' | 'STEPPED_OUT' | 'NOT_IN_CABIN'>('IN_CABIN');
+  const [currentCabinStatus, setCurrentCabinStatus] = useState<
+    'IN_CABIN' | 'STEPPED_OUT' | 'NOT_IN_CABIN'
+  >('IN_CABIN');
   const [notes, setNotes] = useState('');
   const [callingPatientId, setCallingPatientId] = useState<string | null>(null);
+
+  // Standee Modal
+  const [standeeModalOpen, setStandeeModalOpen] = useState(false);
+  const [selectedStandeeClinic, setSelectedStandeeClinic] = useState<{
+    clinicId: string;
+    clinicName: string;
+    clinicAddress?: string;
+    clinicPhone?: string;
+    checkinCode?: string;
+  } | null>(null);
 
   const fetchDoctorQueue = async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
     try {
       const today = new Date().toISOString().split('T')[0];
-      const res = await api.getDoctorQueue(today);
-      if (res.success && Array.isArray(res.data)) {
-        setQueue(res.data);
+      const [queueRes, affRes] = await Promise.all([
+        api.getDoctorQueue(today),
+        api.getDoctorAffiliations(),
+      ]);
+
+      if (queueRes.success && Array.isArray(queueRes.data)) {
+        setQueue(queueRes.data);
+      }
+      if (affRes.success && affRes.data) {
+        setAffiliations(affRes.data);
       }
     } catch (e) {
-      console.error('Failed to fetch doctor queue:', e);
+      console.error('Failed to fetch doctor console data:', e);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -63,7 +94,10 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  const handleUpdatePresence = async (status: 'IN_CABIN' | 'STEPPED_OUT' | 'NOT_IN_CABIN', minutes?: number) => {
+  const handleUpdatePresence = async (
+    status: 'IN_CABIN' | 'STEPPED_OUT' | 'NOT_IN_CABIN',
+    minutes?: number
+  ) => {
     setCurrentCabinStatus(status);
     try {
       await api.updateCabinStatus(status, minutes);
@@ -82,7 +116,7 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
         alert(res.message || 'Failed to call patient');
       }
     } catch (e: any) {
-      alert(e.message || 'Error');
+      alert(e.message || 'Error calling patient');
     } finally {
       setCallingPatientId(null);
     }
@@ -98,12 +132,17 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
         alert(res.message || 'Failed to complete visit');
       }
     } catch (e: any) {
-      alert(e.message || 'Error');
+      alert(e.message || 'Error completing visit');
     }
   };
 
   const inCabinPatient = queue.find((a) => a.status === 'IN_CONSULTATION');
   const waitingPatients = queue.filter((a) => a.status === 'WAITING');
+
+  const affiliatedClinicsCount = affiliations?.clinics?.length || 0;
+  const pendingRequestsCount =
+    (affiliations?.incomingRequests?.length || 0) +
+    (affiliations?.outgoingRequests?.length || 0);
 
   return (
     <div className="flex flex-col min-h-full pb-safe">
@@ -119,7 +158,9 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
           </button>
           <div>
             <h2 className="text-base font-bold text-[#1d1d1f]">Doctor Console</h2>
-            <p className="text-[11px] text-[#86868b]">Dr. {user?.fullName}</p>
+            <p className="text-[11px] text-[#86868b]">
+              Dr. {user?.fullName?.replace(/^Dr\.?\s+/i, '') || 'Practitioner'}
+            </p>
           </div>
         </div>
 
@@ -146,11 +187,80 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
       </div>
 
       <div className="p-4 space-y-4 max-w-md mx-auto w-full">
+        {/* Quick Action Navigation Bar (Clinics, Schedule, Standee) */}
+        <div className="grid grid-cols-2 gap-2.5">
+          {onOpenAffiliations && (
+            <button
+              type="button"
+              onClick={onOpenAffiliations}
+              className="p-3 rounded-2xl bg-white border border-[#e5e5ea] shadow-xs hover:border-[#0066cc]/40 transition-all text-left flex items-center justify-between cursor-pointer active:scale-98"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center shrink-0">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-[#1d1d1f] truncate">Clinics & Staff</div>
+                  <div className="text-[10px] text-[#86868b]">
+                    {affiliatedClinicsCount} {affiliatedClinicsCount === 1 ? 'clinic' : 'clinics'}
+                  </div>
+                </div>
+              </div>
+              {pendingRequestsCount > 0 && (
+                <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0">
+                  {pendingRequestsCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          {onOpenSchedule && (
+            <button
+              type="button"
+              onClick={() => onOpenSchedule()}
+              className="p-3 rounded-2xl bg-white border border-[#e5e5ea] shadow-xs hover:border-[#0066cc]/40 transition-all text-left flex items-center justify-between cursor-pointer active:scale-98"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-[#1d1d1f] truncate">Shifts & Fees</div>
+                  <div className="text-[10px] text-[#86868b]">Set timings & fee</div>
+                </div>
+              </div>
+            </button>
+          )}
+        </div>
+
         {/* Presence Controls Card */}
         <AppleCard className="space-y-3">
-          <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider block">
-            Cabin Presence
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider block">
+              Cabin Presence
+            </span>
+            {affiliations?.clinics && affiliations.clinics.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const firstClinic = affiliations.clinics[0];
+                  setSelectedStandeeClinic({
+                    clinicId: firstClinic.clinicId,
+                    clinicName: firstClinic.clinicName,
+                    clinicAddress: `${firstClinic.address || ''}${firstClinic.city ? `, ${firstClinic.city}` : ''}`,
+                    clinicPhone: firstClinic.phone || '',
+                    checkinCode: (firstClinic as any).checkinCode || '',
+                  });
+                  setStandeeModalOpen(true);
+                }}
+                className="text-[11px] font-semibold text-[#0066cc] flex items-center gap-1 hover:underline cursor-pointer"
+              >
+                <QrCode className="w-3.5 h-3.5" />
+                <span>QR Standee</span>
+              </button>
+            )}
+          </div>
+
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
@@ -264,7 +374,9 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-xs text-[#86868b]">Loading queue...</div>
+            <div className="p-8 text-center text-xs text-[#86868b] bg-white rounded-2xl border border-[#e5e5ea]">
+              Loading queue...
+            </div>
           ) : waitingPatients.length === 0 ? (
             <div className="p-8 bg-white rounded-2xl border border-[#e5e5ea] text-center text-xs text-[#86868b]">
               No patients waiting in queue right now.
@@ -273,7 +385,7 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
             waitingPatients.map((patient) => (
               <div
                 key={patient.id}
-                className="bg-white p-3.5 rounded-2xl border border-[#e5e5ea] flex items-center justify-between gap-2"
+                className="bg-white p-3.5 rounded-2xl border border-[#e5e5ea] flex items-center justify-between gap-2 shadow-2xs"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="text-base font-black text-[#0066cc] w-7 shrink-0">
@@ -318,6 +430,22 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({
           )}
         </div>
       </div>
+
+      {/* Standee Modal */}
+      {selectedStandeeClinic && (
+        <ClinicQrStandeeModal
+          isOpen={standeeModalOpen}
+          onClose={() => {
+            setStandeeModalOpen(false);
+            setSelectedStandeeClinic(null);
+          }}
+          clinicId={selectedStandeeClinic.clinicId}
+          clinicName={selectedStandeeClinic.clinicName}
+          clinicAddress={selectedStandeeClinic.clinicAddress}
+          clinicPhone={selectedStandeeClinic.clinicPhone}
+          checkinCode={selectedStandeeClinic.checkinCode}
+        />
+      )}
     </div>
   );
 };
