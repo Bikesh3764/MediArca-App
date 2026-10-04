@@ -16,7 +16,7 @@ export const AppleCard: React.FC<AppleCardProps> = ({
   return (
     <div
       className={`bg-white rounded-[18px] border border-[#e5e5ea] shadow-[0_2px_12px_rgba(0,0,0,0.03)] transition-all duration-150 ${
-        compact ? 'p-3.5' : 'p-4.5'
+        compact ? 'p-3.5' : 'p-4 sm:p-5'
       } ${
         interactive
           ? 'active:scale-[0.985] active:border-[#0066cc]/40 cursor-pointer select-none'

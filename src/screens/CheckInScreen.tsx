@@ -87,9 +87,9 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
     <div className="flex flex-col min-h-full pb-safe">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea]">
-        <h2 className="text-lg font-bold text-[#1d1d1f]">Clinic Check-In</h2>
+        <h2 className="text-lg font-bold text-[#1d1d1f]">Check-In</h2>
         <p className="text-xs text-[#86868b]">
-          Confirm your physical presence at the clinic lobby
+          Verify your physical presence at the clinic
         </p>
       </div>
 
@@ -118,10 +118,10 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
           </div>
           <div>
             <h3 className="text-base font-bold text-[#1d1d1f]">
-              Scan Clinic Standee
+              Scan Reception QR
             </h3>
             <p className="text-xs text-[#86868b] mt-1 max-w-xs mx-auto">
-              Aim your camera at the QR code displayed at the reception desk to check in instantly.
+              Scan the desk QR code to check in and notify the doctor.
             </p>
           </div>
 
@@ -132,14 +132,14 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
             icon={<QrCode className="w-4 h-4" />}
             onClick={() => setScannerOpen(true)}
           >
-            Launch Camera Scanner
+            Open Camera Scanner
           </AppleButton>
         </AppleCard>
 
         {/* Manual Code Input Card */}
         <AppleCard className="space-y-3">
-          <h4 className="text-xs font-bold text-[#86868b] uppercase tracking-wider">
-            Or Enter Kiosk Code Manually
+          <h4 className="text-xs font-semibold text-[#86868b] uppercase tracking-wider">
+            Or Enter Clinic Code
           </h4>
           <form
             onSubmit={(e) => {
@@ -149,7 +149,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
             className="space-y-3"
           >
             <AppleInput
-              placeholder="e.g. CLN-8842 or 6-digit code"
+              placeholder="e.g. METRO01"
               value={manualCode}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setManualCode(e.target.value)}
             />
@@ -161,16 +161,16 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
               loading={submitting}
               disabled={!manualCode.trim()}
             >
-              Verify Code
+              Verify
             </AppleButton>
           </form>
         </AppleCard>
 
         {/* Pending Appointments for Check-in */}
         {user && appointments.length > 0 && (
-          <div className="space-y-2 pt-2">
+          <div className="space-y-2 pt-1">
             <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider px-1 block">
-              Waiting for Check-In
+              Active Visits ({appointments.length})
             </span>
             {appointments.map((appt) => (
               <div
@@ -194,7 +194,7 @@ export const CheckInScreen: React.FC<CheckInScreenProps> = ({ onOpenAuth }) => {
                 </div>
 
                 {appt.isCheckedIn ? (
-                  <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                  <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                     Checked In
                   </span>
                 ) : (

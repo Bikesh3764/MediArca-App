@@ -32,8 +32,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     <div className="flex flex-col min-h-full pb-safe">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea]">
-        <h2 className="text-lg font-bold text-[#1d1d1f]">Account & Profile</h2>
-        <p className="text-xs text-[#86868b]">Personal details and settings</p>
+        <h2 className="text-lg font-bold text-[#1d1d1f]">Account</h2>
+        <p className="text-xs text-[#86868b]">Personal details and active roles</p>
       </div>
 
       <div className="p-4 space-y-4 max-w-md mx-auto w-full">
@@ -56,79 +56,79 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     <span>{user.fullName ? user.fullName[0].toUpperCase() : 'U'}</span>
                   )}
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-[#1d1d1f]">
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-[#1d1d1f] truncate">
                     {user.fullName}
                   </h3>
-                  <p className="text-xs text-[#86868b]">{user.email}</p>
-                  <span className="inline-block mt-1 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-[#0066cc]/10 text-[#0066cc]">
+                  <p className="text-xs text-[#86868b] truncate">{user.email}</p>
+                  <span className="inline-block mt-1 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-[#0066cc]/10 text-[#0066cc] border border-[#0066cc]/20">
                     {user.role}
                   </span>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-[#f0f0f0] space-y-2 text-xs">
+              <div className="pt-2 border-t border-[#f0f0f2] space-y-2 text-xs">
                 {user.phone && (
-                  <div className="flex items-center gap-2 text-[#7a7a7a]">
+                  <div className="flex items-center gap-2 text-[#86868b]">
                     <Phone className="w-3.5 h-3.5 text-[#0066cc]" />
-                    <span>{user.phone}</span>
+                    <span className="text-[#1d1d1f]">{user.phone}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-[#7a7a7a]">
+                <div className="flex items-center gap-2 text-[#86868b]">
                   <Mail className="w-3.5 h-3.5 text-[#0066cc]" />
-                  <span>{user.email}</span>
+                  <span className="text-[#1d1d1f] truncate">{user.email}</span>
                 </div>
               </div>
             </AppleCard>
 
-            {/* Doctor Console Switcher (if doctor or demo testing) */}
+            {/* Doctor Console Switcher */}
             {(user.role === 'DOCTOR' || user.role === 'ADMIN') && onOpenDoctorConsole && (
               <AppleCard
                 interactive
                 onClick={onOpenDoctorConsole}
-                className="flex items-center justify-between bg-gradient-to-r from-blue-50/60 to-indigo-50/60 border-blue-200/80"
+                className="flex items-center justify-between border-[#e5e5ea]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#0066cc] text-white flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#0066cc]/10 text-[#0066cc] flex items-center justify-center">
                     <Stethoscope className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-[#1d1d1f]">
-                      Doctor Cabin Console
+                      Doctor Console
                     </h4>
                     <p className="text-xs text-[#86868b]">
-                      Live queue caller & cabin status
+                      Queue caller and cabin status
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-[#0066cc]" />
+                <ChevronRight className="w-4 h-4 text-[#86868b]" />
               </AppleCard>
             )}
 
             {/* Clinic Admin Card */}
             {user.role === 'CLINIC' && (
-              <AppleCard className="space-y-3 bg-gradient-to-r from-emerald-50/60 to-teal-50/60 border-emerald-200/80">
+              <AppleCard className="space-y-3 border-[#e5e5ea]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center">
                     <Building className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-[#1d1d1f]">
-                      Clinic Administration Portal
+                      Clinic Portal
                     </h4>
                     <p className="text-xs text-[#86868b]">
-                      Metropolis Polyclinic Operations (Verified)
+                      Metropolis Polyclinic
                     </p>
                   </div>
                 </div>
-                <div className="pt-2 border-t border-emerald-200/40 text-xs text-[#555] space-y-1">
+                <div className="pt-2 border-t border-[#f0f0f2] text-xs space-y-1">
                   <div className="flex justify-between">
-                    <span>Check-in Code:</span>
-                    <span className="font-mono font-bold text-emerald-800">METRO01</span>
+                    <span className="text-[#86868b]">Check-in Code</span>
+                    <span className="font-mono font-bold text-emerald-700">METRO01</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Status:</span>
-                    <span className="text-emerald-700 font-semibold">Active Official Clinic</span>
+                    <span className="text-[#86868b]">Status</span>
+                    <span className="text-emerald-700 font-semibold">Active</span>
                   </div>
                 </div>
               </AppleCard>
@@ -136,28 +136,24 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
             {/* Receptionist Card */}
             {user.role === 'RECEPTIONIST' && (
-              <AppleCard className="space-y-3 bg-gradient-to-r from-purple-50/60 to-indigo-50/60 border-purple-200/80">
+              <AppleCard className="space-y-3 border-[#e5e5ea]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 flex items-center justify-center">
                     <User className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-[#1d1d1f]">
-                      Front Desk Reception Desk
+                      Reception Desk
                     </h4>
                     <p className="text-xs text-[#86868b]">
-                      Clara Oswald (Walk-in Token Dispenser)
+                      Walk-in tokens & desk check-in
                     </p>
                   </div>
                 </div>
-                <div className="pt-2 border-t border-purple-200/40 text-xs text-[#555] space-y-1">
+                <div className="pt-2 border-t border-[#f0f0f2] text-xs space-y-1">
                   <div className="flex justify-between">
-                    <span>Desk Location:</span>
-                    <span className="font-semibold text-purple-900">Front Desk, Metropolis</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Permission:</span>
-                    <span className="text-purple-700 font-semibold">Queue Check-in & Walk-in Pass</span>
+                    <span className="text-[#86868b]">Location</span>
+                    <span className="font-semibold text-[#1d1d1f]">Front Desk</span>
                   </div>
                 </div>
               </AppleCard>
@@ -165,28 +161,24 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
             {/* Admin Card */}
             {user.role === 'ADMIN' && (
-              <AppleCard className="space-y-3 bg-gradient-to-r from-amber-50/60 to-yellow-50/60 border-amber-200/80">
+              <AppleCard className="space-y-3 border-[#e5e5ea]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500 text-black flex items-center justify-center font-bold">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 flex items-center justify-center font-bold">
                     <Shield className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-[#1d1d1f]">
-                      Platform Terminal Console
+                      Platform Console
                     </h4>
                     <p className="text-xs text-[#86868b]">
-                      Root Administrator Access
+                      Administrator Access
                     </p>
                   </div>
                 </div>
-                <div className="pt-2 border-t border-amber-200/40 text-xs text-[#555] space-y-1 font-mono">
+                <div className="pt-2 border-t border-[#f0f0f2] text-xs space-y-1">
                   <div className="flex justify-between">
-                    <span>Terminal Mode:</span>
-                    <span className="font-bold text-amber-800">UNRESTRICTED</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Doctor Verification:</span>
-                    <span className="text-amber-700 font-semibold">Enabled</span>
+                    <span className="text-[#86868b]">Access Level</span>
+                    <span className="font-semibold text-amber-800">Root Admin</span>
                   </div>
                 </div>
               </AppleCard>
@@ -194,25 +186,24 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
             {/* General Info */}
             <AppleCard className="space-y-3">
-              <span className="text-xs font-bold text-[#86868b] uppercase tracking-wider block">
-                MediArca Platform
+              <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider block">
+                About MediArca
               </span>
-              <div className="flex items-center justify-between text-xs py-1">
-                <span className="text-[#1d1d1f]">Cloud Database</span>
-                <span className="text-emerald-600 font-semibold">Supabase Connected</span>
+              <div className="flex items-center justify-between text-xs py-0.5">
+                <span className="text-[#1d1d1f]">Version</span>
+                <span className="text-[#86868b]">1.0.0</span>
               </div>
-              <div className="flex items-center justify-between text-xs py-1">
-                <span className="text-[#1d1d1f]">Backend Engine</span>
-                <span className="text-emerald-600 font-semibold">Render API Live</span>
-              </div>
-              <div className="flex items-center justify-between text-xs py-1">
-                <span className="text-[#1d1d1f]">Design Philosophy</span>
-                <span className="text-[#0066cc] font-semibold">Apple HIG Clean</span>
+              <div className="flex items-center justify-between text-xs py-0.5">
+                <span className="text-[#1d1d1f]">Network Status</span>
+                <span className="text-emerald-700 font-semibold flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                  Operational
+                </span>
               </div>
             </AppleCard>
 
             {/* Sign Out */}
-            <div className="pt-2">
+            <div className="pt-1">
               <AppleButton
                 variant="danger"
                 size="md"
@@ -226,13 +217,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
           </>
         ) : (
           <div className="text-center py-10 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-white shadow-sm border border-[#e5e5ea] flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 rounded-full bg-white shadow-2xs border border-[#e5e5ea] flex items-center justify-center mx-auto">
               <User className="w-8 h-8 text-[#86868b]" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#1d1d1f]">Guest User</h3>
-              <p className="text-xs text-[#86868b] max-w-xs mx-auto mt-1">
-                Sign in to manage your appointments, view live queue tokens, and access doctor consoles.
+              <h3 className="text-base font-bold text-[#1d1d1f]">Guest Account</h3>
+              <p className="text-xs text-[#86868b] max-w-xs mx-auto mt-1 leading-relaxed">
+                Sign in to manage appointments, access live queue passes, and view visits.
               </p>
             </div>
             <AppleButton
@@ -242,7 +233,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               icon={<LogIn className="w-4 h-4" />}
               onClick={onOpenAuth}
             >
-              Sign In / Register
+              Sign In
             </AppleButton>
           </div>
         )}

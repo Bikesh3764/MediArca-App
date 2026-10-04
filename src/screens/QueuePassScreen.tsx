@@ -115,12 +115,12 @@ export const QueuePassScreen: React.FC<QueuePassScreenProps> = ({
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[75vh] p-6 text-center pb-safe">
-        <div className="w-16 h-16 rounded-2xl bg-white shadow-sm border border-[#e5e5ea] flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-white shadow-2xs border border-[#e5e5ea] flex items-center justify-center mb-4">
           <Ticket className="w-8 h-8 text-[#0066cc]" />
         </div>
-        <h3 className="text-lg font-bold text-[#1d1d1f]">Sign In for Live Pass</h3>
+        <h3 className="text-lg font-bold text-[#1d1d1f]">Live Queue Pass</h3>
         <p className="text-xs text-[#86868b] max-w-xs mt-1 mb-5">
-          Sign in to access your digital queue token, track doctor presence, and check in at the clinic.
+          Sign in to access your digital token, live cabin updates, and desk check-in.
         </p>
         <AppleButton
           variant="primary"
@@ -128,7 +128,7 @@ export const QueuePassScreen: React.FC<QueuePassScreenProps> = ({
           icon={<LogIn className="w-4 h-4" />}
           onClick={onOpenAuth}
         >
-          Sign In / Register
+          Sign In
         </AppleButton>
       </div>
     );
@@ -139,14 +139,14 @@ export const QueuePassScreen: React.FC<QueuePassScreenProps> = ({
       {/* Top Header */}
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea] flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-[#1d1d1f] leading-tight">Live Queue Pass</h2>
-          <p className="text-[11px] text-[#86868b]">Syncing with Supabase in real-time</p>
+          <h2 className="text-lg font-bold text-[#1d1d1f] leading-tight">Live Pass</h2>
+          <p className="text-[11px] text-[#86868b]">Real-time queue & cabin updates</p>
         </div>
 
         <button
           onClick={() => fetchAppointments(true)}
           disabled={refreshing}
-          className="p-2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:bg-[#f0f0f0]"
+          className="p-2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
         >
           <RefreshCw className={`w-4 h-4 text-[#0066cc] ${refreshing ? 'animate-spin' : ''}`} />
         </button>
@@ -189,12 +189,12 @@ export const QueuePassScreen: React.FC<QueuePassScreenProps> = ({
           </div>
         ) : (
           <div className="text-center py-12 px-4 max-w-sm mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-white shadow-sm border border-[#e5e5ea] flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-white shadow-2xs border border-[#e5e5ea] flex items-center justify-center mx-auto mb-4">
               <Ticket className="w-8 h-8 text-[#86868b]" />
             </div>
-            <h3 className="text-base font-bold text-[#1d1d1f]">No Active Queue Token</h3>
+            <h3 className="text-base font-bold text-[#1d1d1f]">No Active Pass</h3>
             <p className="text-xs text-[#86868b] mt-1 mb-5 leading-relaxed">
-              You do not have any appointments in progress. Discover verified doctors and reserve a live token.
+              Book an appointment to track your live queue position and cabin arrival.
             </p>
             <AppleButton
               variant="primary"

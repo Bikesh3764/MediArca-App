@@ -54,12 +54,12 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[75vh] p-6 text-center pb-safe">
-        <div className="w-16 h-16 rounded-2xl bg-white shadow-sm border border-[#e5e5ea] flex items-center justify-center mb-4">
+        <div className="w-16 h-16 rounded-2xl bg-white shadow-2xs border border-[#e5e5ea] flex items-center justify-center mb-4">
           <Calendar className="w-8 h-8 text-[#0066cc]" />
         </div>
-        <h3 className="text-lg font-bold text-[#1d1d1f]">Sign In for History</h3>
+        <h3 className="text-lg font-bold text-[#1d1d1f]">Visit History</h3>
         <p className="text-xs text-[#86868b] max-w-xs mt-1 mb-5">
-          Access your past clinic visits, consultation records, and digital queue tokens.
+          Sign in to view your consultation history and queue tokens.
         </p>
         <AppleButton
           variant="primary"
@@ -67,7 +67,7 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
           icon={<LogIn className="w-4 h-4" />}
           onClick={onOpenAuth}
         >
-          Sign In / Register
+          Sign In
         </AppleButton>
       </div>
     );
@@ -76,8 +76,8 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
   return (
     <div className="flex flex-col min-h-full pb-safe">
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea]">
-        <h2 className="text-lg font-bold text-[#1d1d1f]">Consultation History</h2>
-        <p className="text-xs text-[#86868b]">All your past and present appointments</p>
+        <h2 className="text-lg font-bold text-[#1d1d1f]">Visits</h2>
+        <p className="text-xs text-[#86868b]">Past and upcoming consultations</p>
       </div>
 
       <div className="p-4 space-y-3.5">
@@ -95,12 +95,12 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
           </div>
         ) : appointments.length === 0 ? (
           <div className="text-center py-12 px-4 max-w-sm mx-auto">
-            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm border border-[#e5e5ea] flex items-center justify-center mx-auto mb-3">
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-2xs border border-[#e5e5ea] flex items-center justify-center mx-auto mb-3">
               <Calendar className="w-6 h-6 text-[#86868b]" />
             </div>
-            <h4 className="text-base font-bold text-[#1d1d1f]">No Records Yet</h4>
+            <h4 className="text-base font-bold text-[#1d1d1f]">No Visits Yet</h4>
             <p className="text-xs text-[#86868b] mt-1 mb-5">
-              You haven't booked any consultations yet.
+              Your consultation records will appear here.
             </p>
             <AppleButton variant="primary" size="md" onClick={onExplorePress}>
               Find a Doctor
@@ -131,14 +131,14 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
                   </div>
 
                   <span
-                    className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                    className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
                       isCompleted
-                        ? 'bg-slate-100 text-slate-700'
+                        ? 'bg-[#f5f5f7] text-[#1d1d1f] border-[#e5e5ea]'
                         : isCancelled
-                        ? 'bg-red-50 text-red-600'
+                        ? 'bg-rose-50 text-rose-700 border-rose-200'
                         : isInCabin
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-blue-50 text-blue-700'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-blue-50 text-[#0066cc] border-blue-200'
                     }`}
                   >
                     {isCompleted
@@ -151,9 +151,9 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[11px] text-[#7a7a7a] pt-2 border-t border-[#f0f0f0]">
+                <div className="grid grid-cols-2 gap-2 text-[11px] text-[#86868b] pt-2 border-t border-[#f0f0f2]">
                   <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-[#86868b]" />
+                    <Calendar className="w-3.5 h-3.5 text-[#0066cc]" />
                     <span>{appt.date}</span>
                   </div>
                   <div className="flex items-center gap-1.5 justify-end">
@@ -163,11 +163,11 @@ export const AppointmentsHistoryScreen: React.FC<AppointmentsHistoryScreenProps>
                 </div>
 
                 {appt.consultationNotes && (
-                  <div className="bg-[#fafafc] p-2.5 rounded-xl border border-[#f0f0f0] text-xs">
-                    <span className="text-[10px] font-bold text-[#86868b] uppercase block mb-0.5">
+                  <div className="bg-[#fafafc] p-2.5 rounded-xl border border-[#f0f0f2] text-xs">
+                    <span className="text-[10px] font-semibold text-[#86868b] uppercase tracking-wider block mb-0.5">
                       Doctor's Notes
                     </span>
-                    <p className="text-[#1d1d1f]">{appt.consultationNotes}</p>
+                    <p className="text-[#1d1d1f] leading-relaxed">{appt.consultationNotes}</p>
                   </div>
                 )}
               </AppleCard>

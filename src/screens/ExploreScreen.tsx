@@ -201,12 +201,12 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
             type="text"
             placeholder={
               activeSection === 'clinics'
-                ? 'Search clinics by name, city, or address...'
-                : 'Search doctors, specialties, or clinics...'
+                ? 'Search clinic or city...'
+                : 'Search doctor or specialty...'
             }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white text-[#1d1d1f] text-sm rounded-full pl-10 pr-10 py-2 border border-[#d2d2d7] focus:border-[#0066cc] outline-none shadow-2xs transition-all"
+            className="w-full bg-white text-[#1d1d1f] text-sm rounded-full pl-10 pr-10 py-2 border border-[#d2d2d7] focus:border-[#0066cc] outline-none shadow-2xs transition-all placeholder:text-[#86868b]"
           />
           {searchQuery && (
             <button
@@ -219,7 +219,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                   fetchClinics('');
                 }
               }}
-              className="absolute right-3 text-xs text-[#86868b] hover:text-[#1d1d1f]"
+              className="absolute right-3 text-xs text-[#86868b] hover:text-[#1d1d1f] cursor-pointer"
             >
               Clear
             </button>
@@ -248,15 +248,15 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
       </div>
 
       {/* Main Content Area */}
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-3.5">
         {/* Status / Count Bar */}
         <div className="flex items-center justify-between px-1">
-          <p className="text-xs font-semibold text-[#86868b] uppercase tracking-wider">
+          <p className="text-xs font-semibold text-[#86868b]">
             {activeSection === 'clinics'
               ? selectedClinic
-                ? `Doctors at ${selectedClinic.clinicName || selectedClinic.name}`
-                : `${filteredClinics.length} Verified ${filteredClinics.length === 1 ? 'Clinic' : 'Clinics'}`
-              : `${doctors.length} Verified ${doctors.length === 1 ? 'Doctor' : 'Doctors'}`}
+                ? `${selectedClinic.clinicName || selectedClinic.name}`
+                : `${filteredClinics.length} ${filteredClinics.length === 1 ? 'Clinic' : 'Clinics'}`
+              : `${doctors.length} ${doctors.length === 1 ? 'Doctor' : 'Doctors'}`}
           </p>
           <button
             type="button"
@@ -332,11 +332,11 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
 
               {/* Doctors at this clinic */}
               {clinicDoctors.length === 0 ? (
-                <div className="bg-white rounded-[20px] p-8 text-center border border-[#e0e0e0]">
+                <div className="bg-white rounded-[20px] p-8 text-center border border-[#e5e5ea]">
                   <User className="w-8 h-8 text-[#86868b] mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-[#1d1d1f]">No doctors listed yet</p>
+                  <p className="text-sm font-semibold text-[#1d1d1f]">No doctors listed</p>
                   <p className="text-xs text-[#86868b] mt-1">
-                    This clinic hasn't added practicing doctors yet.
+                    No practicing doctors currently active here.
                   </p>
                 </div>
               ) : (
@@ -352,9 +352,9 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       className="space-y-3 group"
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3">
-                          {/* Doctor Avatar with STRICT dimensions */}
-                          <div className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
+                        <div className="flex items-start gap-3 min-w-0">
+                          {/* Doctor Avatar with fixed dimensions */}
+                          <div className="w-13 h-13 min-w-[52px] min-h-[52px] max-w-[52px] max-h-[52px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
                             {avatar ? (
                               <img
                                 src={getFileUrl(avatar)}
@@ -417,11 +417,11 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
             /* Clinics List Cards */
             <div className="space-y-3.5">
               {filteredClinics.length === 0 ? (
-                <div className="bg-white rounded-[20px] p-8 text-center border border-[#e0e0e0]">
+                <div className="bg-white rounded-[20px] p-8 text-center border border-[#e5e5ea]">
                   <Building2 className="w-10 h-10 text-[#86868b] mx-auto mb-2" />
                   <h4 className="text-base font-semibold text-[#1d1d1f]">No Clinics Found</h4>
                   <p className="text-xs text-[#86868b] mt-1">
-                    Try searching with another name or city.
+                    Check spelling or try a different search.
                   </p>
                 </div>
               ) : (
@@ -438,14 +438,14 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       className="space-y-3 group"
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start gap-3 min-w-0">
                           {/* Clinic Icon Badge */}
                           <div className="w-12 h-12 min-w-[48px] min-h-[48px] max-w-[48px] max-h-[48px] rounded-2xl bg-[#0066cc]/10 border border-[#0066cc]/20 flex items-center justify-center shrink-0">
                             <Building2 className="w-6 h-6 text-[#0066cc]" />
                           </div>
 
                           <div className="min-w-0">
-                            <h3 className="text-[16px] font-bold text-[#1d1d1f] leading-snug tracking-tight truncate group-hover:text-[#0066cc] transition-colors">
+                            <h3 className="text-[15px] font-bold text-[#1d1d1f] leading-snug tracking-tight truncate group-hover:text-[#0066cc] transition-colors">
                               {name}
                             </h3>
                             <p className="text-xs text-[#48484a] flex items-center gap-1.5 mt-0.5 truncate">
@@ -472,7 +472,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                       {/* Footer Action */}
                       <div className="flex items-center justify-between pt-2.5 border-t border-[#f0f0f2]">
                         <span className="text-xs font-semibold text-[#0066cc] flex items-center gap-1">
-                          View Doctors & Schedules
+                          View Doctors
                         </span>
                         <div className="p-1 rounded-full bg-[#f5f5f7] group-hover:bg-[#0066cc] group-hover:text-white transition-colors">
                           <ChevronRight className="w-4 h-4" />
@@ -494,7 +494,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                 </div>
                 <h4 className="text-base font-semibold text-[#1d1d1f]">No Doctors Found</h4>
                 <p className="text-xs text-[#86868b] mt-1">
-                  Try selecting a different specialty or clearing your search query.
+                  Try another specialty or clear your filter.
                 </p>
               </div>
             ) : (
@@ -514,8 +514,8 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                     {/* Doctor Avatar & Identity */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 min-w-0">
-                        {/* STRICT fixed avatar dimensions so large images never break the card */}
-                        <div className="w-14 h-14 min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
+                        {/* Doctor Avatar */}
+                        <div className="w-13 h-13 min-w-[52px] min-h-[52px] max-w-[52px] max-h-[52px] rounded-full overflow-hidden bg-[#f5f5f7] border border-[#e5e5ea] shrink-0 flex items-center justify-center">
                           {avatar ? (
                             <img
                               src={getFileUrl(avatar)}

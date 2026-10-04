@@ -43,17 +43,26 @@
   background: transparent;
 }
 
+/* Hide scrollbar for clean horizontal pill filters */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Apple Design System Utility Classes */
 .apple-card {
-  @apply bg-white rounded-[18px] border border-[#e5e5ea] p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)];
+  @apply bg-white rounded-[18px] border border-[#e5e5ea] p-4 sm:p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)];
 }
 
 .apple-card-interactive {
-  @apply apple-card active:scale-[0.985] active:border-[#0066cc]/40 transition-all duration-150;
+  @apply apple-card active:scale-[0.985] active:border-[#0066cc]/40 transition-all duration-150 cursor-pointer;
 }
 
 .apple-pill-btn {
-  @apply inline-flex items-center justify-center font-medium px-5 py-2.5 rounded-full transition-all duration-150 active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  @apply inline-flex items-center justify-center font-medium px-5 py-2.5 rounded-full transition-all duration-150 active:scale-95 disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
 }
 
 .apple-pill-primary {
@@ -70,5 +79,5 @@
 
 /* Safe area bottom padding for mobile navigation bar */
 .pb-safe {
-  padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+  padding-bottom: calc(env(safe-area-inset-bottom) + 72px);
 }

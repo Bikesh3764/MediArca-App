@@ -102,21 +102,23 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
       <div className="sticky top-0 z-30 bg-[#f5f5f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#e5e5ea] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={onBack}
-            className="p-1.5 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:bg-[#f0f0f0]"
+            className="p-1.5 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h2 className="text-base font-bold text-[#1d1d1f]">Doctor Cabin Console</h2>
+            <h2 className="text-base font-bold text-[#1d1d1f]">Doctor Console</h2>
             <p className="text-[11px] text-[#86868b]">Dr. {user?.fullName}</p>
           </div>
         </div>
 
         <button
+          type="button"
           onClick={() => fetchDoctorQueue(true)}
           disabled={refreshing}
-          className="p-2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:bg-[#f0f0f0]"
+          className="p-2 rounded-full bg-white border border-[#e5e5ea] text-[#1d1d1f] active:scale-95 transition-all cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 text-[#0066cc] ${refreshing ? 'animate-spin' : ''}`} />
         </button>
@@ -125,36 +127,39 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
       <div className="p-4 space-y-4 max-w-md mx-auto w-full">
         {/* Presence Controls Card */}
         <AppleCard className="space-y-3">
-          <span className="text-xs font-bold text-[#86868b] uppercase tracking-wider block">
-            Cabin Presence Switch
+          <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider block">
+            Cabin Presence
           </span>
           <div className="grid grid-cols-3 gap-2">
             <button
+              type="button"
               onClick={() => handleUpdatePresence('IN_CABIN')}
-              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all ${
+              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                 currentCabinStatus === 'IN_CABIN'
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
-                  : 'bg-[#fafafc] text-[#1d1d1f] border-[#e5e5ea]'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                  : 'bg-[#fafafc] text-[#1d1d1f] border-[#e5e5ea] hover:bg-[#f5f5f7]'
               }`}
             >
-              ● In Cabin
+              In Cabin
             </button>
             <button
+              type="button"
               onClick={() => handleUpdatePresence('STEPPED_OUT', 15)}
-              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all ${
+              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                 currentCabinStatus === 'STEPPED_OUT'
-                  ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
-                  : 'bg-[#fafafc] text-[#1d1d1f] border-[#e5e5ea]'
+                  ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                  : 'bg-[#fafafc] text-[#1d1d1f] border-[#e5e5ea] hover:bg-[#f5f5f7]'
               }`}
             >
-              ☕ Step Out
+              Step Out
             </button>
             <button
+              type="button"
               onClick={() => handleUpdatePresence('NOT_IN_CABIN')}
-              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all ${
+              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                 currentCabinStatus === 'NOT_IN_CABIN'
-                  ? 'bg-gray-700 text-white border-gray-700 shadow-sm'
-                  : 'bg-[#fafafc] text-[#1d1d1f] border-[#e5e5ea]'
+                  ? 'bg-[#1d1d1f] text-white border-[#1d1d1f] shadow-xs'
+                  : 'bg-[#fafafc] text-[#1d1d1f] border-[#e5e5ea] hover:bg-[#f5f5f7]'
               }`}
             >
               Off Duty
@@ -164,10 +169,10 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
 
         {/* Current Patient In Cabin */}
         {inCabinPatient && (
-          <AppleCard className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 space-y-3">
+          <AppleCard className="bg-emerald-50/50 border-emerald-200 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                Currently In Cabin
+                In Cabin
               </span>
               <span className="text-sm font-black text-emerald-700">
                 #{String(inCabinPatient.queueNumber).padStart(2, '0')}
@@ -178,16 +183,16 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
               <h3 className="text-base font-bold text-[#1d1d1f]">
                 {inCabinPatient.patientName}
               </h3>
-              <p className="text-xs text-[#7a7a7a]">
+              <p className="text-xs text-[#86868b]">
                 {inCabinPatient.patientAge ? `${inCabinPatient.patientAge} yrs • ` : ''}
                 {inCabinPatient.patientGender || 'Patient'}
-                {inCabinPatient.reasonForVisit ? ` • Reason: ${inCabinPatient.reasonForVisit}` : ''}
+                {inCabinPatient.reasonForVisit ? ` • ${inCabinPatient.reasonForVisit}` : ''}
               </p>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-1">
               <textarea
-                placeholder="Prescription / consultation summary notes..."
+                placeholder="Prescription or consultation summary notes..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="w-full text-xs p-3 rounded-xl bg-white border border-emerald-200 focus:border-emerald-500 outline-none resize-none h-20"
@@ -201,7 +206,7 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
               icon={<Check className="w-4 h-4" />}
               onClick={() => handleCompleteConsultation(inCabinPatient.id)}
             >
-              Complete Consultation
+              Complete Visit
             </AppleButton>
           </AppleCard>
         )}
@@ -209,7 +214,7 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
         {/* Waiting List */}
         <div className="space-y-2.5">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-bold text-[#86868b] uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider">
               Waiting Queue ({waitingPatients.length})
             </span>
             {waitingPatients.length > 0 && (
@@ -232,7 +237,7 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
               No patients waiting in queue right now.
             </div>
           ) : (
-            waitingPatients.map((patient, index) => (
+            waitingPatients.map((patient) => (
               <div
                 key={patient.id}
                 className="bg-white p-3.5 rounded-2xl border border-[#e5e5ea] flex items-center justify-between"
@@ -247,9 +252,9 @@ export const DoctorConsoleScreen: React.FC<DoctorConsoleScreenProps> = ({ onBack
                     </h4>
                     <p className="text-[11px] text-[#86868b]">
                       {patient.isCheckedIn ? (
-                        <span className="text-emerald-600 font-medium">Checked In</span>
+                        <span className="text-emerald-700 font-medium">Checked In</span>
                       ) : (
-                        <span>Not checked in</span>
+                        <span>Desk Check-in Pending</span>
                       )}
                     </p>
                   </div>

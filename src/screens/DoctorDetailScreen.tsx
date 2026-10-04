@@ -136,18 +136,18 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#f0f0f0]">
-            <div className="p-2.5 rounded-xl bg-[#fafafc] border border-[#f0f0f0] text-center">
-              <span className="text-[10px] uppercase font-bold text-[#86868b]">
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#f0f0f2]">
+            <div className="p-2.5 rounded-xl bg-[#fafafc] border border-[#f0f0f2] text-center">
+              <span className="text-[10px] font-semibold text-[#86868b] uppercase tracking-wider">
                 Experience
               </span>
               <p className="text-sm font-bold text-[#1d1d1f] mt-0.5">
-                {doctor.experienceYears}+ Years
+                {doctor.experienceYears}+ Yrs
               </p>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#fafafc] border border-[#f0f0f0] text-center">
-              <span className="text-[10px] uppercase font-bold text-[#86868b]">
-                Visit Fee
+            <div className="p-2.5 rounded-xl bg-[#fafafc] border border-[#f0f0f2] text-center">
+              <span className="text-[10px] font-semibold text-[#86868b] uppercase tracking-wider">
+                Consultation Fee
               </span>
               <p className="text-sm font-bold text-[#0066cc] mt-0.5">
                 ₹{doctor.consultationFee || 500}
@@ -157,8 +157,8 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
 
           {doctor.bio && (
             <div className="pt-1">
-              <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider block mb-1">
-                About Doctor
+              <span className="text-xs font-semibold text-[#86868b] block mb-1">
+                About
               </span>
               <p className="text-xs text-[#1d1d1f] leading-relaxed">
                 {doctor.bio}
@@ -169,18 +169,19 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
 
         {/* Date Selector */}
         <div>
-          <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider block mb-2 px-1">
-            Choose Visit Date
+          <span className="text-xs font-semibold text-[#86868b] block mb-2 px-1">
+            Select Date
           </span>
           <div className="grid grid-cols-3 gap-2">
             {dates.map((d) => (
               <button
                 key={d.dateString}
+                type="button"
                 onClick={() => setSelectedDate(d.dateString)}
-                className={`py-2.5 px-3 rounded-2xl border text-center transition-all ${
+                className={`py-2.5 px-3 rounded-2xl border text-center transition-all cursor-pointer active:scale-95 ${
                   selectedDate === d.dateString
-                    ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-sm'
-                    : 'bg-white text-[#1d1d1f] border-[#e5e5ea] active:bg-[#f0f0f0]'
+                    ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs font-semibold'
+                    : 'bg-white text-[#1d1d1f] border-[#e5e5ea] active:bg-[#f5f5f7]'
                 }`}
               >
                 <span className="text-xs font-bold block">{d.dayName}</span>
@@ -194,19 +195,19 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
 
         {/* Clinic & Shifts */}
         <div>
-          <span className="text-xs font-semibold text-[#86868b] uppercase tracking-wider block mb-2 px-1">
-            Select Clinic & Shift
+          <span className="text-xs font-semibold text-[#86868b] block mb-2 px-1">
+            Available Shifts
           </span>
 
           <AppleCard className="space-y-4">
             {/* Clinic Info */}
-            <div className="flex items-start gap-2.5 pb-3 border-b border-[#f0f0f0]">
+            <div className="flex items-start gap-2.5 pb-3 border-b border-[#f0f0f2]">
               <MapPin className="w-4 h-4 text-[#0066cc] shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-sm font-bold text-[#1d1d1f]">
                   {activeSchedule.clinicName}
                 </h4>
-                <p className="text-xs text-[#7a7a7a] mt-0.5">
+                <p className="text-xs text-[#86868b] mt-0.5">
                   {activeSchedule.clinicAddress}, {activeSchedule.clinicCity}
                 </p>
               </div>
@@ -214,9 +215,6 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
 
             {/* Slots */}
             <div className="space-y-2.5">
-              <span className="text-xs font-medium text-[#86868b] block">
-                Available Shifts
-              </span>
               {activeSchedule.slots.map((slot: DoctorSlot) => (
                 <div
                   key={slot.id}
@@ -228,7 +226,7 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
                       <p className="text-xs font-bold text-[#1d1d1f]">
                         {slot.name}
                       </p>
-                      <p className="text-[11px] text-[#7a7a7a]">
+                      <p className="text-[11px] text-[#86868b]">
                         {slot.startTime} - {slot.endTime}
                       </p>
                     </div>
@@ -247,7 +245,7 @@ export const DoctorDetailScreen: React.FC<DoctorDetailScreenProps> = ({
                       })
                     }
                   >
-                    Select & Book
+                    Book
                   </AppleButton>
                 </div>
               ))}

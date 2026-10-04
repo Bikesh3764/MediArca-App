@@ -85,7 +85,7 @@ export const LiveQueuePass: React.FC<LiveQueuePassProps> = ({
         {/* Token Number & Doctor Info */}
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-medium text-white/80">Queue Token</p>
+            <p className="text-xs font-medium text-white/80">Token</p>
             <div className="flex items-baseline gap-1 mt-0.5">
               <span className="text-4xl font-extrabold tracking-tight">
                 #{String(appointment.queueNumber).padStart(2, '0')}
@@ -129,10 +129,10 @@ export const LiveQueuePass: React.FC<LiveQueuePassProps> = ({
       {/* Bottom Pass Body */}
       <div className="bg-white rounded-b-[24px] border-b border-x border-[#e5e5ea] p-5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] space-y-4">
         {/* Cabin Status & Shift Info */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f0]">
+        <div className="flex items-center justify-between pb-3 border-b border-[#f0f0f2]">
           <div>
             <span className="text-[11px] text-[#86868b] block font-medium uppercase tracking-wider">
-              Cabin Status
+              Cabin
             </span>
             <div className="mt-1">
               <DoctorPresenceBadge
@@ -158,13 +158,13 @@ export const LiveQueuePass: React.FC<LiveQueuePassProps> = ({
 
         {/* Clinic Venue Location */}
         {appointment.clinic && (
-          <div className="flex items-start gap-2.5 text-xs text-[#1d1d1f] bg-[#fafafc] p-3 rounded-xl border border-[#f0f0f0]">
+          <div className="flex items-start gap-2.5 text-xs text-[#1d1d1f] bg-[#fafafc] p-3 rounded-xl border border-[#f0f0f2]">
             <MapPin className="w-4 h-4 text-[#0066cc] shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold text-[#1d1d1f]">
                 {appointment.clinic.name}
               </p>
-              <p className="text-[11px] text-[#7a7a7a] mt-0.5">
+              <p className="text-[11px] text-[#86868b] mt-0.5">
                 {appointment.clinic.address}, {appointment.clinic.city}
               </p>
             </div>
@@ -173,14 +173,14 @@ export const LiveQueuePass: React.FC<LiveQueuePassProps> = ({
 
         {/* Check-In Status */}
         <div className="flex items-center justify-between text-xs py-1">
-          <span className="text-[#86868b] font-medium">Clinic Arrival</span>
+          <span className="text-[#86868b] font-medium">Arrival</span>
           {appointment.isCheckedIn ? (
-            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
               <CheckCircle2 className="w-3.5 h-3.5" /> Checked In
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 font-medium text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
-              <AlertCircle className="w-3.5 h-3.5" /> Pending Desk Check-in
+            <span className="inline-flex items-center gap-1 font-medium text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+              <AlertCircle className="w-3.5 h-3.5" /> Desk Check-In Pending
             </span>
           )}
         </div>
@@ -196,16 +196,17 @@ export const LiveQueuePass: React.FC<LiveQueuePassProps> = ({
                 icon={<QrCode className="w-4 h-4" />}
                 onClick={onCheckInPress}
               >
-                Scan Clinic QR to Check In
+                Scan QR to Check In
               </AppleButton>
             )}
 
             {onCancelPress && (
               <button
+                type="button"
                 onClick={onCancelPress}
-                className="text-xs text-[#ff3b30] hover:text-[#d63026] font-medium py-1.5 transition-colors text-center w-full"
+                className="text-xs text-[#ff3b30] hover:text-[#d63026] font-medium py-1.5 transition-colors text-center w-full cursor-pointer"
               >
-                Cancel Appointment
+                Cancel Token
               </button>
             )}
           </div>
@@ -214,10 +215,10 @@ export const LiveQueuePass: React.FC<LiveQueuePassProps> = ({
         {isCallingNow && (
           <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-center">
             <p className="text-sm font-bold text-emerald-800">
-              Doctor is waiting for you!
+              Your Turn!
             </p>
-            <p className="text-xs text-emerald-600 mt-0.5">
-              Please enter Cabin 1 now.
+            <p className="text-xs text-emerald-700 mt-0.5">
+              Please enter the doctor cabin.
             </p>
           </div>
         )}

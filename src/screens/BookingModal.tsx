@@ -137,11 +137,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         </div>
 
         {/* Live Token & Time Preview Card */}
-        <div className="bg-gradient-to-br from-[#0066cc]/10 to-[#10b981]/10 rounded-2xl p-4 border border-[#0066cc]/20 mb-5">
+        <div className="bg-[#f5f5f7] rounded-2xl p-4 border border-[#e5e5ea] mb-4">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-xs font-medium text-[#0066cc]">
-                Live Queue Allocation
+              <span className="text-[11px] font-semibold text-[#0066cc] uppercase tracking-wider">
+                Queue Position
               </span>
               <div className="flex items-baseline gap-2 mt-0.5">
                 <span className="text-2xl font-black text-[#1d1d1f]">
@@ -151,19 +151,19 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     ? `#${String(preview.nextQueueNumber).padStart(2, '0')}`
                     : '#01'}
                 </span>
-                <span className="text-xs text-[#7a7a7a]">Your Token</span>
+                <span className="text-xs text-[#86868b]">Estimated Token</span>
               </div>
             </div>
 
             <div className="text-right">
-              <span className="text-xs font-medium text-[#7a7a7a]">
-                Est. Time
+              <span className="text-[11px] font-semibold text-[#86868b] uppercase tracking-wider">
+                Time Window
               </span>
               <p className="text-sm font-bold text-[#1d1d1f] mt-0.5">
                 {preview?.estimatedTime || `${slot.startTime} - ${slot.endTime}`}
               </p>
               {preview && (
-                <p className="text-[11px] text-[#7a7a7a]">
+                <p className="text-[11px] text-[#86868b]">
                   {preview.patientsAhead} waiting ahead
                 </p>
               )}
@@ -181,7 +181,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Who is this visit for? */}
           <div>
-            <label className="block text-xs font-semibold text-[#86868b] uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-[#86868b] uppercase tracking-wider mb-2 ml-1">
               Appointment For
             </label>
             <div className="flex gap-2">
@@ -191,10 +191,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   setIsForOther(false);
                   if (user) setPatientName(user.fullName);
                 }}
-                className={`flex-1 py-2 text-xs font-semibold rounded-xl border transition-all ${
+                className={`flex-1 py-2 text-xs font-semibold rounded-xl border transition-all cursor-pointer active:scale-95 ${
                   !isForOther
-                    ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-sm'
-                    : 'bg-[#f5f5f7] text-[#1d1d1f] border-transparent'
+                    ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs'
+                    : 'bg-[#f5f5f7] text-[#1d1d1f] border-transparent hover:bg-[#e5e5ea]'
                 }`}
               >
                 Myself
@@ -205,10 +205,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   setIsForOther(true);
                   setPatientName('');
                 }}
-                className={`flex-1 py-2 text-xs font-semibold rounded-xl border transition-all ${
+                className={`flex-1 py-2 text-xs font-semibold rounded-xl border transition-all cursor-pointer active:scale-95 ${
                   isForOther
-                    ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-sm'
-                    : 'bg-[#f5f5f7] text-[#1d1d1f] border-transparent'
+                    ? 'bg-[#0066cc] text-white border-[#0066cc] shadow-xs'
+                    : 'bg-[#f5f5f7] text-[#1d1d1f] border-transparent hover:bg-[#e5e5ea]'
                 }`}
               >
                 Family Member
@@ -227,9 +227,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <AppleInput
-              label="Age (Years)"
+              label="Age"
               type="number"
-              placeholder="e.g. 28"
+              placeholder="Years"
               value={patientAge}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPatientAge(e.target.value)}
             />
@@ -258,20 +258,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           />
 
           {/* Fee & Zero paywall badge */}
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#fafafc] border border-[#f0f0f0]">
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#fafafc] border border-[#e5e5ea]">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <div>
                 <p className="text-xs font-semibold text-[#1d1d1f]">
                   Consultation Fee: ₹{doctor.consultationFee || 500}
                 </p>
-                <p className="text-[11px] text-[#7a7a7a]">
+                <p className="text-[11px] text-[#86868b]">
                   Pay at clinic counter after visit
                 </p>
               </div>
             </div>
-            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-              Zero Prepay
+            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              Pay at Desk
             </span>
           </div>
 
