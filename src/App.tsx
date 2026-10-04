@@ -50,6 +50,8 @@ import {
   Users,
   CheckCircle2,
   Bell,
+  Sparkles,
+  LogIn,
 } from 'lucide-react';
 
 type PatientTab = 'explore' | 'queue' | 'checkin' | 'history' | 'profile';
@@ -196,6 +198,184 @@ const DoctorDeskHome: React.FC<DoctorDeskHomeProps> = ({ onSelectAppointment }) 
               </div>
             ))
           )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface WorkspaceAuthGateProps {
+  requiredRole: 'DOCTOR' | 'CLINIC' | 'RECEPTIONIST';
+  onOpenRoleSwitcher: () => void;
+  onOpenAuth: () => void;
+  onSelectRole: (role: AppRole) => void;
+}
+
+const WorkspaceAuthGate: React.FC<WorkspaceAuthGateProps> = ({
+  requiredRole,
+  onOpenRoleSwitcher,
+  onOpenAuth,
+  onSelectRole,
+}) => {
+  const { user, login, logout } = useAuth();
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  const roleMeta = {
+    DOCTOR: {
+      title: 'Doctor Clinical Workspace',
+      requiredLabel: 'Doctor Account Required',
+      subtitle:
+        'Sign in with your verified practitioner credentials to access your consultation cabin, live queue, and schedule.',
+      icon: Stethoscope,
+      iconColor: 'text-[#0066cc]',
+      iconBg: 'bg-blue-50 border-blue-200/60',
+      demoEmail: 'dr.sarah@mediarca.com',
+      demoPass: 'doctor123',
+      demoLabel: 'Instant Access: Demo Doctor',
+    },
+    CLINIC: {
+      title: 'Clinic Partner Portal',
+      requiredLabel: 'Clinic Partner Account Required',
+      subtitle:
+        'Sign in with your clinical administration account to manage doctor rosters, front desks, and operations.',
+      icon: Building2,
+      iconColor: 'text-teal-700',
+      iconBg: 'bg-teal-50 border-teal-200/60',
+      demoEmail: 'clinic@mediarca.com',
+      demoPass: 'clinic123',
+      demoLabel: 'Instant Access: Demo Clinic',
+    },
+    RECEPTIONIST: {
+      title: 'Front Desk Reception',
+      requiredLabel: 'Receptionist Account Required',
+      subtitle:
+        'Sign in with your front-desk credentials to issue walk-in tokens, confirm payments, and manage arrivals.',
+      icon: Users,
+      iconColor: 'text-indigo-600',
+      iconBg: 'bg-indigo-50 border-indigo-200/60',
+      demoEmail: 'receptionist@mediarca.com',
+      demoPass: 'receptionist123',
+      demoLabel: 'Instant Access: Demo Receptionist',
+    },
+  }[requiredRole];
+
+  const Icon = roleMeta.icon;
+
+  const handleQuickDemo = async () => {
+    setDemoLoading(true);
+    try {
+      const res = await login(roleMeta.demoEmail, roleMeta.demoPass);
+      if (!res.success) {
+        onOpenAuth();
+      }
+    } catch {
+      onOpenAuth();
+    } finally {
+      setDemoLoading(false);
+    }
+  };
+
+  const handleSwitchAccount = async () => {
+    await logout();
+    onOpenAuth();
+  };
+
+  const isRoleMismatch = Boolean(user && user.role !== requiredRole);
+
+  return (
+    <div className="min-h-screen bg-[#ebebee] flex justify-center">
+      <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
+        {/* Header */}
+        <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-[#e5e5ea] px-4 py-3 flex items-center justify-between">
+          <BrandLogo variant="full" size="sm" />
+          <button
+            type="button"
+            onClick={onOpenRoleSwitcher}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f5f5f7] border border-[#e5e5ea] hover:bg-white active:scale-95 transition-all text-xs font-semibold text-[#1d1d1f] cursor-pointer shadow-2xs"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#0066cc]" />
+            <span>Switch Role</span>
+          </button>
+        </header>
+
+        {/* Center Auth Card */}
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+          <div
+            className={`w-16 h-16 rounded-3xl ${roleMeta.iconBg} border flex items-center justify-center mb-4 shadow-2xs`}
+          >
+            <Icon className={`w-8 h-8 ${roleMeta.iconColor}`} />
+          </div>
+
+          <h2 className="text-xl font-bold text-[#1d1d1f] tracking-tight">
+            {isRoleMismatch ? roleMeta.requiredLabel : roleMeta.title}
+          </h2>
+
+          <p className="text-xs text-[#86868b] max-w-xs mt-1.5 mb-6 leading-relaxed">
+            {isRoleMismatch && user ? (
+              <>
+                You are currently signed in as{' '}
+                <strong className="text-[#1d1d1f]">{user.fullName}</strong> ({user.role.toLowerCase()}).
+                Please switch to a {requiredRole.toLowerCase()} account to access this workspace.
+              </>
+            ) : (
+              roleMeta.subtitle
+            )}
+          </p>
+
+          <div className="w-full max-w-xs space-y-2.5">
+            {isRoleMismatch ? (
+              <>
+                <AppleButton
+                  variant="primary"
+                  size="lg"
+                  className="w-full"
+                  icon={<LogIn className="w-4 h-4" />}
+                  onClick={handleSwitchAccount}
+                >
+                  Sign In with {requiredRole.charAt(0) + requiredRole.slice(1).toLowerCase()} Account
+                </AppleButton>
+
+                <AppleButton
+                  variant="secondary"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => onSelectRole('PATIENT')}
+                >
+                  Return to Patient Workspace
+                </AppleButton>
+              </>
+            ) : (
+              <>
+                <AppleButton
+                  variant="primary"
+                  size="lg"
+                  className="w-full"
+                  icon={<LogIn className="w-4 h-4" />}
+                  onClick={onOpenAuth}
+                >
+                  Sign In as {requiredRole.charAt(0) + requiredRole.slice(1).toLowerCase()}
+                </AppleButton>
+
+                <button
+                  type="button"
+                  disabled={demoLoading}
+                  onClick={handleQuickDemo}
+                  className="w-full py-3 px-4 rounded-full bg-white border border-[#e5e5ea] hover:bg-[#fafafc] active:scale-[0.98] transition-all text-xs font-semibold text-[#0066cc] flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                >
+                  <Sparkles className="w-4 h-4 text-[#0066cc]" />
+                  <span>{demoLoading ? 'Connecting...' : roleMeta.demoLabel}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onSelectRole('PATIENT')}
+                  className="w-full py-2.5 text-xs font-medium text-[#86868b] hover:text-[#1d1d1f] transition-colors cursor-pointer"
+                >
+                  Browse as Patient Instead
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -386,6 +566,29 @@ const MainApp: React.FC = () => {
 
   // 1. CLINIC WORKSPACE
   if (activeRole === 'CLINIC') {
+    if (!user || user.role !== 'CLINIC') {
+      return (
+        <>
+          <WorkspaceAuthGate
+            requiredRole="CLINIC"
+            onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
+            onOpenAuth={() => setAuthModalOpen(true)}
+            onSelectRole={handleRoleSelect}
+          />
+          <RoleSwitcherModal
+            isOpen={roleSwitcherOpen}
+            onClose={() => setRoleSwitcherOpen(false)}
+            currentRole={activeRole}
+            onSelectRole={handleRoleSelect}
+          />
+          <AuthModal
+            isOpen={authModalOpen}
+            onClose={() => setAuthModalOpen(false)}
+          />
+        </>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-[#ebebee] flex justify-center">
         <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
@@ -507,6 +710,29 @@ const MainApp: React.FC = () => {
 
   // 2. RECEPTIONIST WORKSPACE
   if (activeRole === 'RECEPTIONIST') {
+    if (!user || user.role !== 'RECEPTIONIST') {
+      return (
+        <>
+          <WorkspaceAuthGate
+            requiredRole="RECEPTIONIST"
+            onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
+            onOpenAuth={() => setAuthModalOpen(true)}
+            onSelectRole={handleRoleSelect}
+          />
+          <RoleSwitcherModal
+            isOpen={roleSwitcherOpen}
+            onClose={() => setRoleSwitcherOpen(false)}
+            currentRole={activeRole}
+            onSelectRole={handleRoleSelect}
+          />
+          <AuthModal
+            isOpen={authModalOpen}
+            onClose={() => setAuthModalOpen(false)}
+          />
+        </>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-[#ebebee] flex justify-center">
         <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
@@ -628,6 +854,29 @@ const MainApp: React.FC = () => {
 
   // 3. DOCTOR WORKSPACE
   if (activeRole === 'DOCTOR') {
+    if (!user || user.role !== 'DOCTOR') {
+      return (
+        <>
+          <WorkspaceAuthGate
+            requiredRole="DOCTOR"
+            onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
+            onOpenAuth={() => setAuthModalOpen(true)}
+            onSelectRole={handleRoleSelect}
+          />
+          <RoleSwitcherModal
+            isOpen={roleSwitcherOpen}
+            onClose={() => setRoleSwitcherOpen(false)}
+            currentRole={activeRole}
+            onSelectRole={handleRoleSelect}
+          />
+          <AuthModal
+            isOpen={authModalOpen}
+            onClose={() => setAuthModalOpen(false)}
+          />
+        </>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-[#ebebee] flex justify-center">
         <div className="w-full max-w-md min-h-screen bg-[#f5f5f7] text-[#1d1d1f] md:shadow-[0_0_60px_rgba(0,0,0,0.06)] md:border-x md:border-[#e5e5ea] flex flex-col relative overflow-x-hidden">
@@ -718,6 +967,7 @@ const MainApp: React.FC = () => {
                 onOpenRoleSwitcher={() => setRoleGatewayOpen(true)}
                 onNavigateToAffiliations={() => setDoctorTab('affiliations')}
                 onNavigateToSchedule={() => setDoctorTab('schedule')}
+                onOpenAuth={() => setAuthModalOpen(true)}
               />
             )}
           </main>

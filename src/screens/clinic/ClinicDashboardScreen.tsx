@@ -1029,17 +1029,19 @@ export const ClinicDashboardScreen: React.FC<ClinicDashboardScreenProps> = ({
                 </button>
               )}
 
-              <button
-                type="button"
-                onClick={logout}
-                className="w-full py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <LogOut className="w-4 h-4 text-rose-600" />
-                  <span>Sign Out of Clinic Account</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-rose-400" />
-              </button>
+              {user && (
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="w-full py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <LogOut className="w-4 h-4 text-rose-600" />
+                    <span>Sign Out of Clinic Account</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-rose-400" />
+                </button>
+              )}
             </div>
           </div>
         )}

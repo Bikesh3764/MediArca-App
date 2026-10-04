@@ -49,7 +49,7 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
   activeTab: propActiveTab,
   onTabChange,
 }) => {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const [data, setData] = useState<ReceptionistDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -1274,17 +1274,19 @@ export const ReceptionistDashboardScreen: React.FC<ReceptionistDashboardScreenPr
                 </button>
               )}
 
-              <button
-                type="button"
-                onClick={logout}
-                className="w-full py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <LogOut className="w-4 h-4 text-rose-600" />
-                  <span>Sign Out of Desk Account</span>
-                </div>
-                <ChevronRight className="w-4 h-4 text-rose-400" />
-              </button>
+              {user && (
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="w-full py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <LogOut className="w-4 h-4 text-rose-600" />
+                    <span>Sign Out of Desk Account</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-rose-400" />
+                </button>
+              )}
             </div>
           </div>
         )}

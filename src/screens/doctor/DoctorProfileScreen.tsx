@@ -23,6 +23,8 @@ import {
   Clock,
   LogOut,
   Sparkles,
+  LogIn,
+  Stethoscope,
 } from 'lucide-react';
 
 interface DoctorProfileScreenProps {
@@ -30,6 +32,7 @@ interface DoctorProfileScreenProps {
   onOpenRoleSwitcher?: () => void;
   onNavigateToAffiliations?: () => void;
   onNavigateToSchedule?: () => void;
+  onOpenAuth?: () => void;
 }
 
 export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
@@ -37,6 +40,7 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
   onOpenRoleSwitcher,
   onNavigateToAffiliations,
   onNavigateToSchedule,
+  onOpenAuth,
 }) => {
   const { user, refreshUser, logout } = useAuth();
 
@@ -133,6 +137,51 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
       setSaving(false);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#f5f5f7] pb-24 text-[#1d1d1f]">
+        <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-[#e5e5ea] px-4 py-3">
+          <div className="max-w-md mx-auto text-center">
+            <h1 className="font-bold text-sm text-[#1d1d1f]">Doctor Profile</h1>
+          </div>
+        </header>
+
+        <main className="max-w-md mx-auto px-4 pt-16 flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 rounded-2xl bg-white border border-[#e5e5ea] flex items-center justify-center mb-4 shadow-2xs">
+            <Stethoscope className="w-8 h-8 text-[#0066cc]" />
+          </div>
+          <h2 className="text-lg font-bold text-[#1d1d1f]">Doctor Account Required</h2>
+          <p className="text-xs text-[#86868b] max-w-xs mt-1 mb-6">
+            Sign in with your practitioner credentials to view and manage your medical credentials and clinical profile.
+          </p>
+
+          <div className="w-full max-w-xs space-y-2.5">
+            <AppleButton
+              variant="primary"
+              size="lg"
+              className="w-full"
+              icon={<LogIn className="w-4 h-4" />}
+              onClick={onOpenAuth}
+            >
+              Sign In as Doctor
+            </AppleButton>
+
+            {onOpenRoleSwitcher && (
+              <button
+                type="button"
+                onClick={onOpenRoleSwitcher}
+                className="w-full py-2.5 px-4 rounded-2xl bg-white border border-[#e5e5ea] text-[#1d1d1f] text-xs font-semibold flex items-center justify-center gap-2 hover:bg-[#f5f5f7] active:scale-[0.99] transition-all cursor-pointer shadow-2xs"
+              >
+                <Sparkles className="w-4 h-4 text-[#0066cc]" />
+                <span>Switch Platform Workspace</span>
+              </button>
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const isVerified =
     user?.doctorProfile?.verificationStatus === 'VERIFIED' || user?.doctorProfile?.isVerified;
@@ -356,17 +405,19 @@ export const DoctorProfileScreen: React.FC<DoctorProfileScreenProps> = ({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={logout}
-            className="w-full py-2.5 px-4 rounded-2xl bg-rose-50 border border-rose-200/60 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center justify-between active:scale-[0.99] transition-all cursor-pointer"
-          >
-            <div className="flex items-center gap-2">
-              <LogOut className="w-4 h-4 text-rose-600" />
-              <span>Sign Out of Doctor Account</span>
-            </div>
-            <ChevronRight className="w-4 h-4 text-rose-400" />
-          </button>
+          {user && (
+            <button
+              type="button"
+              onClick={logout}
+              className="w-full py-2.5 px-4 rounded-2xl bg-rose-50 border border-rose-200/60 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center justify-between active:scale-[0.99] transition-all cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <LogOut className="w-4 h-4 text-rose-600" />
+                <span>Sign Out of Doctor Account</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-rose-400" />
+            </button>
+          )}
         </div>
       </main>
     </div>
